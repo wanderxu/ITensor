@@ -28,15 +28,6 @@ int main(int argc, char* argv[])
     auto sweeps = Sweeps(nsweeps,table);
     println(sweeps);
 
-    //int Nx = 6;
-    //int Ny = 4;
-    //int N = Nx*Ny;
-    //auto yperiodic = true;
-    //auto J1 = 1.0;
-    //auto J2 = 1.0;
-    //auto gamma1 = 1.0;
-    //auto gamma2 = 1.0;
-
     //
     // Initialize the site degrees of freedom.
     //
@@ -115,18 +106,6 @@ int main(int argc, char* argv[])
     //
     printfln("Initial energy = %.5f", overlap(psi,H,psi) );
 
-    //
-    // Set the parameters controlling the accuracy of the DMRG
-    // calculation for each DMRG sweep. 
-    // Here less than 5 cutoff values are provided, for example,
-    // so all remaining sweeps will use the last one given (= 1E-10).
-    //
-    ////auto sweeps = Sweeps(5);
-    ////sweeps.maxm() = 10,20,100,100,200;
-    ////sweeps.cutoff() = 1E-10;
-    ////sweeps.niter() = 2;
-    ////sweeps.noise() = 1E-7,1E-8,0.0;
-    ////println(sweeps);
 
     //
     // Begin the DMRG calculation
