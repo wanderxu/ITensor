@@ -2,17 +2,40 @@
 
 using namespace itensor;
 
-int 
-main()
+int main(int argc, char* argv[])
     {
-    int Nx = 6;
-    int Ny = 4;
-    int N = Nx*Ny;
-    auto yperiodic = true;
-    auto J1 = 1.0;
-    auto J2 = 1.0;
-    auto gamma1 = 1.0;
-    auto gamma2 = 1.0;
+    //Parse the input file
+    if(argc < 2) { printfln("Usage: %s inputfile_dmrg_table",argv[0]); return 0; }
+    auto input = InputGroup(argv[1],"input");
+    //Read in individual parameters from the input file
+    //second argument to getXXX methods is a default
+    //in case parameter not provided in input file
+    auto Nx = input.getInt("Nx");
+    auto Ny = input.getInt("Ny");
+    auto N = Nx*Ny;
+    auto yperiodic = input.getYesNo("yperiodic",true);
+    auto J1 = input.getInt("J1");
+    auto J2 = input.getInt("J2");
+    auto gamma1 = input.getInt("gamma1");
+    auto gamma2 = input.getInt("gamma2");
+    auto quiet = input.getYesNo("quiet",true);
+
+    // Read the sweeps parameters
+    auto nsweeps = input.getInt("nsweeps");
+    auto table = InputGroup(input,"sweeps");
+
+    //Create the sweeps class & print
+    auto sweeps = Sweeps(nsweeps,table);
+    println(sweeps);
+
+    //int Nx = 6;
+    //int Ny = 4;
+    //int N = Nx*Ny;
+    //auto yperiodic = true;
+    //auto J1 = 1.0;
+    //auto J2 = 1.0;
+    //auto gamma1 = 1.0;
+    //auto gamma2 = 1.0;
 
     //
     // Initialize the site degrees of freedom.
@@ -98,17 +121,17 @@ main()
     // Here less than 5 cutoff values are provided, for example,
     // so all remaining sweeps will use the last one given (= 1E-10).
     //
-    auto sweeps = Sweeps(5);
-    sweeps.maxm() = 10,20,100,100,200;
-    sweeps.cutoff() = 1E-10;
-    sweeps.niter() = 2;
-    sweeps.noise() = 1E-7,1E-8,0.0;
-    println(sweeps);
+    ////auto sweeps = Sweeps(5);
+    ////sweeps.maxm() = 10,20,100,100,200;
+    ////sweeps.cutoff() = 1E-10;
+    ////sweeps.niter() = 2;
+    ////sweeps.noise() = 1E-7,1E-8,0.0;
+    ////println(sweeps);
 
     //
     // Begin the DMRG calculation
     //
-    auto energy = dmrg(psi,H,sweeps,"Quiet");
+    auto energy = dmrg(psi,H,sweeps,{"Quiet",quiet});
 
     //
     // Print the final energy reported by DMRG
