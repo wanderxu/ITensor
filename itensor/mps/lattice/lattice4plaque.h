@@ -2,71 +2,97 @@
 // Distributed under the ITensor Library License, Version 1.2
 //    (See accompanying LICENSE file.)
 //
-#ifndef __ITENSOR_LATTICEBOND_H__
-#define __ITENSOR_LATTICEBOND_H__
+#ifndef __ITENSOR_LATTICE4PLAQUE_H__
+#define __ITENSOR_LATTICE4PLAQUE_H__
 
 #include <vector>
 #include "itensor/global.h"
 
 namespace itensor {
 
-struct LatticeBond;
+struct Lattice4Plaque;
 
-using LatticeGraph = std::vector<LatticeBond>;
+using Lattice4PlaqueGraph = std::vector<Lattice4Plaque>;
 
-struct LatticeBond
+struct Lattice4Plaque
     {
     int s1 = 0,
-        s2 = 0;
+        s2 = 0,
+        s3 = 0,
+        s4 = 0;
     std::string type;
     Real x1 = NAN,
          y1 = NAN,
          x2 = NAN,
-         y2 = NAN;
+         y2 = NAN,
+         x3 = NAN,
+         y3 = NAN,
+         x4 = NAN,
+         y4 = NAN;
 
-    LatticeBond() { }
+    Lattice4Plaque() { }
 
-    LatticeBond(int s1_, int s2_)
+    Lattice4Plaque(int s1_, int s2_, int s3_, int s4_)
       : s1{s1_}, 
-        s2{s2_} 
+        s2{s2_}, 
+        s3{s3_}, 
+        s4{s4_} 
         { }
 
-    LatticeBond(int s1_, int s2_,
+    Lattice4Plaque(int s1_, int s2_, int s3_, int s4_,
                 Real x1_,  Real y1_,
-                Real x2_,  Real y2_)
+                Real x2_,  Real y2_,
+                Real x3_,  Real y3_,
+                Real x4_,  Real y4_)
       : s1{s1_}, 
         s2{s2_},
+        s3{s3_},
+        s4{s4_},
         x1{x1_},
         y1{y1_},
         x2{x2_},
-        y2{y2_}
+        y2{y2_},
+        x3{x3_},
+        y3{y3_},
+        x4{x4_},
+        y4{y4_}
         { }
 
-    LatticeBond(int s1_, int s2_, std::string type_)
+    Lattice4Plaque(int s1_, int s2_, int s3_, int s4_, std::string type_)
       : s1{s1_}, 
         s2{s2_}, 
+        s3{s3_}, 
+        s4{s4_}, 
         type{type_} 
         { }
 
-    LatticeBond(int s1_, int s2_, 
+    Lattice4Plaque(int s1_, int s2_, int s3_, int s4_,
                 Real x1_,  Real y1_,
                 Real x2_,  Real y2_,
+                Real x3_,  Real y3_,
+                Real x4_,  Real y4_,
                 std::string type_)
       : s1{s1_}, 
         s2{s2_}, 
+        s3{s3_}, 
+        s4{s4_}, 
         type{type_},
         x1{x1_},
         y1{y1_},
         x2{x2_},
-        y2{y2_}
+        y2{y2_},
+        x3{x3_},
+        y3{y3_},
+        x4{x4_},
+        y4{y4_}
         { }
     };
 
 inline std::ostream& 
-operator<<(std::ostream & s, LatticeBond const& b) 
+operator<<(std::ostream & s, Lattice4Plaque const& b) 
     { 
     //s << format("(%*d,%*d",3,b.s1,3,b.s2);
-    s << format("(%d,%d",b.s1,b.s2);
+    s << format("(%d,%d,%d,%d",b.s1,b.s2,b.s3,b.s4);
     if(b.type.size()!=0) s << "," << b.type;
     s << ")";
     if(!std::isnan(b.x1) && !std::isnan(b.y1))
@@ -74,7 +100,23 @@ operator<<(std::ostream & s, LatticeBond const& b)
         s << format("[%s,%s",b.x1,b.y1);
         if(!std::isnan(b.x2) && !std::isnan(b.y2))
             {
-            s << format(";%s,%s]",b.x2,b.y2);
+            s << format(";%s,%s",b.x2,b.y2);
+            if(!std::isnan(b.x3) && !std::isnan(b.y3))
+                {
+                s << format(";%s,%s",b.x3,b.y3);
+                if(!std::isnan(b.x4) && !std::isnan(b.y4))
+                    {
+                    s << format(";%s,%s]",b.x4,b.y4);
+                    }
+                else
+                    {
+                    s << "]";
+                    }
+                }
+            else
+                {
+                s << "]";
+                }
             }
         else
             {
@@ -85,7 +127,7 @@ operator<<(std::ostream & s, LatticeBond const& b)
     }
 
 inline std::ostream& 
-operator<<(std::ostream& s, LatticeGraph const& G) 
+operator<<(std::ostream& s, Lattice4PlaqueGraph const& G) 
     { 
     for(auto& b : G)
         {

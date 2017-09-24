@@ -9,6 +9,10 @@ main()
     int Ny = 4;
     int N = Nx*Ny;
     auto yperiodic = true;
+    auto J1 = 1.0;
+    auto J2 = 1.0;
+    auto gamma1 = 1.0;
+    auto gamma2 = 1.0;
 
     //
     // Initialize the site degrees of freedom.
@@ -17,18 +21,51 @@ main()
 
     //
     // Use the AutoMPO feature to create the 
-    // next-neighbor Heisenberg model.
+    // nearest-neighbor XXZ model with ring exchange.
     //
+
     auto ampo = AutoMPO(sites);
     auto lattice = triangularLattice(Nx,Ny,{"YPeriodic=",yperiodic});
-    //square lattice also available:
-    //auto lattice = squareLattice(Nx,Ny,{"YPeriodic=",yperiodic});
+    auto lattice4plaque = triangularLattice4Plaque(Nx,Ny,{"YPeriodic=",yperiodic});
+    for(auto bnd : lattice)
+    {
+        println( bnd.s1, " ", bnd.s2 );
+    }
+
+    for(auto bnd : lattice4plaque)
+    {
+        println( bnd.s1, " ", bnd.s2, " ", bnd.s3, " ", bnd.s4 );
+    }
+
+    // two-body term, nearest neighbor
     for(auto bnd : lattice)
         {
-        ampo += 0.5,"S+",bnd.s1,"S-",bnd.s2;
-        ampo += 0.5,"S-",bnd.s1,"S+",bnd.s2;
-        ampo +=     "Sz",bnd.s1,"Sz",bnd.s2;
+        ampo += J1/8.0,"S+",bnd.s1,"S-",bnd.s2;
+        ampo += J1/8.0,"S-",bnd.s1,"S+",bnd.s2;
+        ampo += J1*gamma1/4.0,"Sz",bnd.s1,"Sz",bnd.s2;
         }
+
+
+    // ring-exchange term
+    for(auto bnd : lattice4plaque)
+        {
+        ampo += J2/32.0,"S+",bnd.s1,"S-",bnd.s2,"S+",bnd.s3,"S-",bnd.s4;
+        ampo += J2/32.0,"S-",bnd.s1,"S+",bnd.s2,"S-",bnd.s3,"S+",bnd.s4;
+        ampo += J2*gamma2/32.0,"S+",bnd.s1,"S-",bnd.s2,"Sz",bnd.s3,"Sz",bnd.s4;
+        ampo += J2*gamma2/32.0,"S-",bnd.s1,"S+",bnd.s2,"Sz",bnd.s3,"Sz",bnd.s4;
+        ampo += J2*gamma2/32.0,"Sz",bnd.s1,"Sz",bnd.s2,"S+",bnd.s3,"S-",bnd.s4;
+        ampo += J2*gamma2/32.0,"Sz",bnd.s1,"Sz",bnd.s2,"S-",bnd.s3,"S+",bnd.s4;
+        ampo += J2*gamma2/32.0,"S+",bnd.s2,"S-",bnd.s3,"Sz",bnd.s1,"Sz",bnd.s4;
+        ampo += J2*gamma2/32.0,"S-",bnd.s2,"S+",bnd.s3,"Sz",bnd.s1,"Sz",bnd.s4;
+        ampo += J2*gamma2/32.0,"Sz",bnd.s2,"Sz",bnd.s3,"S+",bnd.s1,"S-",bnd.s4;
+        ampo += J2*gamma2/32.0,"Sz",bnd.s2,"Sz",bnd.s3,"S-",bnd.s1,"S+",bnd.s4;
+        ampo += -J2/32.0,"S+",bnd.s1,"S-",bnd.s3,"Sz",bnd.s2,"Sz",bnd.s4;
+        ampo += -J2/32.0,"S-",bnd.s1,"S+",bnd.s3,"Sz",bnd.s2,"Sz",bnd.s4;
+        ampo += -J2/32.0,"Sz",bnd.s1,"Sz",bnd.s3,"S+",bnd.s2,"S-",bnd.s4;
+        ampo += -J2/32.0,"Sz",bnd.s1,"Sz",bnd.s3,"S-",bnd.s2,"S+",bnd.s4;
+        ampo += J2*(2.0*gamma2*gamma2-1.0)/16.0,"Sz",bnd.s1,"Sz",bnd.s2,"Sz",bnd.s3,"Sz",bnd.s4;
+        }
+
     auto H = IQMPO(ampo);
 
     // Set the initial wavefunction matrix product state
