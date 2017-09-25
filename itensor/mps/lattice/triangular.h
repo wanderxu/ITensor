@@ -62,9 +62,9 @@ triangularLattice4Plaque(int Nx,
     // Periodicity on y is meaningless for one dimensional chain or a ladder
     yperiodic = yperiodic && (Ny > 2);
     auto N = Nx*Ny;
-    auto NPlaque = (Ny<2 ? 0 : 3*N-4*Ny-Nx+1 + (yperiodic ? 0 : -3*Nx+4));
+    auto Nplaque = (Ny<2 ? 0 : 3*N-4*Ny-Nx+1 + (yperiodic ? 0 : -3*Nx+4));
     Lattice4PlaqueGraph latt; 
-    latt.reserve(NPlaque);
+    latt.reserve(Nplaque);
 
     for(int n = 1; n <= N; ++n)
         {
@@ -87,7 +87,7 @@ triangularLattice4Plaque(int Nx,
             }
         }
 
-    if(int(latt.size()) != NPlaque) Error("Wrong number of bonds");
+    if(int(latt.size()) != Nplaque) Error("Wrong number of plaques");
 
     return latt;
     }

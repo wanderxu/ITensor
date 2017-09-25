@@ -45,11 +45,13 @@ int main(int argc, char* argv[])
     {
         println( bnd.s1, " ", bnd.s2 );
     }
+    println("Total number of nn bound: ", lattice.size());
 
     for(auto bnd : lattice4plaque)
     {
         println( bnd.s1, " ", bnd.s2, " ", bnd.s3, " ", bnd.s4 );
     }
+    println("Total number of plaques: ", lattice4plaque.size());
 
     // two-body term, nearest neighbor
     for(auto bnd : lattice)
@@ -69,14 +71,14 @@ int main(int argc, char* argv[])
         ampo += J2*gamma2/32.0,"S-",bnd.s1,"S+",bnd.s2,"Sz",bnd.s3,"Sz",bnd.s4;
         ampo += J2*gamma2/32.0,"Sz",bnd.s1,"Sz",bnd.s2,"S+",bnd.s3,"S-",bnd.s4;
         ampo += J2*gamma2/32.0,"Sz",bnd.s1,"Sz",bnd.s2,"S-",bnd.s3,"S+",bnd.s4;
-        ampo += J2*gamma2/32.0,"S+",bnd.s2,"S-",bnd.s3,"Sz",bnd.s1,"Sz",bnd.s4;
-        ampo += J2*gamma2/32.0,"S-",bnd.s2,"S+",bnd.s3,"Sz",bnd.s1,"Sz",bnd.s4;
-        ampo += J2*gamma2/32.0,"Sz",bnd.s2,"Sz",bnd.s3,"S+",bnd.s1,"S-",bnd.s4;
-        ampo += J2*gamma2/32.0,"Sz",bnd.s2,"Sz",bnd.s3,"S-",bnd.s1,"S+",bnd.s4;
-        ampo += -J2/32.0,"S+",bnd.s1,"S-",bnd.s3,"Sz",bnd.s2,"Sz",bnd.s4;
-        ampo += -J2/32.0,"S-",bnd.s1,"S+",bnd.s3,"Sz",bnd.s2,"Sz",bnd.s4;
-        ampo += -J2/32.0,"Sz",bnd.s1,"Sz",bnd.s3,"S+",bnd.s2,"S-",bnd.s4;
-        ampo += -J2/32.0,"Sz",bnd.s1,"Sz",bnd.s3,"S-",bnd.s2,"S+",bnd.s4;
+        ampo += J2*gamma2/32.0,"Sz",bnd.s1,"S+",bnd.s2,"S-",bnd.s3,"Sz",bnd.s4;
+        ampo += J2*gamma2/32.0,"Sz",bnd.s1,"S-",bnd.s2,"S+",bnd.s3,"Sz",bnd.s4;
+        ampo += J2*gamma2/32.0,"S+",bnd.s1,"Sz",bnd.s2,"Sz",bnd.s3,"S-",bnd.s4;
+        ampo += J2*gamma2/32.0,"S-",bnd.s1,"Sz",bnd.s2,"Sz",bnd.s3,"S+",bnd.s4;
+        ampo += -J2/32.0,"S+",bnd.s1,"Sz",bnd.s2,"S-",bnd.s3,"Sz",bnd.s4;
+        ampo += -J2/32.0,"S-",bnd.s1,"Sz",bnd.s2,"S+",bnd.s3,"Sz",bnd.s4;
+        ampo += -J2/32.0,"Sz",bnd.s1,"S+",bnd.s2,"Sz",bnd.s3,"S-",bnd.s4;
+        ampo += -J2/32.0,"Sz",bnd.s1,"S-",bnd.s2,"Sz",bnd.s3,"S+",bnd.s4;
         ampo += J2*(2.0*gamma2*gamma2-1.0)/16.0,"Sz",bnd.s1,"Sz",bnd.s2,"Sz",bnd.s3,"Sz",bnd.s4;
         }
 
