@@ -122,6 +122,66 @@ int main(int argc, char* argv[])
 
     println("\nTotal QN of Ground State = ",totalQN(psi));
 
+    //
+    // Measure Si.Sj of every {i,j}, and total M
+    //
+    auto totalM = 0.0;
+    for ( int i = 1; i <= N; ++i ) {
+        //'gauge' the MPS to site i
+        psi.position(i); 
+        
+        //psi.Anc(1) *= psi.A(0); //Uncomment if doing iDMRG calculation
+
+        // i == j part
+        auto ket = psi.A(i);
+        auto bra = dag(prime(ket,Site));
+        totalM += (bra*sites.op("Sz",i)*ket).real();
+        auto ss_tmp = 0.0;
+        ss_tmp += 0.75*((dag(ket)*ket).real());
+        //ss_tmp += (bra*zzop*ket).real();
+        //ss_tmp += (bra*pmop*ket).real();
+        //ss_tmp += (bra*mpop*ket).real();
+        println( i, " ", i, " ", ss_tmp );
+        
+        if ( i < N ) {
+            // i != j part
+            //index linking i to i+1:
+            auto ir = commonIndex(psi.A(i),psi.A(i+1),Link);
+   
+            auto op_ip = sites.op("S+",i);
+            auto op_im = sites.op("S-",i);
+            auto op_iz = sites.op("Sz",i);
+            auto Cpm = psi.A(i)*op_ip*dag(prime(psi.A(i),Site,ir));
+            auto Cmp = psi.A(i)*op_im*dag(prime(psi.A(i),Site,ir));
+            auto Czz = psi.A(i)*op_iz*dag(prime(psi.A(i),Site,ir));
+            for(int j = i+1; j <= N; ++j) {
+                Cpm *= psi.A(j);
+                Cmp *= psi.A(j);
+                Czz *= psi.A(j);
+
+                auto jl = commonIndex(psi.A(j),psi.A(j-1),Link);
+
+                auto op_jm = sites.op("S-",j);
+                auto ss_tmp = 0.0;
+                ss_tmp += 0.5*( (Cpm*op_jm)*dag(prime(psi.A(j),jl,Site)) ).real();
+
+                auto op_jp = sites.op("S+",j);
+                ss_tmp += 0.5*( (Cmp*op_jp)*dag(prime(psi.A(j),jl,Site)) ).real();
+
+                auto op_jz = sites.op("Sz",j);
+                ss_tmp += ( (Czz*op_jz)*dag(prime(psi.A(j),jl,Site)) ).real();
+                
+                println( i, " ", j, " ", ss_tmp ); 
+
+                if(j < N) {
+                    Cpm *= dag(prime(psi.A(j),Link));
+                    Cmp *= dag(prime(psi.A(j),Link));
+                    Czz *= dag(prime(psi.A(j),Link));
+                }
+            }
+        }
+    }
+    println( "Total M = ", totalM );
+
     return 0;
     }
-
