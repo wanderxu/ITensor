@@ -14,15 +14,29 @@ int main(int argc, char* argv[])
     auto Ny = input.getInt("Ny");
     auto N = Nx*Ny;
     auto yperiodic = input.getYesNo("yperiodic",true);
-    auto J1 = input.getInt("J1");
-    auto J2 = input.getInt("J2");
-    auto gamma1 = input.getInt("gamma1");
-    auto gamma2 = input.getInt("gamma2");
+    double J1 = input.getReal("J1");
+    double J2 = input.getReal("J2");
+    double gamma1 = input.getReal("gamma1");
+    double gamma2 = input.getReal("gamma2");
     auto quiet = input.getYesNo("quiet",true);
 
     // Read the sweeps parameters
     auto nsweeps = input.getInt("nsweeps");
     auto table = InputGroup(input,"sweeps");
+
+    // suggested output file name from model parameters
+    std::string runlogfile="runlog_";
+    runlogfile += "Nx="; runlogfile += std::to_string(Nx);
+    runlogfile += "_Ny="; runlogfile += std::to_string(Ny);
+    if(yperiodic) runlogfile += "_YPB";
+    else runlogfile += "_OBC";
+    runlogfile += "_J1="; runlogfile += std::to_string(J1);
+    runlogfile += "_J2="; runlogfile += std::to_string(J2);
+    runlogfile += "_g1="; runlogfile += std::to_string(gamma1);
+    runlogfile += "_g2="; runlogfile += std::to_string(gamma2);
+    runlogfile += ".out";
+
+    println("output file name suggested: ", runlogfile);
 
     //Create the sweeps class & print
     auto sweeps = Sweeps(nsweeps,table);
@@ -41,16 +55,13 @@ int main(int argc, char* argv[])
     auto ampo = AutoMPO(sites);
     auto lattice = triangularLattice(Nx,Ny,{"YPeriodic=",yperiodic});
     auto lattice4plaque = triangularLattice4Plaque(Nx,Ny,{"YPeriodic=",yperiodic});
-    for(auto bnd : lattice)
-    {
-        println( bnd.s1, " ", bnd.s2 );
-    }
+
+    println("\nBound coordinate:");
+    println(lattice);
     println("Total number of nn bound: ", lattice.size());
 
-    for(auto bnd : lattice4plaque)
-    {
-        println( bnd.s1, " ", bnd.s2, " ", bnd.s3, " ", bnd.s4 );
-    }
+    println("\nPlaque corrdinate:");
+    println(lattice4plaque);
     println("Total number of plaques: ", lattice4plaque.size());
 
     // two-body term, nearest neighbor
@@ -106,7 +117,7 @@ int main(int argc, char* argv[])
     // overlap calculates matrix elements of MPO's with respect to MPS's
     // overlap(psi,H,psi) = <psi|H|psi>
     //
-    printfln("Initial energy = %.5f", overlap(psi,H,psi) );
+    printfln("\nInitial energy = %.5f", overlap(psi,H,psi));
 
 
     //
@@ -117,8 +128,13 @@ int main(int argc, char* argv[])
     //
     // Print the final energy reported by DMRG
     //
-    printfln("\nGround State Energy = %.10f",energy);
-    printfln("\nUsing overlap = %.10f", overlap(psi,H,psi) );
+    printfln("\nGround State Energy = %.10f", energy);
+
+    auto psiHpsi = overlap(psi,H,psi);
+    auto psiHHpsi = overlap(psi,H,H,psi);
+    printfln("\n<psi|H|psi> = %.10f", psiHpsi );
+    printfln("\n<psi|H^2|psi> = %.10f", psiHHpsi );
+    printfln("\n<psi|H^2|psi> - <psi|H|psi>^2 = %.10f", psiHHpsi-psiHpsi*psiHpsi );
 
     println("\nTotal QN of Ground State = ",totalQN(psi));
 
@@ -140,12 +156,12 @@ int main(int argc, char* argv[])
         auto ket = psi.A(i);
         auto bra = dag(prime(ket,Site));
         auto sz_tmp = (bra*sites.op("Sz",i)*ket).real();
-        Sz_meas.push_back(sz_tmp);
+        Sz_meas.emplace_back(sz_tmp);
         totalM +=  sz_tmp;
 
         auto ss_tmp = 0.0;
         ss_tmp += 0.75*((dag(ket)*ket).real());
-        SiSj_meas.push_back(ss_tmp);
+        SiSj_meas.emplace_back(ss_tmp);
         //println( i, " ", i, " ", ss_tmp );
         
         if ( i < N ) {
@@ -176,7 +192,7 @@ int main(int argc, char* argv[])
                 auto op_jz = sites.op("Sz",j);
                 ss_tmp += ( (Czz*op_jz)*dag(prime(psi.A(j),jl,Site)) ).real();
                 
-                SiSj_meas.push_back(ss_tmp);
+                SiSj_meas.emplace_back(ss_tmp);
                 //println( i, " ", j, " ", ss_tmp ); 
 
                 if(j < N) {
@@ -187,7 +203,7 @@ int main(int argc, char* argv[])
             }
         }
     }
-    println( "Total M = ", totalM );
+    printfln("Total M = %.10e", totalM );
 
     std::ofstream fSzout("Siz.out",std::ios::out);
     for (std::vector<double>::const_iterator i = Sz_meas.begin(); i != Sz_meas.end(); ++i)
@@ -196,6 +212,43 @@ int main(int argc, char* argv[])
     std::ofstream fSiSjout("SiSj.out",std::ios::out);
     for (std::vector<double>::const_iterator i = SiSj_meas.begin(); i != SiSj_meas.end(); ++i)
             fSiSjout << *i << ' ';
+
+    //// 
+    //// measure dimer correlation
+    ////
+    //
+    //// make the dimer table
+    //// x-direction
+    //auto num_x_dimer = (Nx-1)*Ny
+    //auto num_y_dimer = Nx*(yperiodic ? Ny : Ny-1)
+    //auto num_xy_dimer = (Nx-1)*(yperiodic ? Ny : Ny-1)
+    //LatticeGraph x_dimer;
+    //LatticeGraph y_dimer;
+    //LatticeGraph xy_dimer;
+    //x_dimer.reserve(num_x_dimer)
+    //y_dimer.reserve(num_y_dimer)
+    //xy_dimer.reserve(num_xy_dimer)
+    //for(int n = 1; n <= N; ++n)
+    //    {
+    //    int x = (n-1)/Ny+1;
+    //    int y = (n-1)%Ny+1;
+
+    //    //X-direction bonds
+    //    if(x < Nx) x_dimer.emplace_back(n,n+Ny);
+
+    //    if(Ny > 1) //2d bonds
+    //        {
+    //        //vertical bond
+    //        if(y < Ny) y_dimer.emplace_back(n,n+1);
+    //        if((y == Ny) && yperiodic) y_dimer.emplace_back(n,n-Ny+1);
+
+    //        //Diagonal bonds
+    //        if((x < Nx) && (y < Ny)) xy_dimer.emplace_back(n,n+Ny+1)
+    //        if((x < Nx) && (y == Ny) && yperiodic) xy_dimer.emplace_back(n,n+1)
+    //        }
+    //    }
+
+
 
     return 0;
     }
