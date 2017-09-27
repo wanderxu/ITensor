@@ -56,30 +56,30 @@ int main(int argc, char* argv[])
     // two-body term, nearest neighbor
     for(auto bnd : lattice)
         {
-        ampo += J1/8.0,"S+",bnd.s1,"S-",bnd.s2;
-        ampo += J1/8.0,"S-",bnd.s1,"S+",bnd.s2;
-        ampo += J1*gamma1/4.0,"Sz",bnd.s1,"Sz",bnd.s2;
+        ampo += J1*2.0,"S+",bnd.s1,"S-",bnd.s2;
+        ampo += J1*2.0,"S-",bnd.s1,"S+",bnd.s2;
+        ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
         }
 
 
     // ring-exchange term
     for(auto bnd : lattice4plaque)
         {
-        ampo += J2/32.0,"S+",bnd.s1,"S-",bnd.s2,"S+",bnd.s3,"S-",bnd.s4;
-        ampo += J2/32.0,"S-",bnd.s1,"S+",bnd.s2,"S-",bnd.s3,"S+",bnd.s4;
-        ampo += J2*gamma2/32.0,"S+",bnd.s1,"S-",bnd.s2,"Sz",bnd.s3,"Sz",bnd.s4;
-        ampo += J2*gamma2/32.0,"S-",bnd.s1,"S+",bnd.s2,"Sz",bnd.s3,"Sz",bnd.s4;
-        ampo += J2*gamma2/32.0,"Sz",bnd.s1,"Sz",bnd.s2,"S+",bnd.s3,"S-",bnd.s4;
-        ampo += J2*gamma2/32.0,"Sz",bnd.s1,"Sz",bnd.s2,"S-",bnd.s3,"S+",bnd.s4;
-        ampo += J2*gamma2/32.0,"Sz",bnd.s1,"S+",bnd.s2,"S-",bnd.s3,"Sz",bnd.s4;
-        ampo += J2*gamma2/32.0,"Sz",bnd.s1,"S-",bnd.s2,"S+",bnd.s3,"Sz",bnd.s4;
-        ampo += J2*gamma2/32.0,"S+",bnd.s1,"Sz",bnd.s2,"Sz",bnd.s3,"S-",bnd.s4;
-        ampo += J2*gamma2/32.0,"S-",bnd.s1,"Sz",bnd.s2,"Sz",bnd.s3,"S+",bnd.s4;
-        ampo += -J2/32.0,"S+",bnd.s1,"Sz",bnd.s2,"S-",bnd.s3,"Sz",bnd.s4;
-        ampo += -J2/32.0,"S-",bnd.s1,"Sz",bnd.s2,"S+",bnd.s3,"Sz",bnd.s4;
-        ampo += -J2/32.0,"Sz",bnd.s1,"S+",bnd.s2,"Sz",bnd.s3,"S-",bnd.s4;
-        ampo += -J2/32.0,"Sz",bnd.s1,"S-",bnd.s2,"Sz",bnd.s3,"S+",bnd.s4;
-        ampo += J2*(2.0*gamma2*gamma2-1.0)/16.0,"Sz",bnd.s1,"Sz",bnd.s2,"Sz",bnd.s3,"Sz",bnd.s4;
+        ampo += J2*8.0,"S+",bnd.s1,"S-",bnd.s2,"S+",bnd.s3,"S-",bnd.s4;
+        ampo += J2*8.0,"S-",bnd.s1,"S+",bnd.s2,"S-",bnd.s3,"S+",bnd.s4;
+        ampo += J2*gamma2*8.0,"S+",bnd.s1,"S-",bnd.s2,"Sz",bnd.s3,"Sz",bnd.s4;
+        ampo += J2*gamma2*8.0,"S-",bnd.s1,"S+",bnd.s2,"Sz",bnd.s3,"Sz",bnd.s4;
+        ampo += J2*gamma2*8.0,"Sz",bnd.s1,"Sz",bnd.s2,"S+",bnd.s3,"S-",bnd.s4;
+        ampo += J2*gamma2*8.0,"Sz",bnd.s1,"Sz",bnd.s2,"S-",bnd.s3,"S+",bnd.s4;
+        ampo += J2*gamma2*8.0,"Sz",bnd.s1,"S+",bnd.s2,"S-",bnd.s3,"Sz",bnd.s4;
+        ampo += J2*gamma2*8.0,"Sz",bnd.s1,"S-",bnd.s2,"S+",bnd.s3,"Sz",bnd.s4;
+        ampo += J2*gamma2*8.0,"S+",bnd.s1,"Sz",bnd.s2,"Sz",bnd.s3,"S-",bnd.s4;
+        ampo += J2*gamma2*8.0,"S-",bnd.s1,"Sz",bnd.s2,"Sz",bnd.s3,"S+",bnd.s4;
+        ampo += -J2*8.0,"S+",bnd.s1,"Sz",bnd.s2,"S-",bnd.s3,"Sz",bnd.s4;
+        ampo += -J2*8.0,"S-",bnd.s1,"Sz",bnd.s2,"S+",bnd.s3,"Sz",bnd.s4;
+        ampo += -J2*8.0,"Sz",bnd.s1,"S+",bnd.s2,"Sz",bnd.s3,"S-",bnd.s4;
+        ampo += -J2*8.0,"Sz",bnd.s1,"S-",bnd.s2,"Sz",bnd.s3,"S+",bnd.s4;
+        ampo += J2*(2.0*gamma2*gamma2-1.0)*16.0,"Sz",bnd.s1,"Sz",bnd.s2,"Sz",bnd.s3,"Sz",bnd.s4;
         }
 
     auto H = IQMPO(ampo);
@@ -126,6 +126,8 @@ int main(int argc, char* argv[])
     // Measure Si.Sj of every {i,j}, and total M
     //
     auto totalM = 0.0;
+    std::vector<double> SiSj_meas={};
+    std::vector<double> Sz_meas={};
     for ( int i = 1; i <= N; ++i ) {
         //'gauge' the MPS to site i
         psi.position(i); 
@@ -133,15 +135,18 @@ int main(int argc, char* argv[])
         //psi.Anc(1) *= psi.A(0); //Uncomment if doing iDMRG calculation
 
         // i == j part
+
+        // magnetization
         auto ket = psi.A(i);
         auto bra = dag(prime(ket,Site));
-        totalM += (bra*sites.op("Sz",i)*ket).real();
+        auto sz_tmp = (bra*sites.op("Sz",i)*ket).real();
+        Sz_meas.push_back(sz_tmp);
+        totalM +=  sz_tmp;
+
         auto ss_tmp = 0.0;
         ss_tmp += 0.75*((dag(ket)*ket).real());
-        //ss_tmp += (bra*zzop*ket).real();
-        //ss_tmp += (bra*pmop*ket).real();
-        //ss_tmp += (bra*mpop*ket).real();
-        println( i, " ", i, " ", ss_tmp );
+        SiSj_meas.push_back(ss_tmp);
+        //println( i, " ", i, " ", ss_tmp );
         
         if ( i < N ) {
             // i != j part
@@ -171,7 +176,8 @@ int main(int argc, char* argv[])
                 auto op_jz = sites.op("Sz",j);
                 ss_tmp += ( (Czz*op_jz)*dag(prime(psi.A(j),jl,Site)) ).real();
                 
-                println( i, " ", j, " ", ss_tmp ); 
+                SiSj_meas.push_back(ss_tmp);
+                //println( i, " ", j, " ", ss_tmp ); 
 
                 if(j < N) {
                     Cpm *= dag(prime(psi.A(j),Link));
@@ -182,6 +188,14 @@ int main(int argc, char* argv[])
         }
     }
     println( "Total M = ", totalM );
+
+    std::ofstream fSzout("Siz.out",std::ios::out);
+    for (std::vector<double>::const_iterator i = Sz_meas.begin(); i != Sz_meas.end(); ++i)
+            fSzout << *i << ' ';
+
+    std::ofstream fSiSjout("SiSj.out",std::ios::out);
+    for (std::vector<double>::const_iterator i = SiSj_meas.begin(); i != SiSj_meas.end(); ++i)
+            fSiSjout << *i << ' ';
 
     return 0;
     }
