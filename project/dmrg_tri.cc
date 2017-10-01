@@ -272,7 +272,7 @@ int main(int argc, char* argv[])
 
     // 
     //auto DDmpo = AutoMPO(sites);
-    //auto DDcorr = MPO(DDmpo);
+    //auto DDcorr = IQMPO(DDmpo);
     //auto ddcorr_meas = overlap(psi,DDcorr,psi);
     for(int i = 0; i < int(x_dimer.size()); ++i) {
         for(int j = 0; j < int(x_dimer.size()); ++j) {
@@ -331,6 +331,41 @@ int main(int argc, char* argv[])
     }
     if(int(tri_plaq.size()) != num_tri_plaq) Error("Wrong number of tri_plaq");
     println( "tri_plaq: \n", tri_plaq );
+
+    auto Xmpoi = AutoMPO(sites);
+    auto Xmpoj = AutoMPO(sites);
+    auto Xopi = IQMPO(Xmpoi);
+    auto Xopj = IQMPO(Xmpoj);
+    auto xxcorr_meas = overlap(psi,Xopi,psi);
+    for(int i = 0; i < int(tri_plaq.size()); ++i) {
+        Xmpoi = AutoMPO(sites);
+        Xmpoi +=  0.5,"S+",tri_plaq[i].s1,"S-",tri_plaq[i].s2,"Sz",tri_plaq[i].s3;
+        Xmpoi += -0.5,"S-",tri_plaq[i].s1,"S+",tri_plaq[i].s2,"Sz",tri_plaq[i].s3;
+        Xmpoi +=  0.5,"S+",tri_plaq[i].s3,"S-",tri_plaq[i].s1,"Sz",tri_plaq[i].s2;
+        Xmpoi += -0.5,"S-",tri_plaq[i].s3,"S+",tri_plaq[i].s1,"Sz",tri_plaq[i].s2;
+        Xmpoi +=  0.5,"S+",tri_plaq[i].s2,"S-",tri_plaq[i].s3,"Sz",tri_plaq[i].s1;
+        Xmpoi += -0.5,"S-",tri_plaq[i].s2,"S+",tri_plaq[i].s3,"Sz",tri_plaq[i].s1;
+        Xopi = IQMPO(Xmpoi);
+        for(int j = 0; j < int(tri_plaq.size()); ++j) {
+            std::vector<int> sites_tmp = { tri_plaq[i].s1, tri_plaq[i].s2, tri_plaq[i].s3, tri_plaq[j].s1, tri_plaq[j].s2, tri_plaq[j].s3 };
+            //std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
+
+            //println( sites_tmp );
+            for (auto n : sites_tmp ) { std::cout << n; }
+            std::cout << '\n';
+
+            // calculate correlation, Si*Sj*Sk*Sl
+            Xmpoj +=  0.5,"S+",tri_plaq[j].s1,"S-",tri_plaq[j].s2,"Sz",tri_plaq[j].s3;
+            Xmpoj += -0.5,"S-",tri_plaq[j].s1,"S+",tri_plaq[j].s2,"Sz",tri_plaq[j].s3;
+            Xmpoj +=  0.5,"S+",tri_plaq[j].s3,"S-",tri_plaq[j].s1,"Sz",tri_plaq[j].s2;
+            Xmpoj += -0.5,"S-",tri_plaq[j].s3,"S+",tri_plaq[j].s1,"Sz",tri_plaq[j].s2;
+            Xmpoj +=  0.5,"S+",tri_plaq[j].s2,"S-",tri_plaq[j].s3,"Sz",tri_plaq[j].s1;
+            Xmpoj += -0.5,"S-",tri_plaq[j].s2,"S+",tri_plaq[j].s3,"Sz",tri_plaq[j].s1;
+            Xopj = IQMPO(Xmpoj);
+            xxcorr_meas = -overlap(psi,Xopi,Xopj,psi);  // Note that "-" comes of i^2
+            printfln("xxcorr_meas = %.8f\n", xxcorr_meas); 
+        }
+    }
 
     return 0; 
     }
