@@ -1,4 +1,5 @@
 #include "itensor/all.h"
+#include "triangular_more.h"
 
 using namespace itensor;
 
@@ -310,5 +311,24 @@ int main(int argc, char* argv[])
         }
     }
 
-    return 0;
+    // 
+    // measure chiral correlation
+    //
+
+    // make the chiral table
+    auto num_tri_plaq = 2*(Nx-1)*(yperiodic ? Ny : Ny-1);
+    Lattice3PlaqueGraph tri_plaq;
+    tri_plaq.reserve(num_tri_plaq);
+    for(int n = 1; n <= N; ++n) {
+        int x = (n-1)/Ny+1;
+        int y = (n-1)%Ny+1;
+
+        if((x < Nx) && (y < Ny || yperiodic)) {
+            tri_plaq.emplace_back(n, n+1, n+Ny+1);
+            tri_plaq.emplace_back(n, n+Ny+1, n+Ny);
+        }
+
+    }
+
+    return 0; 
     }
