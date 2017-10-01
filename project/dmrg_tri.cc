@@ -329,6 +329,8 @@ int main(int argc, char* argv[])
         }
 
     }
+    if(int(tri_plaq.size()) != num_tri_plaq) Error("Wrong number of tri_plaq");
+    println( "tri_plaq: \n", tri_plaq );
 
     return 0; 
     }

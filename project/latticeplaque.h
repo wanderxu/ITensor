@@ -80,7 +80,7 @@ inline std::ostream&
 operator<<(std::ostream & s, Lattice3Plaque const& b) 
     { 
     //s << format("(%*d,%*d",3,b.s1,3,b.s2);
-    s << format("(%d,%d,%d,%d",b.s1,b.s2,b.s3);
+    s << format("(%d,%d,%d",b.s1,b.s2,b.s3);
     if(b.type.size()!=0) s << "," << b.type;
     s << ")";
     if(!std::isnan(b.x1) && !std::isnan(b.y1))
