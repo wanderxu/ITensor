@@ -56,12 +56,10 @@ int main(int argc, char* argv[])
     auto lattice = triangularLattice(Nx,Ny,{"YPeriodic=",yperiodic});
     auto lattice4plaque = triangularLattice4Plaque(Nx,Ny,{"YPeriodic=",yperiodic});
 
-    println("\nBound coordinate:");
-    println(lattice);
+    println("\nBound coordinate:\n", lattice);
     println("Total number of nn bound: ", lattice.size());
 
-    println("\nPlaque corrdinate:");
-    println(lattice4plaque);
+    println("\nPlaque corrdinate:\n", lattice4plaque);
     println("Total number of plaques: ", lattice4plaque.size());
 
     // two-body term, nearest neighbor
@@ -136,7 +134,7 @@ int main(int argc, char* argv[])
     printfln("\n<psi|H^2|psi> = %.10f", psiHHpsi );
     printfln("\n<psi|H^2|psi> - <psi|H|psi>^2 = %.10f", psiHHpsi-psiHpsi*psiHpsi );
 
-    println("\nTotal QN of Ground State = ",totalQN(psi));
+    //println("\nTotal QN of Ground State = ",totalQN(psi));
 
     //
     // Measure Si.Sj of every {i,j}, and total M
@@ -213,42 +211,104 @@ int main(int argc, char* argv[])
     for (std::vector<double>::const_iterator i = SiSj_meas.begin(); i != SiSj_meas.end(); ++i)
             fSiSjout << *i << ' ';
 
-    //// 
-    //// measure dimer correlation
-    ////
+    // 
+    // measure dimer correlation
     //
-    //// make the dimer table
-    //// x-direction
-    //auto num_x_dimer = (Nx-1)*Ny
-    //auto num_y_dimer = Nx*(yperiodic ? Ny : Ny-1)
-    //auto num_xy_dimer = (Nx-1)*(yperiodic ? Ny : Ny-1)
-    //LatticeGraph x_dimer;
-    //LatticeGraph y_dimer;
-    //LatticeGraph xy_dimer;
-    //x_dimer.reserve(num_x_dimer)
-    //y_dimer.reserve(num_y_dimer)
-    //xy_dimer.reserve(num_xy_dimer)
-    //for(int n = 1; n <= N; ++n)
-    //    {
-    //    int x = (n-1)/Ny+1;
-    //    int y = (n-1)%Ny+1;
+    
+    // make the dimer table
+    // x-direction
+    auto num_x_dimer = (Nx-1)*Ny;
+    auto num_y_dimer = Nx*(yperiodic ? Ny : Ny-1);
+    auto num_xy_dimer = (Nx-1)*(yperiodic ? Ny : Ny-1);
+    LatticeGraph x_dimer;
+    LatticeGraph y_dimer;
+    LatticeGraph xy_dimer;
+    x_dimer.reserve(num_x_dimer);
+    y_dimer.reserve(num_y_dimer);
+    xy_dimer.reserve(num_xy_dimer);
+    for(int n = 1; n <= N; ++n)
+        {
+        int x = (n-1)/Ny+1;
+        int y = (n-1)%Ny+1;
 
-    //    //X-direction bonds
-    //    if(x < Nx) x_dimer.emplace_back(n,n+Ny);
+        //X-direction bonds
+        if(x < Nx) x_dimer.emplace_back(n,n+Ny);
 
-    //    if(Ny > 1) //2d bonds
-    //        {
-    //        //vertical bond
-    //        if(y < Ny) y_dimer.emplace_back(n,n+1);
-    //        if((y == Ny) && yperiodic) y_dimer.emplace_back(n,n-Ny+1);
+        if(Ny > 1) //2d bonds
+            {
+            //vertical bond
+            if(y < Ny) y_dimer.emplace_back(n,n+1);
+            if((y == Ny) && yperiodic) y_dimer.emplace_back(n,n-Ny+1);
 
-    //        //Diagonal bonds
-    //        if((x < Nx) && (y < Ny)) xy_dimer.emplace_back(n,n+Ny+1)
-    //        if((x < Nx) && (y == Ny) && yperiodic) xy_dimer.emplace_back(n,n+1)
-    //        }
-    //    }
+            //Diagonal bonds
+            if((x < Nx) && (y < Ny)) xy_dimer.emplace_back(n,n+Ny+1);
+            if((x < Nx) && (y == Ny) && yperiodic) xy_dimer.emplace_back(n,n+1);
+            }
+        }
+    if(int(x_dimer.size()) != num_x_dimer) Error("Wrong number of x_dimer");
+    if(int(y_dimer.size()) != num_y_dimer) Error("Wrong number of y_dimer");
+    if(int(xy_dimer.size()) != num_xy_dimer) Error("Wrong number of xy_dimer");
+    println( "\nx_dimer: \n", x_dimer );
+    println( "y_dimer: \n", y_dimer );
+    println( "xy_dimer: \n", xy_dimer );
 
+    auto DDmpo = AutoMPO(sites);
+    //DDmpo += 0.25,"S+",3,"S-",5,"S+",2,"S-",3;
+    //DDmpo += 0.25,"S+",3,"S-",5,"S-",2,"S+",3;
+    //DDmpo += 0.50,"S+",3,"S-",5,"Sz",2,"Sz",3;
+    //DDmpo += 0.25,"S-",3,"S+",5,"S+",2,"S-",3;
+    //DDmpo += 0.25,"S-",3,"S+",5,"S-",2,"S+",3;
+    //DDmpo += 0.50,"S-",3,"S+",5,"Sz",2,"Sz",3;
+    //DDmpo += 0.50,"Sz",3,"Sz",5,"S+",2,"S-",3;
+    //DDmpo += 0.50,"Sz",3,"Sz",5,"S-",2,"S+",3;
+    //DDmpo += 1.00,"Sz",3,"Sz",5,"Sz",2,"Sz",3;
+    DDmpo += 0.5,"S+",1,"S-",3;
+    DDmpo += 0.5,"S-",1,"S+",3;
+    DDmpo += 1.0,"Sz",1,"Sz",3;
+    auto DDcorr = IQMPO(DDmpo);
+    auto ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
+    printfln("\nddcorr_meas = %.5f\n\n", ddcorr_meas);
 
+    // 
+    //auto DDmpo = AutoMPO(sites);
+    //auto DDcorr = MPO(DDmpo);
+    //auto ddcorr_meas = overlap(psi,DDcorr,psi);
+    for(int i = 0; i < int(x_dimer.size()); ++i) {
+        for(int j = 0; j < int(x_dimer.size()); ++j) {
+            std::vector<int> sites_tmp = { x_dimer[i].s1, x_dimer[i].s2, x_dimer[j].s1, x_dimer[j].s2 };
+            //std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
+
+            //println( sites_tmp );
+            for (auto n : sites_tmp ) { std::cout << n; }
+            std::cout << '\n';
+
+            // calculate correlation, Si*Sj*Sk*Sl
+            if(i == j){
+                DDmpo = AutoMPO(sites);
+                DDmpo += 0.5,"S+",x_dimer[i].s1,"S-",x_dimer[i].s2;
+                DDmpo += 0.5,"S-",x_dimer[i].s1,"S+",x_dimer[i].s2;
+                DDmpo += 1.0,"Sz",x_dimer[i].s1,"Sz",x_dimer[i].s2;
+                DDcorr = IQMPO(DDmpo);
+                ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
+                printfln("ddcorr_meas = %.8f\n", ddcorr_meas); 
+            }
+            else {
+                DDmpo = AutoMPO(sites);
+                DDmpo += 0.25,"S+",x_dimer[i].s1,"S-",x_dimer[i].s2,"S+",x_dimer[j].s1,"S-",x_dimer[j].s2;
+                DDmpo += 0.25,"S+",x_dimer[i].s1,"S-",x_dimer[i].s2,"S-",x_dimer[j].s1,"S+",x_dimer[j].s2;
+                DDmpo += 0.50,"S+",x_dimer[i].s1,"S-",x_dimer[i].s2,"Sz",x_dimer[j].s1,"Sz",x_dimer[j].s2;
+                DDmpo += 0.25,"S-",x_dimer[i].s1,"S+",x_dimer[i].s2,"S+",x_dimer[j].s1,"S-",x_dimer[j].s2;
+                DDmpo += 0.25,"S-",x_dimer[i].s1,"S+",x_dimer[i].s2,"S-",x_dimer[j].s1,"S+",x_dimer[j].s2;
+                DDmpo += 0.50,"S-",x_dimer[i].s1,"S+",x_dimer[i].s2,"Sz",x_dimer[j].s1,"Sz",x_dimer[j].s2;
+                DDmpo += 0.50,"Sz",x_dimer[i].s1,"Sz",x_dimer[i].s2,"S+",x_dimer[j].s1,"S-",x_dimer[j].s2;
+                DDmpo += 0.50,"Sz",x_dimer[i].s1,"Sz",x_dimer[i].s2,"S-",x_dimer[j].s1,"S+",x_dimer[j].s2;
+                DDmpo += 1.00,"Sz",x_dimer[i].s1,"Sz",x_dimer[i].s2,"Sz",x_dimer[j].s1,"Sz",x_dimer[j].s2;
+                DDcorr = IQMPO(DDmpo);
+                ddcorr_meas = overlap(psi,DDcorr,psi);
+                printfln("ddcorr_meas = %.8f\n", ddcorr_meas);
+            }
+        }
+    }
 
     return 0;
     }
