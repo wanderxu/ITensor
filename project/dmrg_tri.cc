@@ -312,6 +312,7 @@ int main(int argc, char* argv[])
         auto DDcorr = IQMPO(DDmpo);
         auto ddcorr_meas = overlap(psi,DDcorr,psi);
         // measure x_dimer correlation
+        println("measure x_dimer correlation");
         std::vector<double> dxdx_meas={};
         for(int i = 0; i < int(x_dimer.size()); ++i) {
             for(int j = 0; j < int(x_dimer.size()); ++j) {
@@ -355,6 +356,7 @@ int main(int argc, char* argv[])
                 fdxdxout << *i << ' ';
 
         // measure y_dimer correlation
+        println("measure y_dimer correlation");
         std::vector<double> dydy_meas={};
         for(int i = 0; i < int(y_dimer.size()); ++i) {
             for(int j = 0; j < int(y_dimer.size()); ++j) {
@@ -398,6 +400,7 @@ int main(int argc, char* argv[])
                 fdydyout << *i << ' ';
 
         // measure xy_dimer correlation
+        println("measure xy_dimer correlation");
         std::vector<double> dxydxy_meas={};
         for(int i = 0; i < int(xy_dimer.size()); ++i) {
             for(int j = 0; j < int(xy_dimer.size()); ++j) {
@@ -456,9 +459,13 @@ int main(int argc, char* argv[])
             int x = (n-1)/Ny+1;
             int y = (n-1)%Ny+1;
 
-            if((x < Nx) && (y < Ny || yperiodic)) {
+            if((x < Nx) && (y < Ny)) {
                 tri_plaq.emplace_back(n, n+1, n+Ny+1);
                 tri_plaq.emplace_back(n, n+Ny+1, n+Ny);
+            }
+            if((x < Nx) && (y == Ny) && yperiodic) {
+                tri_plaq.emplace_back(n, n-Ny+1, n+1);
+                tri_plaq.emplace_back(n, n+1, n+Ny);
             }
 
         }
