@@ -550,6 +550,7 @@ int main(int argc, char* argv[])
                 std::cout << '\n';
 
                 // calculate correlation, Si*Sj*Sk*Sl
+                Xmpoj = AutoMPO(sites);
                 Xmpoj +=  0.5,"S+",tri_plaq[j].s1,"S-",tri_plaq[j].s2,"Sz",tri_plaq[j].s3;
                 Xmpoj += -0.5,"S-",tri_plaq[j].s1,"S+",tri_plaq[j].s2,"Sz",tri_plaq[j].s3;
                 Xmpoj +=  0.5,"S+",tri_plaq[j].s3,"S-",tri_plaq[j].s1,"Sz",tri_plaq[j].s2;

@@ -65,8 +65,8 @@ for i in range(Neff):
             #print "imj=",imj
             simj[imj] += indat[icount]
             icount += 1
-    np.set_printoptions(precision=1,linewidth=400)
-    print( sisj[i] )
+    np.set_printoptions(precision=2,linewidth=400)
+    print( sisj[i][0:max(Neff,20)] )
     #print str(sisj[i])
     #print( sisj[i], end=" ")
     #print sisj[i],
