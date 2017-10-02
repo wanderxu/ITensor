@@ -88,7 +88,10 @@ ic=(Nx/2-1)*Ny+Ny/2-1
 # x-direction
 with open(tag+"ij_xdirec.dat","w") as f:
     for i in range(ic,N,Ny):
-        f.write( "{} {: .8f}\n".format(i/Nx-Nx/2+1, sisj[ic][i]) )
+        f.write( "{} {: .8f}\n".format((i/Ny-Nx/2+1)*yfold, sisj[ic][i]) )
+        if yfold == 2 :
+            ## in chiral case, you can also count plaq in x direction 
+            f.write( "{} {: .8f}\n".format((i/Ny-Nx/2+1)*yfold+1, sisj[ic][i-1]) )
 
 # y-direction
 with open(tag+"ij_ydirec.dat","w") as f:
