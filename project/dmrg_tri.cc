@@ -23,6 +23,9 @@ int main(int argc, char* argv[])
     double gamma2 = input.getReal("gamma2");
     auto eneropt = input.getYesNo("eneropt",true);
     auto domeas = input.getYesNo("domeas",false);
+    auto meas_spincorr = input.getYesNo("meas_spincorr",false);
+    auto meas_dimercorr = input.getYesNo("meas_dimercorr",false);
+    auto meas_chiralcorr = input.getYesNo("meas_chiralcorr",false);
     auto quiet = input.getYesNo("quiet",true);
 
     // Read the sweeps parameters
@@ -175,9 +178,9 @@ int main(int argc, char* argv[])
         println("\nTotal QN of Ground State = ",totalQN(psi));
     }
 
-    if(domeas) {
+    if(domeas && meas_spincorr) {
         println("\n////////////////////////////");
-        println("Start to perform measurement \n");
+        println("Start to perform measurement of spin correlation\n");
         //
         // Measure Si.Sj of every {i,j}, and total M
         //
@@ -252,7 +255,11 @@ int main(int argc, char* argv[])
         std::ofstream fSiSjout("SiSj.out",std::ios::out);
         for (std::vector<double>::const_iterator i = SiSj_meas.begin(); i != SiSj_meas.end(); ++i)
                 fSiSjout << *i << ' ';
+    }
 
+    if(domeas && meas_dimercorr) {
+        println("\n////////////////////////////");
+        println("Start to perform measurement of dimer correlation\n");
         // 
         // measure dimer correlation
         //
@@ -351,7 +358,11 @@ int main(int argc, char* argv[])
                 }
             }
         }
+    }
 
+    if(domeas && meas_chiralcorr) {
+        println("\n////////////////////////////");
+        println("Start to perform measurement of chiral correlation\n");
         // 
         // measure chiral correlation
         //
