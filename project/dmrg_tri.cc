@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
         auto lattice = triangularLattice(Nx,Ny,{"YPeriodic=",yperiodic});
         auto lattice4plaque = triangularLattice4Plaque(Nx,Ny,{"YPeriodic=",yperiodic});
 
-        println("H is made up of \n");
+        println("H is made up of ");
         println("\nBound:\n", lattice);
         println("Total number of nn bound: ", lattice.size());
 
@@ -154,13 +154,13 @@ int main(int argc, char* argv[])
         // overlap calculates matrix elements of MPO's with respect to MPS's
         // overlap(psi,H,psi) = <psi|H|psi>
         //
-        printfln("\nInitial energy = %.5f", overlap(psi,H,psi));
+        printfln("\nInitial energy = %.5f\n", overlap(psi,H,psi));
     }
 
 
     if(eneropt){
-        println("//////////////////////////");
-        println("Beigin energy optimization, to get ground state wavefunction ......\n");
+        println("\n//////////////////////////////////////////////////////////////////");
+        println("Beigin energy optimization, to get ground state wavefunction ......");
         //
         // Begin the DMRG calculation
         //
@@ -265,7 +265,7 @@ int main(int argc, char* argv[])
 
     if(domeas && meas_dimercorr) {
         println("\n////////////////////////////");
-        println("Start to perform measurement of dimer correlation\n");
+        println("Start to perform measurement of dimer correlation");
         // 
         // measure dimer correlation
         //
