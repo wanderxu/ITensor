@@ -301,32 +301,16 @@ int main(int argc, char* argv[])
         println( "y_dimer: \n", y_dimer );
         println( "xy_dimer: \n", xy_dimer );
 
-        auto DDmpo = AutoMPO(sites);
-        //DDmpo += 0.25,"S+",3,"S-",5,"S+",2,"S-",3;
-        //DDmpo += 0.25,"S+",3,"S-",5,"S-",2,"S+",3;
-        //DDmpo += 0.50,"S+",3,"S-",5,"Sz",2,"Sz",3;
-        //DDmpo += 0.25,"S-",3,"S+",5,"S+",2,"S-",3;
-        //DDmpo += 0.25,"S-",3,"S+",5,"S-",2,"S+",3;
-        //DDmpo += 0.50,"S-",3,"S+",5,"Sz",2,"Sz",3;
-        //DDmpo += 0.50,"Sz",3,"Sz",5,"S+",2,"S-",3;
-        //DDmpo += 0.50,"Sz",3,"Sz",5,"S-",2,"S+",3;
-        //DDmpo += 1.00,"Sz",3,"Sz",5,"Sz",2,"Sz",3;
-        DDmpo += 0.5,"S+",1,"S-",3;
-        DDmpo += 0.5,"S-",1,"S+",3;
-        DDmpo += 1.0,"Sz",1,"Sz",3;
-        auto DDcorr = IQMPO(DDmpo);
-        auto ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
-        printfln("\nddcorr_meas = %.5f\n\n", ddcorr_meas);
 
-        // 
-        //auto DDmpo = AutoMPO(sites);
-        //auto DDcorr = IQMPO(DDmpo);
-        //auto ddcorr_meas = overlap(psi,DDcorr,psi);
+        auto DDmpo = AutoMPO(sites);
+        auto DDcorr = IQMPO(DDmpo);
+        auto ddcorr_meas = overlap(psi,DDcorr,psi);
+        // measure x_dimer correlation
+        std::vector<double> dxdx_meas={};
         for(int i = 0; i < int(x_dimer.size()); ++i) {
             for(int j = 0; j < int(x_dimer.size()); ++j) {
                 std::vector<int> sites_tmp = { x_dimer[i].s1, x_dimer[i].s2, x_dimer[j].s1, x_dimer[j].s2 };
                 //std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
-
                 //println( sites_tmp );
                 for (auto n : sites_tmp ) { std::cout << n; }
                 std::cout << '\n';
@@ -340,6 +324,7 @@ int main(int argc, char* argv[])
                     DDcorr = IQMPO(DDmpo);
                     ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
                     printfln("ddcorr_meas = %.8f\n", ddcorr_meas); 
+                    dxdx_meas.emplace_back(ddcorr_meas);
                 }
                 else {
                     DDmpo = AutoMPO(sites);
@@ -355,9 +340,99 @@ int main(int argc, char* argv[])
                     DDcorr = IQMPO(DDmpo);
                     ddcorr_meas = overlap(psi,DDcorr,psi);
                     printfln("ddcorr_meas = %.8f\n", ddcorr_meas);
+                    dxdx_meas.emplace_back(ddcorr_meas);
                 }
             }
         }
+        std::ofstream fdxdxout("DxiDxj.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = dxdx_meas.begin(); i != dxdx_meas.end(); ++i)
+                fdxdxout << *i << ' ';
+
+        // measure y_dimer correlation
+        std::vector<double> dydy_meas={};
+        for(int i = 0; i < int(y_dimer.size()); ++i) {
+            for(int j = 0; j < int(y_dimer.size()); ++j) {
+                std::vector<int> sites_tmp = { y_dimer[i].s1, y_dimer[i].s2, y_dimer[j].s1, y_dimer[j].s2 };
+                //std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
+                //println( sites_tmp );
+                for (auto n : sites_tmp ) { std::cout << n; }
+                std::cout << '\n';
+
+                // calculate correlation, Si*Sj*Sk*Sl
+                if(i == j){
+                    DDmpo = AutoMPO(sites);
+                    DDmpo += 0.5,"S+",y_dimer[i].s1,"S-",y_dimer[i].s2;
+                    DDmpo += 0.5,"S-",y_dimer[i].s1,"S+",y_dimer[i].s2;
+                    DDmpo += 1.0,"Sz",y_dimer[i].s1,"Sz",y_dimer[i].s2;
+                    DDcorr = IQMPO(DDmpo);
+                    ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
+                    printfln("ddcorr_meas = %.8f\n", ddcorr_meas); 
+                    dydy_meas.emplace_back(ddcorr_meas);
+                }
+                else {
+                    DDmpo = AutoMPO(sites);
+                    DDmpo += 0.25,"S+",y_dimer[i].s1,"S-",y_dimer[i].s2,"S+",y_dimer[j].s1,"S-",y_dimer[j].s2;
+                    DDmpo += 0.25,"S+",y_dimer[i].s1,"S-",y_dimer[i].s2,"S-",y_dimer[j].s1,"S+",y_dimer[j].s2;
+                    DDmpo += 0.50,"S+",y_dimer[i].s1,"S-",y_dimer[i].s2,"Sz",y_dimer[j].s1,"Sz",y_dimer[j].s2;
+                    DDmpo += 0.25,"S-",y_dimer[i].s1,"S+",y_dimer[i].s2,"S+",y_dimer[j].s1,"S-",y_dimer[j].s2;
+                    DDmpo += 0.25,"S-",y_dimer[i].s1,"S+",y_dimer[i].s2,"S-",y_dimer[j].s1,"S+",y_dimer[j].s2;
+                    DDmpo += 0.50,"S-",y_dimer[i].s1,"S+",y_dimer[i].s2,"Sz",y_dimer[j].s1,"Sz",y_dimer[j].s2;
+                    DDmpo += 0.50,"Sz",y_dimer[i].s1,"Sz",y_dimer[i].s2,"S+",y_dimer[j].s1,"S-",y_dimer[j].s2;
+                    DDmpo += 0.50,"Sz",y_dimer[i].s1,"Sz",y_dimer[i].s2,"S-",y_dimer[j].s1,"S+",y_dimer[j].s2;
+                    DDmpo += 1.00,"Sz",y_dimer[i].s1,"Sz",y_dimer[i].s2,"Sz",y_dimer[j].s1,"Sz",y_dimer[j].s2;
+                    DDcorr = IQMPO(DDmpo);
+                    ddcorr_meas = overlap(psi,DDcorr,psi);
+                    printfln("ddcorr_meas = %.8f\n", ddcorr_meas);
+                    dydy_meas.emplace_back(ddcorr_meas);
+                }
+            }
+        }
+        std::ofstream fdydyout("DyiDyj.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = dydy_meas.begin(); i != dydy_meas.end(); ++i)
+                fdydyout << *i << ' ';
+
+        // measure xy_dimer correlation
+        std::vector<double> dxydxy_meas={};
+        for(int i = 0; i < int(xy_dimer.size()); ++i) {
+            for(int j = 0; j < int(xy_dimer.size()); ++j) {
+                std::vector<int> sites_tmp = { xy_dimer[i].s1, xy_dimer[i].s2, xy_dimer[j].s1, xy_dimer[j].s2 };
+                //std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
+                //println( sites_tmp );
+                for (auto n : sites_tmp ) { std::cout << n; }
+                std::cout << '\n';
+
+                // calculate correlation, Si*Sj*Sk*Sl
+                if(i == j){
+                    DDmpo = AutoMPO(sites);
+                    DDmpo += 0.5,"S+",xy_dimer[i].s1,"S-",xy_dimer[i].s2;
+                    DDmpo += 0.5,"S-",xy_dimer[i].s1,"S+",xy_dimer[i].s2;
+                    DDmpo += 1.0,"Sz",xy_dimer[i].s1,"Sz",xy_dimer[i].s2;
+                    DDcorr = IQMPO(DDmpo);
+                    ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
+                    printfln("ddcorr_meas = %.8f\n", ddcorr_meas); 
+                    dxydxy_meas.emplace_back(ddcorr_meas);
+                }
+                else {
+                    DDmpo = AutoMPO(sites);
+                    DDmpo += 0.25,"S+",xy_dimer[i].s1,"S-",xy_dimer[i].s2,"S+",xy_dimer[j].s1,"S-",xy_dimer[j].s2;
+                    DDmpo += 0.25,"S+",xy_dimer[i].s1,"S-",xy_dimer[i].s2,"S-",xy_dimer[j].s1,"S+",xy_dimer[j].s2;
+                    DDmpo += 0.50,"S+",xy_dimer[i].s1,"S-",xy_dimer[i].s2,"Sz",xy_dimer[j].s1,"Sz",xy_dimer[j].s2;
+                    DDmpo += 0.25,"S-",xy_dimer[i].s1,"S+",xy_dimer[i].s2,"S+",xy_dimer[j].s1,"S-",xy_dimer[j].s2;
+                    DDmpo += 0.25,"S-",xy_dimer[i].s1,"S+",xy_dimer[i].s2,"S-",xy_dimer[j].s1,"S+",xy_dimer[j].s2;
+                    DDmpo += 0.50,"S-",xy_dimer[i].s1,"S+",xy_dimer[i].s2,"Sz",xy_dimer[j].s1,"Sz",xy_dimer[j].s2;
+                    DDmpo += 0.50,"Sz",xy_dimer[i].s1,"Sz",xy_dimer[i].s2,"S+",xy_dimer[j].s1,"S-",xy_dimer[j].s2;
+                    DDmpo += 0.50,"Sz",xy_dimer[i].s1,"Sz",xy_dimer[i].s2,"S-",xy_dimer[j].s1,"S+",xy_dimer[j].s2;
+                    DDmpo += 1.00,"Sz",xy_dimer[i].s1,"Sz",xy_dimer[i].s2,"Sz",xy_dimer[j].s1,"Sz",xy_dimer[j].s2;
+                    DDcorr = IQMPO(DDmpo);
+                    ddcorr_meas = overlap(psi,DDcorr,psi);
+                    printfln("ddcorr_meas = %.8f\n", ddcorr_meas);
+                    dxydxy_meas.emplace_back(ddcorr_meas);
+                }
+            }
+        }
+        std::ofstream fdxydxyout("DxyiDxyj.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = dxydxy_meas.begin(); i != dxydxy_meas.end(); ++i)
+                fdxydxyout << *i << ' ';
     }
 
     if(domeas && meas_chiralcorr) {
@@ -388,7 +463,9 @@ int main(int argc, char* argv[])
         auto Xmpoj = AutoMPO(sites);
         auto Xopi = IQMPO(Xmpoi);
         auto Xopj = IQMPO(Xmpoj);
-        auto xxcorr_meas = overlap(psi,Xopi,psi);
+        auto XXcorr_meas = overlap(psi,Xopi,psi);
+        // measure chiral correlation
+        std::vector<double> XiXj_meas={};
         for(int i = 0; i < int(tri_plaq.size()); ++i) {
             Xmpoi = AutoMPO(sites);
             Xmpoi +=  0.5,"S+",tri_plaq[i].s1,"S-",tri_plaq[i].s2,"Sz",tri_plaq[i].s3;
@@ -401,7 +478,6 @@ int main(int argc, char* argv[])
             for(int j = 0; j < int(tri_plaq.size()); ++j) {
                 std::vector<int> sites_tmp = { tri_plaq[i].s1, tri_plaq[i].s2, tri_plaq[i].s3, tri_plaq[j].s1, tri_plaq[j].s2, tri_plaq[j].s3 };
                 //std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
-
                 //println( sites_tmp );
                 for (auto n : sites_tmp ) { std::cout << n; }
                 std::cout << '\n';
@@ -414,10 +490,14 @@ int main(int argc, char* argv[])
                 Xmpoj +=  0.5,"S+",tri_plaq[j].s2,"S-",tri_plaq[j].s3,"Sz",tri_plaq[j].s1;
                 Xmpoj += -0.5,"S-",tri_plaq[j].s2,"S+",tri_plaq[j].s3,"Sz",tri_plaq[j].s1;
                 Xopj = IQMPO(Xmpoj);
-                xxcorr_meas = -overlap(psi,Xopi,Xopj,psi);  // Note that "-" comes of i^2
-                printfln("xxcorr_meas = %.8f\n", xxcorr_meas); 
+                XXcorr_meas = -overlap(psi,Xopi,Xopj,psi);  // Note that "-" comes of i^2
+                printfln("XXcorr_meas = %.8f\n", XXcorr_meas); 
+                XiXj_meas.emplace_back(XXcorr_meas);
             }
         }
+        std::ofstream fXiXjout("XiXj.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = XiXj_meas.begin(); i != XiXj_meas.end(); ++i)
+                fXiXjout << *i << ' ';
     }
 
     return 0; 
