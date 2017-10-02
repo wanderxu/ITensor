@@ -1,12 +1,18 @@
 input
     {
-    Nx = 6
-    Ny = 4
-    yperiodic = yes
-    J1 = 1.0
+    Nx = 4
+    Ny = 2
+    yperiodic = no 
+    J1 = 2.01110
     J2 = 1.0
     gamma1 = 1.0
     gamma2 = 1.0
+    readmps = no
+    eneropt = yes
+    domeas  = yes // if domeas=no, then following meas* tag will not work
+    meas_spincorr = yes
+    meas_dimercorr = yes
+    meas_chiralcorr = yes
 
     nsweeps = 5
     sweeps
