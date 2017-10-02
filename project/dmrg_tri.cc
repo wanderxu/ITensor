@@ -356,6 +356,11 @@ int main(int argc, char* argv[])
                 fdxdxout << *i << ' ';
 
         // measure y_dimer correlation
+        // note when we have yperiodic boundary condition, care should be take for y_dimer correlation
+        auto Dmpoi = AutoMPO(sites);
+        auto Dmpoj = AutoMPO(sites);
+        auto Diop = IQMPO(Dmpoi);
+        auto Djop = IQMPO(Dmpoj);
         println("measure y_dimer correlation");
         std::vector<double> dydy_meas={};
         for(int i = 0; i < int(y_dimer.size()); ++i) {
@@ -374,6 +379,21 @@ int main(int argc, char* argv[])
                     DDmpo += 1.0,"Sz",y_dimer[i].s1,"Sz",y_dimer[i].s2;
                     DDcorr = IQMPO(DDmpo);
                     ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
+                    printfln("ddcorr_meas = %.8f\n", ddcorr_meas); 
+                    dydy_meas.emplace_back(ddcorr_meas);
+                }
+                else if( yperiodic && ((i+2)%Ny==0) && ((j+1)%Ny==0)) { //this is a specical case accross the y-boundary
+                    Dmpoi = AutoMPO(sites);
+                    Dmpoi += 0.5,"S+",y_dimer[i].s1,"S-",y_dimer[i].s2;
+                    Dmpoi += 0.5,"S-",y_dimer[i].s1,"S+",y_dimer[i].s2;
+                    Dmpoi += 1.0,"Sz",y_dimer[i].s1,"Sz",y_dimer[i].s2;
+                    Dmpoj = AutoMPO(sites);
+                    Dmpoj += 0.5,"S+",y_dimer[j].s1,"S-",y_dimer[j].s2;
+                    Dmpoj += 0.5,"S-",y_dimer[j].s1,"S+",y_dimer[j].s2;
+                    Dmpoj += 1.0,"Sz",y_dimer[j].s1,"Sz",y_dimer[j].s2;
+                    Diop = IQMPO(Dmpoi);
+                    Djop = IQMPO(Dmpoj);
+                    ddcorr_meas = overlap(psi,Diop,Djop,psi);
                     printfln("ddcorr_meas = %.8f\n", ddcorr_meas); 
                     dydy_meas.emplace_back(ddcorr_meas);
                 }
