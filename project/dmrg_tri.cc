@@ -67,11 +67,11 @@ int main(int argc, char* argv[])
         H=IQMPO(sites);
         readFromFile("H_file", H);
         auto psiHpsi = overlap(psi,H,psi);
-        auto psiHHpsi = overlap(psi,H,H,psi);
+        //auto psiHHpsi = overlap(psi,H,H,psi);
         printfln(" Intial energy information from input file: ");
         printfln("\n<psi|H|psi> = %.10f", psiHpsi );
-        printfln("\n<psi|H^2|psi> = %.10f", psiHHpsi );
-        printfln("\n<psi|H^2|psi> - <psi|H|psi>^2 = %.10f", psiHHpsi-psiHpsi*psiHpsi );
+        //printfln("\n<psi|H^2|psi> = %.10f", psiHHpsi );
+        //printfln("\n<psi|H^2|psi> - <psi|H|psi>^2 = %.10f", psiHHpsi-psiHpsi*psiHpsi );
         println("\nTotal QN of Ground State = ",totalQN(psi));
     }
     else {
