@@ -513,12 +513,12 @@ int main(int argc, char* argv[])
             int y = (n-1)%Ny+1;
 
             if((x < Nx) && (y < Ny)) {
-                tri_plaq.emplace_back(n, n+1, n+Ny+1);
-                tri_plaq.emplace_back(n, n+Ny+1, n+Ny);
+                tri_plaq.emplace_back(n, n+Ny+1, n+Ny); // x-direction plaq
+                tri_plaq.emplace_back(n, n+1, n+Ny+1); // y-direction plaq
             }
             if((x < Nx) && (y == Ny) && yperiodic) {
-                tri_plaq.emplace_back(n, n-Ny+1, n+1);
                 tri_plaq.emplace_back(n, n+1, n+Ny);
+                tri_plaq.emplace_back(n, n-Ny+1, n+1);
             }
 
         }
