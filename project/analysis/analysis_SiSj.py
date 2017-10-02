@@ -1,5 +1,8 @@
 #!/usr/bin/dev python
 #coding=utf-8
+#
+# can be used to analysis spin, dimer and chiral correlation
+#
 
 import sys
 import math
@@ -9,14 +12,30 @@ import scipy.optimize as opt
 # set parameter
 from model_para import *
 
-assert len(sys.argv) == 2, "Usage: python file.py data.out"
+assert len(sys.argv) == 3, "Usage: python file.py data.out tag"
+tag=sys.argv[2]
 
 # read data
 print "reading file "+sys.argv[1]+" ......"
 indat=np.loadtxt(sys.argv[1])  #
-#print "input = ", indat
+numsij = len(indat)
+print "len(indat) = ", numsij
 
-assert len(indat) == N*(N+1)/2, "Wrong number of SiSj, please check your SiSj.out"
+## check SiSj.out, to take care different cases
+yfold = 1 # a factor for taking care of chiral correlation
+if numsij == N*(N+1)/2:
+    Neff = N  ## for spin correaltion, y_dimer correaltion
+elif numsij == (N-Ny)*(N-Ny+1)/2:
+    Neff = N-Ny ## for x_dimer, xy_dimer correaltion
+elif numsij == (N-Ny)*(2*N-2*Ny+1):
+    Neff = 2*(N-Ny) ## for chiral correlation
+    yfold = 2 ## two tri_plaq for one unit cell, we count it in y direction
+else:
+    print "Wrong number of SiSj, please check your SiSj.out"
+
+## redefine N and Ny
+N *= yfold
+Ny *= yfold
 
 # set fourier phase
 expirk = np.zeros((N,N),dtype=complex)
@@ -37,17 +56,24 @@ simj = np.zeros(N)
 
 # load indat to sisj and simj
 icount = 0
-for i in range(N):
-    for j in range(i,N):
-        sisj[i,j] = indat[icount]
-        sisj[j,i] = indat[icount]
-        imj = int( (xv[i]-xv[j] + Nx)%Nx * Ny + (yv[i]-yv[j]+Ny)%Ny )
-        #print "imj=",imj
-        simj[imj] += indat[icount]
-        icount += 1
+for i in range(Neff):
+    for j in range(i,Neff):
+        if icount < numsij:
+            sisj[i,j] = indat[icount]
+            sisj[j,i] = indat[icount]
+            imj = int( (xv[i]-xv[j] + Nx)%Nx * Ny + (yv[i]-yv[j]+Ny)%Ny )
+            #print "imj=",imj
+            simj[imj] += indat[icount]
+            icount += 1
+    np.set_printoptions(precision=1,linewidth=400)
+    print( sisj[i] )
+    #print str(sisj[i])
+    #print( sisj[i], end=" ")
+    #print sisj[i],
+    #print "16{: .8f}".format(sisj[i])
 
 # perform fourier transformation
-with open("ssk.dat","w") as f:
+with open(tag+"k.dat","w") as f:
     for ki in range(N):
         ssk = 0.+0.j
         for rimj in range(N):
@@ -60,11 +86,11 @@ with open("ssk.dat","w") as f:
 ic=(Nx/2-1)*Ny+Ny/2-1
 
 # x-direction
-with open("ssij_xdirec.dat","w") as f:
+with open(tag+"ij_xdirec.dat","w") as f:
     for i in range(ic,N,Ny):
         f.write( "{} {: .8f}\n".format(i/Nx-Nx/2+1, sisj[ic][i]) )
 
 # y-direction
-with open("ssij_ydirec.dat","w") as f:
+with open(tag+"ij_ydirec.dat","w") as f:
     for i in range(ic,ic+Ny/2+1):
         f.write( "{} {: .8f}\n".format(i-ic, sisj[ic][i]) )
