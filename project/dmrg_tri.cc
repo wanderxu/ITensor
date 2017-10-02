@@ -315,7 +315,7 @@ int main(int argc, char* argv[])
         println("measure x_dimer correlation");
         std::vector<double> dxdx_meas={};
         for(int i = 0; i < int(x_dimer.size()); ++i) {
-            for(int j = 0; j < int(x_dimer.size()); ++j) {
+            for(int j = i; j < int(x_dimer.size()); ++j) {
                 std::vector<int> sites_tmp = { x_dimer[i].s1, x_dimer[i].s2, x_dimer[j].s1, x_dimer[j].s2 };
                 //std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
                 //println( sites_tmp );
@@ -359,7 +359,7 @@ int main(int argc, char* argv[])
         println("measure y_dimer correlation");
         std::vector<double> dydy_meas={};
         for(int i = 0; i < int(y_dimer.size()); ++i) {
-            for(int j = 0; j < int(y_dimer.size()); ++j) {
+            for(int j = i; j < int(y_dimer.size()); ++j) {
                 std::vector<int> sites_tmp = { y_dimer[i].s1, y_dimer[i].s2, y_dimer[j].s1, y_dimer[j].s2 };
                 //std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
                 //println( sites_tmp );
@@ -403,7 +403,7 @@ int main(int argc, char* argv[])
         println("measure xy_dimer correlation");
         std::vector<double> dxydxy_meas={};
         for(int i = 0; i < int(xy_dimer.size()); ++i) {
-            for(int j = 0; j < int(xy_dimer.size()); ++j) {
+            for(int j = i; j < int(xy_dimer.size()); ++j) {
                 std::vector<int> sites_tmp = { xy_dimer[i].s1, xy_dimer[i].s2, xy_dimer[j].s1, xy_dimer[j].s2 };
                 //std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
                 //println( sites_tmp );
@@ -488,7 +488,7 @@ int main(int argc, char* argv[])
             Xmpoi +=  0.5,"S+",tri_plaq[i].s2,"S-",tri_plaq[i].s3,"Sz",tri_plaq[i].s1;
             Xmpoi += -0.5,"S-",tri_plaq[i].s2,"S+",tri_plaq[i].s3,"Sz",tri_plaq[i].s1;
             Xopi = IQMPO(Xmpoi);
-            for(int j = 0; j < int(tri_plaq.size()); ++j) {
+            for(int j = i; j < int(tri_plaq.size()); ++j) {
                 std::vector<int> sites_tmp = { tri_plaq[i].s1, tri_plaq[i].s2, tri_plaq[i].s3, tri_plaq[j].s1, tri_plaq[j].s2, tri_plaq[j].s3 };
                 //std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
                 //println( sites_tmp );
