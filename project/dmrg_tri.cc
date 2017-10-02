@@ -21,6 +21,7 @@ int main(int argc, char* argv[])
     double J2 = input.getReal("J2");
     double gamma1 = input.getReal("gamma1");
     double gamma2 = input.getReal("gamma2");
+    auto readmps = input.getYesNo("readmps",false);
     auto eneropt = input.getYesNo("eneropt",true);
     auto domeas = input.getYesNo("domeas",false);
     auto meas_spincorr = input.getYesNo("meas_spincorr",false);
@@ -54,9 +55,28 @@ int main(int argc, char* argv[])
     IQMPS psi;
     IQMPO H;
 
-    if(eneropt){
-        println("//////////////////////////");
-        println("Building basis and H ......\n");
+    if(readmps) {
+        println("\n//////////////////////////////////////////////////");
+        println("Reading basis, wavefunction and H from files ......");
+        //SpinHalf sites;
+        readFromFile("sites_file", sites);
+        //IQMPS psi(sites);
+        psi=IQMPS(sites);
+        readFromFile("psi_file", psi);
+        //IQMPO H(sites);
+        H=IQMPO(sites);
+        readFromFile("H_file", H);
+        auto psiHpsi = overlap(psi,H,psi);
+        auto psiHHpsi = overlap(psi,H,H,psi);
+        printfln(" Intial energy information from input file: ");
+        printfln("\n<psi|H|psi> = %.10f", psiHpsi );
+        printfln("\n<psi|H^2|psi> = %.10f", psiHHpsi );
+        printfln("\n<psi|H^2|psi> - <psi|H|psi>^2 = %.10f", psiHHpsi-psiHpsi*psiHpsi );
+        println("\nTotal QN of Ground State = ",totalQN(psi));
+    }
+    else {
+        println("\n//////////////////////////////////////////////////");
+        println("Building basis, wavefunction and H from scratch ......\n");
         //
         // Initialize the site degrees of freedom.
         //
@@ -135,8 +155,12 @@ int main(int argc, char* argv[])
         // overlap(psi,H,psi) = <psi|H|psi>
         //
         printfln("\nInitial energy = %.5f", overlap(psi,H,psi));
+    }
 
 
+    if(eneropt){
+        println("//////////////////////////");
+        println("Beigin energy optimization, to get ground state wavefunction ......\n");
         //
         // Begin the DMRG calculation
         //
@@ -158,24 +182,6 @@ int main(int argc, char* argv[])
         writeToFile("sites_file", sites);
         writeToFile("psi_file", psi);
         writeToFile("H_file", H);
-    }
-    else {
-        println("\n///////////////////////////////////////");
-        println("Reading wavefunction from files ......");
-        //SpinHalf sites;
-        readFromFile("sites_file", sites);
-        //IQMPS psi(sites);
-        psi=IQMPS(sites);
-        readFromFile("psi_file", psi);
-        //IQMPO H(sites);
-        H=IQMPO(sites);
-        readFromFile("H_file", H);
-        auto psiHpsi = overlap(psi,H,psi);
-        auto psiHHpsi = overlap(psi,H,H,psi);
-        printfln("\n<psi|H|psi> = %.10f", psiHpsi );
-        printfln("\n<psi|H^2|psi> = %.10f", psiHHpsi );
-        printfln("\n<psi|H^2|psi> - <psi|H|psi>^2 = %.10f", psiHHpsi-psiHpsi*psiHpsi );
-        println("\nTotal QN of Ground State = ",totalQN(psi));
     }
 
     if(domeas && meas_spincorr) {
