@@ -318,7 +318,7 @@ int main(int argc, char* argv[])
                 std::vector<int> sites_tmp = { x_dimer[i].s1, x_dimer[i].s2, x_dimer[j].s1, x_dimer[j].s2 };
                 //std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
                 //println( sites_tmp );
-                for (auto n : sites_tmp ) { std::cout << n; }
+                for (auto n : sites_tmp ) { std::cout << n <<" "; }
                 std::cout << '\n';
 
                 // calculate correlation, Si*Sj*Sk*Sl
@@ -361,7 +361,7 @@ int main(int argc, char* argv[])
                 std::vector<int> sites_tmp = { y_dimer[i].s1, y_dimer[i].s2, y_dimer[j].s1, y_dimer[j].s2 };
                 //std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
                 //println( sites_tmp );
-                for (auto n : sites_tmp ) { std::cout << n; }
+                for (auto n : sites_tmp ) { std::cout << n <<" "; }
                 std::cout << '\n';
 
                 // calculate correlation, Si*Sj*Sk*Sl
@@ -404,7 +404,7 @@ int main(int argc, char* argv[])
                 std::vector<int> sites_tmp = { xy_dimer[i].s1, xy_dimer[i].s2, xy_dimer[j].s1, xy_dimer[j].s2 };
                 //std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
                 //println( sites_tmp );
-                for (auto n : sites_tmp ) { std::cout << n; }
+                for (auto n : sites_tmp ) { std::cout << n <<" "; }
                 std::cout << '\n';
 
                 // calculate correlation, Si*Sj*Sk*Sl
@@ -485,7 +485,7 @@ int main(int argc, char* argv[])
                 std::vector<int> sites_tmp = { tri_plaq[i].s1, tri_plaq[i].s2, tri_plaq[i].s3, tri_plaq[j].s1, tri_plaq[j].s2, tri_plaq[j].s3 };
                 //std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
                 //println( sites_tmp );
-                for (auto n : sites_tmp ) { std::cout << n; }
+                for (auto n : sites_tmp ) { std::cout << n <<" "; }
                 std::cout << '\n';
 
                 // calculate correlation, Si*Sj*Sk*Sl
