@@ -193,6 +193,8 @@ int main(int argc, char* argv[])
         auto totalM = 0.0;
         std::vector<double> SiSj_meas={};
         std::vector<double> Sz_meas={};
+        std::vector<double> Sp_meas={};
+        std::vector<double> Sm_meas={};
         for ( int i = 1; i <= N; ++i ) {
             //'gauge' the MPS to site i
             psi.position(i); 
@@ -208,10 +210,15 @@ int main(int argc, char* argv[])
             Sz_meas.emplace_back(sz_tmp);
             totalM +=  sz_tmp;
 
+            auto sp_tmp = (bra*sites.op("S+",i)*ket).real();
+            Sp_meas.emplace_back(sp_tmp);
+            auto sm_tmp = (bra*sites.op("S-",i)*ket).real();
+            Sm_meas.emplace_back(sm_tmp);
+
             auto ss_tmp = 0.0;
             ss_tmp += 0.75*((dag(ket)*ket).real());
             SiSj_meas.emplace_back(ss_tmp);
-            //println( i, " ", i, " ", ss_tmp );
+            println( i, " ", i, " ", ss_tmp );
             
             if ( i < N ) {
                 // i != j part
@@ -242,7 +249,7 @@ int main(int argc, char* argv[])
                     ss_tmp += ( (Czz*op_jz)*dag(prime(psi.A(j),jl,Site)) ).real();
                     
                     SiSj_meas.emplace_back(ss_tmp);
-                    //println( i, " ", j, " ", ss_tmp ); 
+                    println( i, " ", j, " ", ss_tmp ); 
 
                     if(j < N) {
                         Cpm *= dag(prime(psi.A(j),Link));
@@ -257,6 +264,14 @@ int main(int argc, char* argv[])
         std::ofstream fSzout("Siz.out",std::ios::out);
         for (std::vector<double>::const_iterator i = Sz_meas.begin(); i != Sz_meas.end(); ++i)
                 fSzout << *i << ' ';
+
+        std::ofstream fSpout("Sip.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = Sp_meas.begin(); i != Sp_meas.end(); ++i)
+                fSpout << *i << ' ';
+
+        std::ofstream fSmout("Sim.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = Sm_meas.begin(); i != Sm_meas.end(); ++i)
+                fSmout << *i << ' ';
 
         std::ofstream fSiSjout("SiSj.out",std::ios::out);
         for (std::vector<double>::const_iterator i = SiSj_meas.begin(); i != SiSj_meas.end(); ++i)
@@ -314,6 +329,7 @@ int main(int argc, char* argv[])
         // measure x_dimer correlation
         println("measure x_dimer correlation");
         std::vector<double> dxdx_meas={};
+        std::vector<double> dx_meas={};
         for(int i = 0; i < int(x_dimer.size()); ++i) {
             for(int j = i; j < int(x_dimer.size()); ++j) {
                 std::vector<int> sites_tmp = { x_dimer[i].s1, x_dimer[i].s2, x_dimer[j].s1, x_dimer[j].s2 };
@@ -332,6 +348,7 @@ int main(int argc, char* argv[])
                     ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
                     printfln("ddcorr_meas = %.8f\n", ddcorr_meas); 
                     dxdx_meas.emplace_back(ddcorr_meas);
+                    dx_meas.emplace_back(overlap(psi,DDcorr,psi));
                 }
                 else {
                     DDmpo = AutoMPO(sites);
@@ -355,6 +372,10 @@ int main(int argc, char* argv[])
         for (std::vector<double>::const_iterator i = dxdx_meas.begin(); i != dxdx_meas.end(); ++i)
                 fdxdxout << *i << ' ';
 
+        std::ofstream fdxout("Dxi.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = dx_meas.begin(); i != dx_meas.end(); ++i)
+                fdxout << *i << ' ';
+
         // measure y_dimer correlation
         // note when we have yperiodic boundary condition, care should be take for y_dimer correlation
         auto Dmpoi = AutoMPO(sites);
@@ -363,6 +384,7 @@ int main(int argc, char* argv[])
         auto Djop = IQMPO(Dmpoj);
         println("measure y_dimer correlation");
         std::vector<double> dydy_meas={};
+        std::vector<double> dy_meas={};
         for(int i = 0; i < int(y_dimer.size()); ++i) {
             for(int j = i; j < int(y_dimer.size()); ++j) {
                 std::vector<int> sites_tmp = { y_dimer[i].s1, y_dimer[i].s2, y_dimer[j].s1, y_dimer[j].s2 };
@@ -381,6 +403,7 @@ int main(int argc, char* argv[])
                     ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
                     printfln("ddcorr_meas = %.8f\n", ddcorr_meas); 
                     dydy_meas.emplace_back(ddcorr_meas);
+                    dy_meas.emplace_back(overlap(psi,DDcorr,psi));
                 }
                 else if( yperiodic && ((i+2)%Ny==0) && ((j+1)%Ny==0)) { //this is a specical case accross the y-boundary
                     Dmpoi = AutoMPO(sites);
@@ -419,9 +442,14 @@ int main(int argc, char* argv[])
         for (std::vector<double>::const_iterator i = dydy_meas.begin(); i != dydy_meas.end(); ++i)
                 fdydyout << *i << ' ';
 
+        std::ofstream fdyout("Dyi.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = dy_meas.begin(); i != dy_meas.end(); ++i)
+                fdyout << *i << ' ';
+
         // measure xy_dimer correlation
         println("measure xy_dimer correlation");
         std::vector<double> dxydxy_meas={};
+        std::vector<double> dxy_meas={};
         for(int i = 0; i < int(xy_dimer.size()); ++i) {
             for(int j = i; j < int(xy_dimer.size()); ++j) {
                 std::vector<int> sites_tmp = { xy_dimer[i].s1, xy_dimer[i].s2, xy_dimer[j].s1, xy_dimer[j].s2 };
@@ -440,6 +468,7 @@ int main(int argc, char* argv[])
                     ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
                     printfln("ddcorr_meas = %.8f\n", ddcorr_meas); 
                     dxydxy_meas.emplace_back(ddcorr_meas);
+                    dxy_meas.emplace_back(overlap(psi,DDcorr,psi));
                 }
                 else {
                     DDmpo = AutoMPO(sites);
@@ -462,6 +491,10 @@ int main(int argc, char* argv[])
         std::ofstream fdxydxyout("DxyiDxyj.out",std::ios::out);
         for (std::vector<double>::const_iterator i = dxydxy_meas.begin(); i != dxydxy_meas.end(); ++i)
                 fdxydxyout << *i << ' ';
+
+        std::ofstream fdxyout("Dxyi.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = dxy_meas.begin(); i != dxy_meas.end(); ++i)
+                fdxyout << *i << ' ';
     }
 
     if(domeas && meas_chiralcorr) {
@@ -499,6 +532,7 @@ int main(int argc, char* argv[])
         auto XXcorr_meas = overlap(psi,Xopi,psi);
         // measure chiral correlation
         std::vector<double> XiXj_meas={};
+        std::vector<double> Xi_meas={};
         for(int i = 0; i < int(tri_plaq.size()); ++i) {
             Xmpoi = AutoMPO(sites);
             Xmpoi +=  0.5,"S+",tri_plaq[i].s1,"S-",tri_plaq[i].s2,"Sz",tri_plaq[i].s3;
@@ -526,11 +560,16 @@ int main(int argc, char* argv[])
                 XXcorr_meas = -overlap(psi,Xopi,Xopj,psi);  // Note that "-" comes of i^2
                 printfln("XXcorr_meas = %.8f\n", XXcorr_meas); 
                 XiXj_meas.emplace_back(XXcorr_meas);
+                if(j==i) Xi_meas.emplace_back(overlap(psi,Xopi,psi));
             }
         }
         std::ofstream fXiXjout("XiXj.out",std::ios::out);
         for (std::vector<double>::const_iterator i = XiXj_meas.begin(); i != XiXj_meas.end(); ++i)
                 fXiXjout << *i << ' ';
+
+        std::ofstream fXiout("Xi.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = Xi_meas.begin(); i != Xi_meas.end(); ++i)
+                fXiout << *i << ' ';
     }
 
     return 0; 
