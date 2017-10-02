@@ -5,6 +5,8 @@ using namespace itensor;
 
 int main(int argc, char* argv[])
     {
+    println("//////////////////////////");
+    println("Reading input file ......\n");
     //Parse the input file
     if(argc < 2) { printfln("Usage: %s inputfile_dmrg_table",argv[0]); return 0; }
     auto input = InputGroup(argv[1],"input");
@@ -19,6 +21,8 @@ int main(int argc, char* argv[])
     double J2 = input.getReal("J2");
     double gamma1 = input.getReal("gamma1");
     double gamma2 = input.getReal("gamma2");
+    auto eneropt = input.getYesNo("eneropt",true);
+    auto domeas = input.getYesNo("domeas",false);
     auto quiet = input.getYesNo("quiet",true);
 
     // Read the sweeps parameters
@@ -43,327 +47,365 @@ int main(int argc, char* argv[])
     auto sweeps = Sweeps(nsweeps,table);
     println(sweeps);
 
-    //
-    // Initialize the site degrees of freedom.
-    //
-    auto sites = SpinHalf(N);
+    SpinHalf sites;
+    IQMPS psi;
+    IQMPO H;
 
-    //
-    // Use the AutoMPO feature to create the 
-    // nearest-neighbor XXZ model with ring exchange.
-    //
+    if(eneropt){
+        println("//////////////////////////");
+        println("Building basis and H ......\n");
+        //
+        // Initialize the site degrees of freedom.
+        //
+        //auto sites = SpinHalf(N);
+        sites = SpinHalf(N);
 
-    auto ampo = AutoMPO(sites);
-    auto lattice = triangularLattice(Nx,Ny,{"YPeriodic=",yperiodic});
-    auto lattice4plaque = triangularLattice4Plaque(Nx,Ny,{"YPeriodic=",yperiodic});
+        //
+        // Use the AutoMPO feature to create the 
+        // nearest-neighbor XXZ model with ring exchange.
+        //
 
-    println("\nBound coordinate:\n", lattice);
-    println("Total number of nn bound: ", lattice.size());
+        auto ampo = AutoMPO(sites);
+        auto lattice = triangularLattice(Nx,Ny,{"YPeriodic=",yperiodic});
+        auto lattice4plaque = triangularLattice4Plaque(Nx,Ny,{"YPeriodic=",yperiodic});
 
-    println("\nPlaque corrdinate:\n", lattice4plaque);
-    println("Total number of plaques: ", lattice4plaque.size());
+        println("H is made up of \n");
+        println("\nBound:\n", lattice);
+        println("Total number of nn bound: ", lattice.size());
 
-    // two-body term, nearest neighbor
-    for(auto bnd : lattice)
-        {
-        ampo += J1*2.0,"S+",bnd.s1,"S-",bnd.s2;
-        ampo += J1*2.0,"S-",bnd.s1,"S+",bnd.s2;
-        ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
-        }
+        println("\nPlaque:\n", lattice4plaque);
+        println("Total number of plaques: ", lattice4plaque.size());
 
-
-    // ring-exchange term
-    for(auto bnd : lattice4plaque)
-        {
-        ampo += J2*8.0,"S+",bnd.s1,"S-",bnd.s2,"S+",bnd.s3,"S-",bnd.s4;
-        ampo += J2*8.0,"S-",bnd.s1,"S+",bnd.s2,"S-",bnd.s3,"S+",bnd.s4;
-        ampo += J2*gamma2*8.0,"S+",bnd.s1,"S-",bnd.s2,"Sz",bnd.s3,"Sz",bnd.s4;
-        ampo += J2*gamma2*8.0,"S-",bnd.s1,"S+",bnd.s2,"Sz",bnd.s3,"Sz",bnd.s4;
-        ampo += J2*gamma2*8.0,"Sz",bnd.s1,"Sz",bnd.s2,"S+",bnd.s3,"S-",bnd.s4;
-        ampo += J2*gamma2*8.0,"Sz",bnd.s1,"Sz",bnd.s2,"S-",bnd.s3,"S+",bnd.s4;
-        ampo += J2*gamma2*8.0,"Sz",bnd.s1,"S+",bnd.s2,"S-",bnd.s3,"Sz",bnd.s4;
-        ampo += J2*gamma2*8.0,"Sz",bnd.s1,"S-",bnd.s2,"S+",bnd.s3,"Sz",bnd.s4;
-        ampo += J2*gamma2*8.0,"S+",bnd.s1,"Sz",bnd.s2,"Sz",bnd.s3,"S-",bnd.s4;
-        ampo += J2*gamma2*8.0,"S-",bnd.s1,"Sz",bnd.s2,"Sz",bnd.s3,"S+",bnd.s4;
-        ampo += -J2*8.0,"S+",bnd.s1,"Sz",bnd.s2,"S-",bnd.s3,"Sz",bnd.s4;
-        ampo += -J2*8.0,"S-",bnd.s1,"Sz",bnd.s2,"S+",bnd.s3,"Sz",bnd.s4;
-        ampo += -J2*8.0,"Sz",bnd.s1,"S+",bnd.s2,"Sz",bnd.s3,"S-",bnd.s4;
-        ampo += -J2*8.0,"Sz",bnd.s1,"S-",bnd.s2,"Sz",bnd.s3,"S+",bnd.s4;
-        ampo += J2*(2.0*gamma2*gamma2-1.0)*16.0,"Sz",bnd.s1,"Sz",bnd.s2,"Sz",bnd.s3,"Sz",bnd.s4;
-        }
-
-    auto H = IQMPO(ampo);
-
-    // Set the initial wavefunction matrix product state
-    // to be a Neel state.
-    //
-    // This choice implicitly sets the global Sz quantum number
-    // of the wavefunction to zero. Since it is an IQMPS
-    // it will remain in this quantum number sector.
-    //
-    auto state = InitState(sites);
-    for(int i = 1; i <= N; ++i) 
-        {
-        if(i%2 == 1)
-            state.set(i,"Up");
-        else
-            state.set(i,"Dn");
-        }
-
-    auto psi = IQMPS(state);
-
-    //
-    // overlap calculates matrix elements of MPO's with respect to MPS's
-    // overlap(psi,H,psi) = <psi|H|psi>
-    //
-    printfln("\nInitial energy = %.5f", overlap(psi,H,psi));
+        // two-body term, nearest neighbor
+        for(auto bnd : lattice)
+            {
+            ampo += J1*2.0,"S+",bnd.s1,"S-",bnd.s2;
+            ampo += J1*2.0,"S-",bnd.s1,"S+",bnd.s2;
+            ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
+            }
 
 
-    //
-    // Begin the DMRG calculation
-    //
-    auto energy = dmrg(psi,H,sweeps,{"Quiet",quiet});
+        // ring-exchange term
+        for(auto bnd : lattice4plaque)
+            {
+            ampo += J2*8.0,"S+",bnd.s1,"S-",bnd.s2,"S+",bnd.s3,"S-",bnd.s4;
+            ampo += J2*8.0,"S-",bnd.s1,"S+",bnd.s2,"S-",bnd.s3,"S+",bnd.s4;
+            ampo += J2*gamma2*8.0,"S+",bnd.s1,"S-",bnd.s2,"Sz",bnd.s3,"Sz",bnd.s4;
+            ampo += J2*gamma2*8.0,"S-",bnd.s1,"S+",bnd.s2,"Sz",bnd.s3,"Sz",bnd.s4;
+            ampo += J2*gamma2*8.0,"Sz",bnd.s1,"Sz",bnd.s2,"S+",bnd.s3,"S-",bnd.s4;
+            ampo += J2*gamma2*8.0,"Sz",bnd.s1,"Sz",bnd.s2,"S-",bnd.s3,"S+",bnd.s4;
+            ampo += J2*gamma2*8.0,"Sz",bnd.s1,"S+",bnd.s2,"S-",bnd.s3,"Sz",bnd.s4;
+            ampo += J2*gamma2*8.0,"Sz",bnd.s1,"S-",bnd.s2,"S+",bnd.s3,"Sz",bnd.s4;
+            ampo += J2*gamma2*8.0,"S+",bnd.s1,"Sz",bnd.s2,"Sz",bnd.s3,"S-",bnd.s4;
+            ampo += J2*gamma2*8.0,"S-",bnd.s1,"Sz",bnd.s2,"Sz",bnd.s3,"S+",bnd.s4;
+            ampo += -J2*8.0,"S+",bnd.s1,"Sz",bnd.s2,"S-",bnd.s3,"Sz",bnd.s4;
+            ampo += -J2*8.0,"S-",bnd.s1,"Sz",bnd.s2,"S+",bnd.s3,"Sz",bnd.s4;
+            ampo += -J2*8.0,"Sz",bnd.s1,"S+",bnd.s2,"Sz",bnd.s3,"S-",bnd.s4;
+            ampo += -J2*8.0,"Sz",bnd.s1,"S-",bnd.s2,"Sz",bnd.s3,"S+",bnd.s4;
+            ampo += J2*(2.0*gamma2*gamma2-1.0)*16.0,"Sz",bnd.s1,"Sz",bnd.s2,"Sz",bnd.s3,"Sz",bnd.s4;
+            }
 
-    //
-    // Print the final energy reported by DMRG
-    //
-    printfln("\nGround State Energy = %.10f", energy);
+        //auto H = IQMPO(ampo);
+        H = IQMPO(ampo);
 
-    auto psiHpsi = overlap(psi,H,psi);
-    auto psiHHpsi = overlap(psi,H,H,psi);
-    printfln("\n<psi|H|psi> = %.10f", psiHpsi );
-    printfln("\n<psi|H^2|psi> = %.10f", psiHHpsi );
-    printfln("\n<psi|H^2|psi> - <psi|H|psi>^2 = %.10f", psiHHpsi-psiHpsi*psiHpsi );
+        // Set the initial wavefunction matrix product state
+        // to be a Neel state.
+        //
+        // This choice implicitly sets the global Sz quantum number
+        // of the wavefunction to zero. Since it is an IQMPS
+        // it will remain in this quantum number sector.
+        //
+        auto state = InitState(sites);
+        for(int i = 1; i <= N; ++i) 
+            {
+            if(i%2 == 1)
+                state.set(i,"Up");
+            else
+                state.set(i,"Dn");
+            }
 
-    //println("\nTotal QN of Ground State = ",totalQN(psi));
+        //auto psi = IQMPS(state);
+        psi = IQMPS(state);
 
-    //
-    // Measure Si.Sj of every {i,j}, and total M
-    //
-    auto totalM = 0.0;
-    std::vector<double> SiSj_meas={};
-    std::vector<double> Sz_meas={};
-    for ( int i = 1; i <= N; ++i ) {
-        //'gauge' the MPS to site i
-        psi.position(i); 
-        
-        //psi.Anc(1) *= psi.A(0); //Uncomment if doing iDMRG calculation
+        //
+        // overlap calculates matrix elements of MPO's with respect to MPS's
+        // overlap(psi,H,psi) = <psi|H|psi>
+        //
+        printfln("\nInitial energy = %.5f", overlap(psi,H,psi));
 
-        // i == j part
 
-        // magnetization
-        auto ket = psi.A(i);
-        auto bra = dag(prime(ket,Site));
-        auto sz_tmp = (bra*sites.op("Sz",i)*ket).real();
-        Sz_meas.emplace_back(sz_tmp);
-        totalM +=  sz_tmp;
+        //
+        // Begin the DMRG calculation
+        //
+        auto energy = dmrg(psi,H,sweeps,{"Quiet",quiet});
 
-        auto ss_tmp = 0.0;
-        ss_tmp += 0.75*((dag(ket)*ket).real());
-        SiSj_meas.emplace_back(ss_tmp);
-        //println( i, " ", i, " ", ss_tmp );
-        
-        if ( i < N ) {
-            // i != j part
-            //index linking i to i+1:
-            auto ir = commonIndex(psi.A(i),psi.A(i+1),Link);
+        //
+        // Print the final energy reported by DMRG
+        //
+        printfln("\nGround State Energy = %.10f", energy);
+
+        auto psiHpsi = overlap(psi,H,psi);
+        auto psiHHpsi = overlap(psi,H,H,psi);
+        printfln("\n<psi|H|psi> = %.10f", psiHpsi );
+        printfln("\n<psi|H^2|psi> = %.10f", psiHHpsi );
+        printfln("\n<psi|H^2|psi> - <psi|H|psi>^2 = %.10f", psiHHpsi-psiHpsi*psiHpsi );
+        println("\nTotal QN of Ground State = ",totalQN(psi));
+
+        // after the MPS converged, write basis, psi, and H to disk
+        writeToFile("sites_file", sites);
+        writeToFile("psi_file", psi);
+        writeToFile("H_file", H);
+    }
+    else {
+        println("\n///////////////////////////////////////");
+        println("Reading wavefunction from files ......");
+        //SpinHalf sites;
+        readFromFile("sites_file", sites);
+        //IQMPS psi(sites);
+        psi=IQMPS(sites);
+        readFromFile("psi_file", psi);
+        //IQMPO H(sites);
+        H=IQMPO(sites);
+        readFromFile("H_file", H);
+        auto psiHpsi = overlap(psi,H,psi);
+        auto psiHHpsi = overlap(psi,H,H,psi);
+        printfln("\n<psi|H|psi> = %.10f", psiHpsi );
+        printfln("\n<psi|H^2|psi> = %.10f", psiHHpsi );
+        printfln("\n<psi|H^2|psi> - <psi|H|psi>^2 = %.10f", psiHHpsi-psiHpsi*psiHpsi );
+        println("\nTotal QN of Ground State = ",totalQN(psi));
+    }
+
+    if(domeas) {
+        println("\n////////////////////////////");
+        println("Start to perform measurement \n");
+        //
+        // Measure Si.Sj of every {i,j}, and total M
+        //
+        auto totalM = 0.0;
+        std::vector<double> SiSj_meas={};
+        std::vector<double> Sz_meas={};
+        for ( int i = 1; i <= N; ++i ) {
+            //'gauge' the MPS to site i
+            psi.position(i); 
+            
+            //psi.Anc(1) *= psi.A(0); //Uncomment if doing iDMRG calculation
+
+            // i == j part
+
+            // magnetization
+            auto ket = psi.A(i);
+            auto bra = dag(prime(ket,Site));
+            auto sz_tmp = (bra*sites.op("Sz",i)*ket).real();
+            Sz_meas.emplace_back(sz_tmp);
+            totalM +=  sz_tmp;
+
+            auto ss_tmp = 0.0;
+            ss_tmp += 0.75*((dag(ket)*ket).real());
+            SiSj_meas.emplace_back(ss_tmp);
+            //println( i, " ", i, " ", ss_tmp );
+            
+            if ( i < N ) {
+                // i != j part
+                //index linking i to i+1:
+                auto ir = commonIndex(psi.A(i),psi.A(i+1),Link);
    
-            auto op_ip = sites.op("S+",i);
-            auto op_im = sites.op("S-",i);
-            auto op_iz = sites.op("Sz",i);
-            auto Cpm = psi.A(i)*op_ip*dag(prime(psi.A(i),Site,ir));
-            auto Cmp = psi.A(i)*op_im*dag(prime(psi.A(i),Site,ir));
-            auto Czz = psi.A(i)*op_iz*dag(prime(psi.A(i),Site,ir));
-            for(int j = i+1; j <= N; ++j) {
-                Cpm *= psi.A(j);
-                Cmp *= psi.A(j);
-                Czz *= psi.A(j);
+                auto op_ip = sites.op("S+",i);
+                auto op_im = sites.op("S-",i);
+                auto op_iz = sites.op("Sz",i);
+                auto Cpm = psi.A(i)*op_ip*dag(prime(psi.A(i),Site,ir));
+                auto Cmp = psi.A(i)*op_im*dag(prime(psi.A(i),Site,ir));
+                auto Czz = psi.A(i)*op_iz*dag(prime(psi.A(i),Site,ir));
+                for(int j = i+1; j <= N; ++j) {
+                    Cpm *= psi.A(j);
+                    Cmp *= psi.A(j);
+                    Czz *= psi.A(j);
 
-                auto jl = commonIndex(psi.A(j),psi.A(j-1),Link);
+                    auto jl = commonIndex(psi.A(j),psi.A(j-1),Link);
 
-                auto op_jm = sites.op("S-",j);
-                auto ss_tmp = 0.0;
-                ss_tmp += 0.5*( (Cpm*op_jm)*dag(prime(psi.A(j),jl,Site)) ).real();
+                    auto op_jm = sites.op("S-",j);
+                    auto ss_tmp = 0.0;
+                    ss_tmp += 0.5*( (Cpm*op_jm)*dag(prime(psi.A(j),jl,Site)) ).real();
 
-                auto op_jp = sites.op("S+",j);
-                ss_tmp += 0.5*( (Cmp*op_jp)*dag(prime(psi.A(j),jl,Site)) ).real();
+                    auto op_jp = sites.op("S+",j);
+                    ss_tmp += 0.5*( (Cmp*op_jp)*dag(prime(psi.A(j),jl,Site)) ).real();
 
-                auto op_jz = sites.op("Sz",j);
-                ss_tmp += ( (Czz*op_jz)*dag(prime(psi.A(j),jl,Site)) ).real();
-                
-                SiSj_meas.emplace_back(ss_tmp);
-                //println( i, " ", j, " ", ss_tmp ); 
+                    auto op_jz = sites.op("Sz",j);
+                    ss_tmp += ( (Czz*op_jz)*dag(prime(psi.A(j),jl,Site)) ).real();
+                    
+                    SiSj_meas.emplace_back(ss_tmp);
+                    //println( i, " ", j, " ", ss_tmp ); 
 
-                if(j < N) {
-                    Cpm *= dag(prime(psi.A(j),Link));
-                    Cmp *= dag(prime(psi.A(j),Link));
-                    Czz *= dag(prime(psi.A(j),Link));
+                    if(j < N) {
+                        Cpm *= dag(prime(psi.A(j),Link));
+                        Cmp *= dag(prime(psi.A(j),Link));
+                        Czz *= dag(prime(psi.A(j),Link));
+                    }
                 }
             }
         }
-    }
-    printfln("Total M = %.10e", totalM );
+        printfln("Total M = %.10e", totalM );
 
-    std::ofstream fSzout("Siz.out",std::ios::out);
-    for (std::vector<double>::const_iterator i = Sz_meas.begin(); i != Sz_meas.end(); ++i)
-            fSzout << *i << ' ';
+        std::ofstream fSzout("Siz.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = Sz_meas.begin(); i != Sz_meas.end(); ++i)
+                fSzout << *i << ' ';
 
-    std::ofstream fSiSjout("SiSj.out",std::ios::out);
-    for (std::vector<double>::const_iterator i = SiSj_meas.begin(); i != SiSj_meas.end(); ++i)
-            fSiSjout << *i << ' ';
+        std::ofstream fSiSjout("SiSj.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = SiSj_meas.begin(); i != SiSj_meas.end(); ++i)
+                fSiSjout << *i << ' ';
 
-    // 
-    // measure dimer correlation
-    //
-    
-    // make the dimer table
-    // x-direction
-    auto num_x_dimer = (Nx-1)*Ny;
-    auto num_y_dimer = Nx*(yperiodic ? Ny : Ny-1);
-    auto num_xy_dimer = (Nx-1)*(yperiodic ? Ny : Ny-1);
-    LatticeGraph x_dimer;
-    LatticeGraph y_dimer;
-    LatticeGraph xy_dimer;
-    x_dimer.reserve(num_x_dimer);
-    y_dimer.reserve(num_y_dimer);
-    xy_dimer.reserve(num_xy_dimer);
-    for(int n = 1; n <= N; ++n)
-        {
-        int x = (n-1)/Ny+1;
-        int y = (n-1)%Ny+1;
-
-        //X-direction bonds
-        if(x < Nx) x_dimer.emplace_back(n,n+Ny);
-
-        if(Ny > 1) //2d bonds
+        // 
+        // measure dimer correlation
+        //
+        
+        // make the dimer table
+        // x-direction
+        auto num_x_dimer = (Nx-1)*Ny;
+        auto num_y_dimer = Nx*(yperiodic ? Ny : Ny-1);
+        auto num_xy_dimer = (Nx-1)*(yperiodic ? Ny : Ny-1);
+        LatticeGraph x_dimer;
+        LatticeGraph y_dimer;
+        LatticeGraph xy_dimer;
+        x_dimer.reserve(num_x_dimer);
+        y_dimer.reserve(num_y_dimer);
+        xy_dimer.reserve(num_xy_dimer);
+        for(int n = 1; n <= N; ++n)
             {
-            //vertical bond
-            if(y < Ny) y_dimer.emplace_back(n,n+1);
-            if((y == Ny) && yperiodic) y_dimer.emplace_back(n,n-Ny+1);
+            int x = (n-1)/Ny+1;
+            int y = (n-1)%Ny+1;
 
-            //Diagonal bonds
-            if((x < Nx) && (y < Ny)) xy_dimer.emplace_back(n,n+Ny+1);
-            if((x < Nx) && (y == Ny) && yperiodic) xy_dimer.emplace_back(n,n+1);
+            //X-direction bonds
+            if(x < Nx) x_dimer.emplace_back(n,n+Ny);
+
+            if(Ny > 1) //2d bonds
+                {
+                //vertical bond
+                if(y < Ny) y_dimer.emplace_back(n,n+1);
+                if((y == Ny) && yperiodic) y_dimer.emplace_back(n,n-Ny+1);
+
+                //Diagonal bonds
+                if((x < Nx) && (y < Ny)) xy_dimer.emplace_back(n,n+Ny+1);
+                if((x < Nx) && (y == Ny) && yperiodic) xy_dimer.emplace_back(n,n+1);
+                }
+            }
+        if(int(x_dimer.size()) != num_x_dimer) Error("Wrong number of x_dimer");
+        if(int(y_dimer.size()) != num_y_dimer) Error("Wrong number of y_dimer");
+        if(int(xy_dimer.size()) != num_xy_dimer) Error("Wrong number of xy_dimer");
+        println( "\nx_dimer: \n", x_dimer );
+        println( "y_dimer: \n", y_dimer );
+        println( "xy_dimer: \n", xy_dimer );
+
+        auto DDmpo = AutoMPO(sites);
+        //DDmpo += 0.25,"S+",3,"S-",5,"S+",2,"S-",3;
+        //DDmpo += 0.25,"S+",3,"S-",5,"S-",2,"S+",3;
+        //DDmpo += 0.50,"S+",3,"S-",5,"Sz",2,"Sz",3;
+        //DDmpo += 0.25,"S-",3,"S+",5,"S+",2,"S-",3;
+        //DDmpo += 0.25,"S-",3,"S+",5,"S-",2,"S+",3;
+        //DDmpo += 0.50,"S-",3,"S+",5,"Sz",2,"Sz",3;
+        //DDmpo += 0.50,"Sz",3,"Sz",5,"S+",2,"S-",3;
+        //DDmpo += 0.50,"Sz",3,"Sz",5,"S-",2,"S+",3;
+        //DDmpo += 1.00,"Sz",3,"Sz",5,"Sz",2,"Sz",3;
+        DDmpo += 0.5,"S+",1,"S-",3;
+        DDmpo += 0.5,"S-",1,"S+",3;
+        DDmpo += 1.0,"Sz",1,"Sz",3;
+        auto DDcorr = IQMPO(DDmpo);
+        auto ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
+        printfln("\nddcorr_meas = %.5f\n\n", ddcorr_meas);
+
+        // 
+        //auto DDmpo = AutoMPO(sites);
+        //auto DDcorr = IQMPO(DDmpo);
+        //auto ddcorr_meas = overlap(psi,DDcorr,psi);
+        for(int i = 0; i < int(x_dimer.size()); ++i) {
+            for(int j = 0; j < int(x_dimer.size()); ++j) {
+                std::vector<int> sites_tmp = { x_dimer[i].s1, x_dimer[i].s2, x_dimer[j].s1, x_dimer[j].s2 };
+                //std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
+
+                //println( sites_tmp );
+                for (auto n : sites_tmp ) { std::cout << n; }
+                std::cout << '\n';
+
+                // calculate correlation, Si*Sj*Sk*Sl
+                if(i == j){
+                    DDmpo = AutoMPO(sites);
+                    DDmpo += 0.5,"S+",x_dimer[i].s1,"S-",x_dimer[i].s2;
+                    DDmpo += 0.5,"S-",x_dimer[i].s1,"S+",x_dimer[i].s2;
+                    DDmpo += 1.0,"Sz",x_dimer[i].s1,"Sz",x_dimer[i].s2;
+                    DDcorr = IQMPO(DDmpo);
+                    ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
+                    printfln("ddcorr_meas = %.8f\n", ddcorr_meas); 
+                }
+                else {
+                    DDmpo = AutoMPO(sites);
+                    DDmpo += 0.25,"S+",x_dimer[i].s1,"S-",x_dimer[i].s2,"S+",x_dimer[j].s1,"S-",x_dimer[j].s2;
+                    DDmpo += 0.25,"S+",x_dimer[i].s1,"S-",x_dimer[i].s2,"S-",x_dimer[j].s1,"S+",x_dimer[j].s2;
+                    DDmpo += 0.50,"S+",x_dimer[i].s1,"S-",x_dimer[i].s2,"Sz",x_dimer[j].s1,"Sz",x_dimer[j].s2;
+                    DDmpo += 0.25,"S-",x_dimer[i].s1,"S+",x_dimer[i].s2,"S+",x_dimer[j].s1,"S-",x_dimer[j].s2;
+                    DDmpo += 0.25,"S-",x_dimer[i].s1,"S+",x_dimer[i].s2,"S-",x_dimer[j].s1,"S+",x_dimer[j].s2;
+                    DDmpo += 0.50,"S-",x_dimer[i].s1,"S+",x_dimer[i].s2,"Sz",x_dimer[j].s1,"Sz",x_dimer[j].s2;
+                    DDmpo += 0.50,"Sz",x_dimer[i].s1,"Sz",x_dimer[i].s2,"S+",x_dimer[j].s1,"S-",x_dimer[j].s2;
+                    DDmpo += 0.50,"Sz",x_dimer[i].s1,"Sz",x_dimer[i].s2,"S-",x_dimer[j].s1,"S+",x_dimer[j].s2;
+                    DDmpo += 1.00,"Sz",x_dimer[i].s1,"Sz",x_dimer[i].s2,"Sz",x_dimer[j].s1,"Sz",x_dimer[j].s2;
+                    DDcorr = IQMPO(DDmpo);
+                    ddcorr_meas = overlap(psi,DDcorr,psi);
+                    printfln("ddcorr_meas = %.8f\n", ddcorr_meas);
+                }
             }
         }
-    if(int(x_dimer.size()) != num_x_dimer) Error("Wrong number of x_dimer");
-    if(int(y_dimer.size()) != num_y_dimer) Error("Wrong number of y_dimer");
-    if(int(xy_dimer.size()) != num_xy_dimer) Error("Wrong number of xy_dimer");
-    println( "\nx_dimer: \n", x_dimer );
-    println( "y_dimer: \n", y_dimer );
-    println( "xy_dimer: \n", xy_dimer );
 
-    auto DDmpo = AutoMPO(sites);
-    //DDmpo += 0.25,"S+",3,"S-",5,"S+",2,"S-",3;
-    //DDmpo += 0.25,"S+",3,"S-",5,"S-",2,"S+",3;
-    //DDmpo += 0.50,"S+",3,"S-",5,"Sz",2,"Sz",3;
-    //DDmpo += 0.25,"S-",3,"S+",5,"S+",2,"S-",3;
-    //DDmpo += 0.25,"S-",3,"S+",5,"S-",2,"S+",3;
-    //DDmpo += 0.50,"S-",3,"S+",5,"Sz",2,"Sz",3;
-    //DDmpo += 0.50,"Sz",3,"Sz",5,"S+",2,"S-",3;
-    //DDmpo += 0.50,"Sz",3,"Sz",5,"S-",2,"S+",3;
-    //DDmpo += 1.00,"Sz",3,"Sz",5,"Sz",2,"Sz",3;
-    DDmpo += 0.5,"S+",1,"S-",3;
-    DDmpo += 0.5,"S-",1,"S+",3;
-    DDmpo += 1.0,"Sz",1,"Sz",3;
-    auto DDcorr = IQMPO(DDmpo);
-    auto ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
-    printfln("\nddcorr_meas = %.5f\n\n", ddcorr_meas);
+        // 
+        // measure chiral correlation
+        //
 
-    // 
-    //auto DDmpo = AutoMPO(sites);
-    //auto DDcorr = IQMPO(DDmpo);
-    //auto ddcorr_meas = overlap(psi,DDcorr,psi);
-    for(int i = 0; i < int(x_dimer.size()); ++i) {
-        for(int j = 0; j < int(x_dimer.size()); ++j) {
-            std::vector<int> sites_tmp = { x_dimer[i].s1, x_dimer[i].s2, x_dimer[j].s1, x_dimer[j].s2 };
-            //std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
+        // make the chiral table
+        auto num_tri_plaq = 2*(Nx-1)*(yperiodic ? Ny : Ny-1);
+        Lattice3PlaqueGraph tri_plaq;
+        tri_plaq.reserve(num_tri_plaq);
+        for(int n = 1; n <= N; ++n) {
+            int x = (n-1)/Ny+1;
+            int y = (n-1)%Ny+1;
 
-            //println( sites_tmp );
-            for (auto n : sites_tmp ) { std::cout << n; }
-            std::cout << '\n';
-
-            // calculate correlation, Si*Sj*Sk*Sl
-            if(i == j){
-                DDmpo = AutoMPO(sites);
-                DDmpo += 0.5,"S+",x_dimer[i].s1,"S-",x_dimer[i].s2;
-                DDmpo += 0.5,"S-",x_dimer[i].s1,"S+",x_dimer[i].s2;
-                DDmpo += 1.0,"Sz",x_dimer[i].s1,"Sz",x_dimer[i].s2;
-                DDcorr = IQMPO(DDmpo);
-                ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
-                printfln("ddcorr_meas = %.8f\n", ddcorr_meas); 
+            if((x < Nx) && (y < Ny || yperiodic)) {
+                tri_plaq.emplace_back(n, n+1, n+Ny+1);
+                tri_plaq.emplace_back(n, n+Ny+1, n+Ny);
             }
-            else {
-                DDmpo = AutoMPO(sites);
-                DDmpo += 0.25,"S+",x_dimer[i].s1,"S-",x_dimer[i].s2,"S+",x_dimer[j].s1,"S-",x_dimer[j].s2;
-                DDmpo += 0.25,"S+",x_dimer[i].s1,"S-",x_dimer[i].s2,"S-",x_dimer[j].s1,"S+",x_dimer[j].s2;
-                DDmpo += 0.50,"S+",x_dimer[i].s1,"S-",x_dimer[i].s2,"Sz",x_dimer[j].s1,"Sz",x_dimer[j].s2;
-                DDmpo += 0.25,"S-",x_dimer[i].s1,"S+",x_dimer[i].s2,"S+",x_dimer[j].s1,"S-",x_dimer[j].s2;
-                DDmpo += 0.25,"S-",x_dimer[i].s1,"S+",x_dimer[i].s2,"S-",x_dimer[j].s1,"S+",x_dimer[j].s2;
-                DDmpo += 0.50,"S-",x_dimer[i].s1,"S+",x_dimer[i].s2,"Sz",x_dimer[j].s1,"Sz",x_dimer[j].s2;
-                DDmpo += 0.50,"Sz",x_dimer[i].s1,"Sz",x_dimer[i].s2,"S+",x_dimer[j].s1,"S-",x_dimer[j].s2;
-                DDmpo += 0.50,"Sz",x_dimer[i].s1,"Sz",x_dimer[i].s2,"S-",x_dimer[j].s1,"S+",x_dimer[j].s2;
-                DDmpo += 1.00,"Sz",x_dimer[i].s1,"Sz",x_dimer[i].s2,"Sz",x_dimer[j].s1,"Sz",x_dimer[j].s2;
-                DDcorr = IQMPO(DDmpo);
-                ddcorr_meas = overlap(psi,DDcorr,psi);
-                printfln("ddcorr_meas = %.8f\n", ddcorr_meas);
+
+        }
+        if(int(tri_plaq.size()) != num_tri_plaq) Error("Wrong number of tri_plaq");
+        println( "tri_plaq: \n", tri_plaq );
+
+        auto Xmpoi = AutoMPO(sites);
+        auto Xmpoj = AutoMPO(sites);
+        auto Xopi = IQMPO(Xmpoi);
+        auto Xopj = IQMPO(Xmpoj);
+        auto xxcorr_meas = overlap(psi,Xopi,psi);
+        for(int i = 0; i < int(tri_plaq.size()); ++i) {
+            Xmpoi = AutoMPO(sites);
+            Xmpoi +=  0.5,"S+",tri_plaq[i].s1,"S-",tri_plaq[i].s2,"Sz",tri_plaq[i].s3;
+            Xmpoi += -0.5,"S-",tri_plaq[i].s1,"S+",tri_plaq[i].s2,"Sz",tri_plaq[i].s3;
+            Xmpoi +=  0.5,"S+",tri_plaq[i].s3,"S-",tri_plaq[i].s1,"Sz",tri_plaq[i].s2;
+            Xmpoi += -0.5,"S-",tri_plaq[i].s3,"S+",tri_plaq[i].s1,"Sz",tri_plaq[i].s2;
+            Xmpoi +=  0.5,"S+",tri_plaq[i].s2,"S-",tri_plaq[i].s3,"Sz",tri_plaq[i].s1;
+            Xmpoi += -0.5,"S-",tri_plaq[i].s2,"S+",tri_plaq[i].s3,"Sz",tri_plaq[i].s1;
+            Xopi = IQMPO(Xmpoi);
+            for(int j = 0; j < int(tri_plaq.size()); ++j) {
+                std::vector<int> sites_tmp = { tri_plaq[i].s1, tri_plaq[i].s2, tri_plaq[i].s3, tri_plaq[j].s1, tri_plaq[j].s2, tri_plaq[j].s3 };
+                //std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
+
+                //println( sites_tmp );
+                for (auto n : sites_tmp ) { std::cout << n; }
+                std::cout << '\n';
+
+                // calculate correlation, Si*Sj*Sk*Sl
+                Xmpoj +=  0.5,"S+",tri_plaq[j].s1,"S-",tri_plaq[j].s2,"Sz",tri_plaq[j].s3;
+                Xmpoj += -0.5,"S-",tri_plaq[j].s1,"S+",tri_plaq[j].s2,"Sz",tri_plaq[j].s3;
+                Xmpoj +=  0.5,"S+",tri_plaq[j].s3,"S-",tri_plaq[j].s1,"Sz",tri_plaq[j].s2;
+                Xmpoj += -0.5,"S-",tri_plaq[j].s3,"S+",tri_plaq[j].s1,"Sz",tri_plaq[j].s2;
+                Xmpoj +=  0.5,"S+",tri_plaq[j].s2,"S-",tri_plaq[j].s3,"Sz",tri_plaq[j].s1;
+                Xmpoj += -0.5,"S-",tri_plaq[j].s2,"S+",tri_plaq[j].s3,"Sz",tri_plaq[j].s1;
+                Xopj = IQMPO(Xmpoj);
+                xxcorr_meas = -overlap(psi,Xopi,Xopj,psi);  // Note that "-" comes of i^2
+                printfln("xxcorr_meas = %.8f\n", xxcorr_meas); 
             }
-        }
-    }
-
-    // 
-    // measure chiral correlation
-    //
-
-    // make the chiral table
-    auto num_tri_plaq = 2*(Nx-1)*(yperiodic ? Ny : Ny-1);
-    Lattice3PlaqueGraph tri_plaq;
-    tri_plaq.reserve(num_tri_plaq);
-    for(int n = 1; n <= N; ++n) {
-        int x = (n-1)/Ny+1;
-        int y = (n-1)%Ny+1;
-
-        if((x < Nx) && (y < Ny || yperiodic)) {
-            tri_plaq.emplace_back(n, n+1, n+Ny+1);
-            tri_plaq.emplace_back(n, n+Ny+1, n+Ny);
-        }
-
-    }
-    if(int(tri_plaq.size()) != num_tri_plaq) Error("Wrong number of tri_plaq");
-    println( "tri_plaq: \n", tri_plaq );
-
-    auto Xmpoi = AutoMPO(sites);
-    auto Xmpoj = AutoMPO(sites);
-    auto Xopi = IQMPO(Xmpoi);
-    auto Xopj = IQMPO(Xmpoj);
-    auto xxcorr_meas = overlap(psi,Xopi,psi);
-    for(int i = 0; i < int(tri_plaq.size()); ++i) {
-        Xmpoi = AutoMPO(sites);
-        Xmpoi +=  0.5,"S+",tri_plaq[i].s1,"S-",tri_plaq[i].s2,"Sz",tri_plaq[i].s3;
-        Xmpoi += -0.5,"S-",tri_plaq[i].s1,"S+",tri_plaq[i].s2,"Sz",tri_plaq[i].s3;
-        Xmpoi +=  0.5,"S+",tri_plaq[i].s3,"S-",tri_plaq[i].s1,"Sz",tri_plaq[i].s2;
-        Xmpoi += -0.5,"S-",tri_plaq[i].s3,"S+",tri_plaq[i].s1,"Sz",tri_plaq[i].s2;
-        Xmpoi +=  0.5,"S+",tri_plaq[i].s2,"S-",tri_plaq[i].s3,"Sz",tri_plaq[i].s1;
-        Xmpoi += -0.5,"S-",tri_plaq[i].s2,"S+",tri_plaq[i].s3,"Sz",tri_plaq[i].s1;
-        Xopi = IQMPO(Xmpoi);
-        for(int j = 0; j < int(tri_plaq.size()); ++j) {
-            std::vector<int> sites_tmp = { tri_plaq[i].s1, tri_plaq[i].s2, tri_plaq[i].s3, tri_plaq[j].s1, tri_plaq[j].s2, tri_plaq[j].s3 };
-            //std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
-
-            //println( sites_tmp );
-            for (auto n : sites_tmp ) { std::cout << n; }
-            std::cout << '\n';
-
-            // calculate correlation, Si*Sj*Sk*Sl
-            Xmpoj +=  0.5,"S+",tri_plaq[j].s1,"S-",tri_plaq[j].s2,"Sz",tri_plaq[j].s3;
-            Xmpoj += -0.5,"S-",tri_plaq[j].s1,"S+",tri_plaq[j].s2,"Sz",tri_plaq[j].s3;
-            Xmpoj +=  0.5,"S+",tri_plaq[j].s3,"S-",tri_plaq[j].s1,"Sz",tri_plaq[j].s2;
-            Xmpoj += -0.5,"S-",tri_plaq[j].s3,"S+",tri_plaq[j].s1,"Sz",tri_plaq[j].s2;
-            Xmpoj +=  0.5,"S+",tri_plaq[j].s2,"S-",tri_plaq[j].s3,"Sz",tri_plaq[j].s1;
-            Xmpoj += -0.5,"S-",tri_plaq[j].s2,"S+",tri_plaq[j].s3,"Sz",tri_plaq[j].s1;
-            Xopj = IQMPO(Xmpoj);
-            xxcorr_meas = -overlap(psi,Xopi,Xopj,psi);  // Note that "-" comes of i^2
-            printfln("xxcorr_meas = %.8f\n", xxcorr_meas); 
         }
     }
 
