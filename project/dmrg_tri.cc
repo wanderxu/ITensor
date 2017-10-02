@@ -176,6 +176,11 @@ int main(int argc, char* argv[])
         printfln("\n<psi|H|psi> = %.10f", psiHpsi );
         printfln("\n<psi|H^2|psi> = %.10f", psiHHpsi );
         printfln("\n<psi|H^2|psi> - <psi|H|psi>^2 = %.10f", psiHHpsi-psiHpsi*psiHpsi );
+
+        printfln("\n<psi|H|psi> / N = %.10f", psiHpsi/N );
+        printfln("\n<psi|H^2|psi> / N^2 = %.10f", psiHHpsi/(N*N) );
+        printfln("\nsqrt( <psi|H^2|psi> - <psi|H|psi>^2 ) / N = %.10f", sqrt(psiHHpsi-psiHpsi*psiHpsi)/N );
+
         println("\nTotal QN of Ground State = ",totalQN(psi));
 
         // after the MPS converged, write basis, psi, and H to disk
