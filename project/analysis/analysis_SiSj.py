@@ -45,10 +45,12 @@ for i in range(Nx):
     for j in range(Ny):
         xv[Ny*i+j] = float(i)
         yv[Ny*i+j] = float(j)
+kxv = xv - Nx/2
+kyv = yv - Ny/2
 
 for ri in range(N):
     for kj in range(N):
-        expirk[ri,kj] = np.exp( 1.j*(xv[ri]*xv[kj]/Nx+yv[ri]*yv[kj]/Ny)*2.0*np.pi )
+        expirk[ri,kj] = np.exp( 1.j*(xv[ri]*kxv[kj]/Nx+yv[ri]*kyv[kj]/Ny)*2.0*np.pi )
         ##print "expirk[ri,kj]=", expirk[ri,kj]
 
 sisj = np.zeros((N,N))
@@ -79,7 +81,9 @@ with open(tag+"k.dat","w") as f:
         for rimj in range(N):
             ssk += simj[rimj]*expirk[rimj,ki]
         ssk /= N
-        f.write( "{: .8f} {: .8f} {: .8f} {: .8f}\n".format(xv[ki]/Nx*2.0*np.pi, yv[ki]/Ny*2.0*np.pi, ssk.real, ssk.imag) )
+        if ki%Ny == 0 :
+            f.write( "\n" )
+        f.write( "{: .8f} {: .8f} {: .8f} {: .8f}\n".format(kxv[ki]/Nx*2.0*np.pi, kyv[ki]/Ny*2.0*np.pi, ssk.real, ssk.imag) )
 
 # output sisj in x-direction
 # pick the central point
