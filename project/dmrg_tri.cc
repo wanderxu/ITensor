@@ -177,6 +177,11 @@ int main(int argc, char* argv[])
         //
         auto energy = dmrg(psi,H,sweeps,{"Quiet",quiet});
 
+        // after the MPS converged, write basis, psi, and H to disk
+        writeToFile("sites_file", sites);
+        writeToFile("psi_file", psi);
+        writeToFile("H_file", H);
+
         //
         // Print the final energy reported by DMRG
         //
@@ -194,11 +199,6 @@ int main(int argc, char* argv[])
         printfln("\nsqrt( | <psi|H^2|psi> - <psi|H|psi>^2 | ) / N = %.10f", sqrt(abs(psiHHpsi-psiHpsi*psiHpsi))/N );
 
         println("\nTotal QN of Ground State = ",totalQN(psi));
-
-        // after the MPS converged, write basis, psi, and H to disk
-        writeToFile("sites_file", sites);
-        writeToFile("psi_file", psi);
-        writeToFile("H_file", H);
     }
 
     if(domeas && meas_spincorr) {
