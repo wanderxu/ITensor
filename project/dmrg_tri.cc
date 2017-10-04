@@ -55,6 +55,17 @@ int main(int argc, char* argv[])
     IQMPS psi;
     IQMPO H;
 
+    // check whether "psi_file" exists
+    {
+        std::ifstream ifile("psi_file");
+        if(ifile) {
+            readmps=true;
+            println("psi_file is found, readmps is set to true"); }
+        else{
+            readmps=false;
+            println("psi_file is NOT found, readmps is set to false"); }
+    }
+
     if(readmps) {
         println("\n//////////////////////////////////////////////////");
         println("Reading basis, wavefunction and H from files ......");
