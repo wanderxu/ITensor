@@ -185,20 +185,20 @@ int main(int argc, char* argv[])
         //
         // Print the final energy reported by DMRG
         //
-        printfln("\nGround State Energy = %.10f", energy);
-
-        auto psiHpsi = overlap(psi,H,psi);
-        auto psiHHpsi = overlap(psi,H,H,psi);
-        printfln("\n<psi|H|psi> = %.10f", psiHpsi );
-        printfln("\n<psi|H^2|psi> = %.10f", psiHHpsi );
-        printfln("\n<psi|H^2|psi> - <psi|H|psi>^2 = %.10f", psiHHpsi-psiHpsi*psiHpsi );
-
-        printfln("\n<psi|H|psi> / N = %.10f", psiHpsi/N );
-        printfln("\n<psi|H^2|psi> / N^2 = %.10f", psiHHpsi/(N*N) );
-        printfln("\n( <psi|H^2|psi> - <psi|H|psi>^2 ) / N^2 = %.10f", (psiHHpsi-psiHpsi*psiHpsi)/(N*N) );
-        printfln("\nsqrt( | <psi|H^2|psi> - <psi|H|psi>^2 | ) / N = %.10f", sqrt(abs(psiHHpsi-psiHpsi*psiHpsi))/N );
-
         println("\nTotal QN of Ground State = ",totalQN(psi));
+        printfln("\nGround State Energy = %.10f", energy);
+        printfln("\n<psi|H|psi> / N = %.10f", energy/N );
+
+        // since calculate overlap(psi,H,H,psi) is extremely memory expensive, we only calculate it when maxm <= 1280
+        if( sweeps.maxm( sweeps.nsweep() ) <= 1280 ) { 
+            auto psiHHpsi = overlap(psi,H,H,psi);
+            printfln("\n<psi|H^2|psi> = %.10f", psiHHpsi );
+            printfln("\n<psi|H^2|psi> - <psi|H|psi>^2 = %.10f", psiHHpsi-energy*energy);
+            printfln("\n<psi|H^2|psi> / N^2 = %.10f", psiHHpsi/(N*N) );
+            printfln("\n( <psi|H^2|psi> - <psi|H|psi>^2 ) / N^2 = %.10f", (psiHHpsi-energy*energy)/(N*N) );
+            printfln("\nsqrt( | <psi|H^2|psi> - <psi|H|psi>^2 | ) / N = %.10f", sqrt(abs(psiHHpsi-energy*energy))/N );
+        }
+
     }
 
     if(domeas && meas_spincorr) {
@@ -589,6 +589,8 @@ int main(int argc, char* argv[])
         for (std::vector<double>::const_iterator i = Xi_meas.begin(); i != Xi_meas.end(); ++i)
                 fXiout << *i << ' ';
     }
+
+    println( "\nRUNNING FINISHED ^_^ !!! " );
 
     return 0; 
     }
