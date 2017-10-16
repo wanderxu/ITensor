@@ -209,6 +209,8 @@ int main(int argc, char* argv[])
         //
         auto totalM = 0.0;
         std::vector<double> SiSj_meas={};
+        std::vector<double> SiSjzz_meas={};
+        std::vector<double> SiSjpm_meas={};
         std::vector<double> Sz_meas={};
         std::vector<double> Sp_meas={};
         std::vector<double> Sm_meas={};
@@ -235,6 +237,8 @@ int main(int argc, char* argv[])
             auto ss_tmp = 0.0;
             ss_tmp += 0.75*((dag(ket)*ket).real());
             SiSj_meas.emplace_back(ss_tmp);
+            SiSjzz_meas.emplace_back(0.25);
+            SiSjpm_meas.emplace_back(ss_tmp-0.25);
             println( i, " ", i, " ", ss_tmp );
             
             if ( i < N ) {
@@ -262,8 +266,13 @@ int main(int argc, char* argv[])
                     auto op_jp = sites.op("S+",j);
                     ss_tmp += 0.5*( (Cmp*op_jp)*dag(prime(psi.A(j),jl,Site)) ).real();
 
+                    auto spm_tmp = ss_tmp;
+                    SiSjpm_meas.emplace_back(ss_tmp);
+
                     auto op_jz = sites.op("Sz",j);
                     ss_tmp += ( (Czz*op_jz)*dag(prime(psi.A(j),jl,Site)) ).real();
+
+                    SiSjzz_meas.emplace_back(ss_tmp-spm_tmp);
                     
                     SiSj_meas.emplace_back(ss_tmp);
                     println( i, " ", j, " ", ss_tmp ); 
@@ -293,6 +302,14 @@ int main(int argc, char* argv[])
         std::ofstream fSiSjout("SiSj.out",std::ios::out);
         for (std::vector<double>::const_iterator i = SiSj_meas.begin(); i != SiSj_meas.end(); ++i)
                 fSiSjout << *i << ' ';
+
+        std::ofstream fSiSjzzout("SiSjzz.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = SiSjzz_meas.begin(); i != SiSjzz_meas.end(); ++i)
+                fSiSjzzout << *i << ' ';
+
+        std::ofstream fSiSjpmout("SiSjpm.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = SiSjpm_meas.begin(); i != SiSjpm_meas.end(); ++i)
+                fSiSjpmout << *i << ' ';
     }
 
     if(domeas && meas_dimercorr) {
