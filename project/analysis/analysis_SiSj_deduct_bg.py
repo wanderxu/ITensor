@@ -12,14 +12,20 @@ import scipy.optimize as opt
 # set parameter
 from model_para import *
 
-assert len(sys.argv) == 3, "Usage: python file.py data.out tag"
-tag=sys.argv[2]
+# data1.out is correlation data, data2.out is background
+assert len(sys.argv) == 4, "Usage: python file.py data1.out data2.out tag"
+tag=sys.argv[3]+"dbg"
 
 # read data
 print "reading file "+sys.argv[1]+" ......"
 indat=np.loadtxt(sys.argv[1])  #
 numsij = len(indat)
 print "len(indat) = ", numsij
+
+print "reading file "+sys.argv[2]+" ......"
+indati=np.loadtxt(sys.argv[2])  #
+numsi = len(indati)
+print "len(indati) = ", numsi
 
 ## check SiSj.out, to take care different cases
 yfold = 1 # a factor for taking care of chiral correlation
@@ -56,16 +62,13 @@ for ri in range(N):
 sisj = np.zeros((N,N))
 simj = np.zeros(N)
 
-# load indat to sisj and simj
+# load indat to sisj
 icount = 0
 for i in range(Neff):
     for j in range(i,Neff):
         if icount < numsij:
-            sisj[i,j] = indat[icount]
-            sisj[j,i] = indat[icount]
-            imj = int( (xv[i]-xv[j] + Nx)%Nx * Ny + (yv[i]-yv[j]+Ny)%Ny )
-            #print "imj=",imj
-            simj[imj] += indat[icount]
+            sisj[i,j] = indat[icount] - indati[i]*indati[j]
+            sisj[j,i] = indat[icount] - indati[j]*indati[i]
             icount += 1
     np.set_printoptions(precision=2,linewidth=400)
     print( sisj[i][0:max(Neff,20)] )
@@ -73,6 +76,13 @@ for i in range(Neff):
     #print( sisj[i], end=" ")
     #print sisj[i],
     #print "16{: .8f}".format(sisj[i])
+
+# calculate simj
+for i in range(N):
+    for j in range(N):
+        imj = int( (xv[i]-xv[j] + Nx)%Nx * Ny + (yv[i]-yv[j]+Ny)%Ny )
+        #print "imj=",imj
+        simj[imj] += sisj[i,j]
 
 # perform fourier transformation
 with open(tag+"k.dat","w") as f:
