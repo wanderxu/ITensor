@@ -399,6 +399,12 @@ int main(int argc, char* argv[])
                 ////    DDcorr = IQMPO(DDmpo);
                 ////    ddcorr_meas = overlap(psi,DDcorr,psi);
                     ddcorr_meas = 0.0;
+                    if( (sites_tmp[0] == sites_tmp[1]) ||
+                        (sites_tmp[0] == sites_tmp[2]) ||
+                        (sites_tmp[0] == sites_tmp[3]) ||
+                        (sites_tmp[1] == sites_tmp[2]) ||
+                        (sites_tmp[1] == sites_tmp[3]) ||
+                        (sites_tmp[2] == sites_tmp[3]) ) {
                     ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S+","S-","S+","S-");
                     ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S+","S-","S-","S+");
                     ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S+","S-","Sz","Sz");
@@ -407,7 +413,14 @@ int main(int argc, char* argv[])
                     ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S-","S+","Sz","Sz");
                     ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S+","S-");
                     ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S-","S+");
-                    ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","Sz","Sz");
+                    ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","Sz","Sz"); 
+                    }
+                    else{
+                    ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S+","S-","S+","S-");
+                    ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S+","S-","S-","S+");
+                    ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"S+","S-","Sz","Sz");
+                    ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S+","S-");
+                    ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","Sz","Sz"); }
                     printfln("ddcorr_meas = %.8f\n", ddcorr_meas);
                     dxdx_meas.emplace_back(ddcorr_meas);
                 ////}
@@ -479,6 +492,12 @@ int main(int argc, char* argv[])
                 ////    DDcorr = IQMPO(DDmpo);
                 ////    ddcorr_meas = overlap(psi,DDcorr,psi);
                     ddcorr_meas = 0.0;
+                    if( (sites_tmp[0] == sites_tmp[1]) ||
+                        (sites_tmp[0] == sites_tmp[2]) ||
+                        (sites_tmp[0] == sites_tmp[3]) ||
+                        (sites_tmp[1] == sites_tmp[2]) ||
+                        (sites_tmp[1] == sites_tmp[3]) ||
+                        (sites_tmp[2] == sites_tmp[3]) ) {
                     ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S+","S-","S+","S-");
                     ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S+","S-","S-","S+");
                     ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S+","S-","Sz","Sz");
@@ -487,7 +506,14 @@ int main(int argc, char* argv[])
                     ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S-","S+","Sz","Sz");
                     ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S+","S-");
                     ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S-","S+");
-                    ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","Sz","Sz");
+                    ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","Sz","Sz"); 
+                    }
+                    else {
+                    ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S+","S-","S+","S-");
+                    ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S+","S-","S-","S+");
+                    ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"S+","S-","Sz","Sz");
+                    ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S+","S-");
+                    ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","Sz","Sz"); }
                     printfln("ddcorr_meas = %.8f\n", ddcorr_meas);
                     dydy_meas.emplace_back(ddcorr_meas);
                 ////}
@@ -540,7 +566,12 @@ int main(int argc, char* argv[])
                 ////    ddcorr_meas = overlap(psi,DDcorr,psi);
 
                     ddcorr_meas = 0.0;
-
+                    if( (sites_tmp[0] == sites_tmp[1]) ||
+                        (sites_tmp[0] == sites_tmp[2]) ||
+                        (sites_tmp[0] == sites_tmp[3]) ||
+                        (sites_tmp[1] == sites_tmp[2]) ||
+                        (sites_tmp[1] == sites_tmp[3]) ||
+                        (sites_tmp[2] == sites_tmp[3]) ) {
                     ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S+","S-","S+","S-");
                     ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S+","S-","S-","S+");
                     ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S+","S-","Sz","Sz");
@@ -549,7 +580,14 @@ int main(int argc, char* argv[])
                     ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S-","S+","Sz","Sz");
                     ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S+","S-");
                     ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S-","S+");
-                    ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","Sz","Sz");
+                    ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","Sz","Sz"); 
+                    }
+                    else {
+                    ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S+","S-","S+","S-");
+                    ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S+","S-","S-","S+");
+                    ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"S+","S-","Sz","Sz");
+                    ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S+","S-");
+                    ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","Sz","Sz"); }
 
                     printfln("ddcorr_meas = %.8f\n", ddcorr_meas);
                     dxydxy_meas.emplace_back(ddcorr_meas);
