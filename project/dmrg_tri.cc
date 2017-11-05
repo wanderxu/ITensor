@@ -608,14 +608,6 @@ int main(int argc, char* argv[])
                 fXiout << *i << ' ';
     }
 
-    // test
-    srand (time(NULL));
-    std::vector<int> sites_tmp={rand()%N+1,rand()%N+1,rand()%N+1,rand()%N+1};
-    for (auto n : sites_tmp ) { std::cout << n <<" "; }
-    std::cout << '\n';
-
-    mfourbody(psi,sites,sites_tmp,"S+","S-","S-","S+");
-
     println( "\nRUNNING FINISHED ^_^ !!! " );
 
     return 0;
