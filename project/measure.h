@@ -36,10 +36,13 @@ mfourbody(MPSt<Tensor>& psi,
         println( opstr[i].first, opstr[i].second );
     }
 
-    auto tmp_mpo = AutoMPO(sites);
-    tmp_mpo += 1.0,op1_label,sites_tmp[0], 1.0,op2_label,sites_tmp[1], 1.0,op3_label,sites_tmp[2], 1.0,op4_label,sites_tmp[3];
-    auto tmp_corr = IQMPO(tmp_mpo);
-    println( "with overlap <sisjsksl> =", overlap(psi,tmp_corr,psi));
+    auto tmp_mpo1 = AutoMPO(sites);
+    auto tmp_mpo2 = AutoMPO(sites);
+    tmp_mpo1 += 1.0,op1_label,sites_tmp[0], op2_label,sites_tmp[1];
+    tmp_mpo2 += 1.0,op1_label,sites_tmp[2], op2_label,sites_tmp[3];
+    auto tmp_o1 = IQMPO(tmp_mpo1);
+    auto tmp_o2 = IQMPO(tmp_mpo2);
+    println( "with overlap <sisjsksl> =", overlap(psi,tmp_o1,tmp_o2,psi));
 
     auto opi = sites.op(opstr[0].first,opstr[0].second);
     auto opj = sites.op(opstr[1].first,opstr[1].second);
