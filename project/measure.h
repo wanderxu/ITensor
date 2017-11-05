@@ -28,21 +28,8 @@ mfourbody(MPSt<Tensor>& psi,
                                  std::make_pair(op2_label,sites_tmp[1]),
                                  std::make_pair(op3_label,sites_tmp[2]),
                                  std::make_pair(op4_label,sites_tmp[3])};
-    for (int i=0; i<4; ++i){
-        println( opstr[i].first, opstr[i].second );
-    }
+    // sort by site index
     std::sort(opstr.begin(), opstr.end(), cmp_by_value);
-    for (int i=0; i<4; ++i){
-        println( opstr[i].first, opstr[i].second );
-    }
-
-    auto tmp_mpo1 = AutoMPO(sites);
-    auto tmp_mpo2 = AutoMPO(sites);
-    tmp_mpo1 += 1.0,op1_label,sites_tmp[0], op2_label,sites_tmp[1];
-    tmp_mpo2 += 1.0,op1_label,sites_tmp[2], op2_label,sites_tmp[3];
-    auto tmp_o1 = IQMPO(tmp_mpo1);
-    auto tmp_o2 = IQMPO(tmp_mpo2);
-    println( "with overlap <sisjsksl> =", overlap(psi,tmp_o1,tmp_o2,psi));
 
     auto opi = sites.op(opstr[0].first,opstr[0].second);
     auto opj = sites.op(opstr[1].first,opstr[1].second);
@@ -52,7 +39,7 @@ mfourbody(MPSt<Tensor>& psi,
     psi.position(opstr[0].second);
     IQTensor SStmp=psi.A(opstr[0].second);
     if( opstr[1].second != opstr[0].second ) {
-        println("i!=j");
+        //println("i!=j");
         SStmp *= opi;
         auto ir1 = commonIndex(psi.A(opstr[0].second), psi.A(opstr[0].second+1),Link);
         SStmp *= dag(prime(prime(psi.A(opstr[0].second),Site),ir1));
@@ -62,7 +49,7 @@ mfourbody(MPSt<Tensor>& psi,
             SStmp *= dag(prime(psi.A(i1),Link));
         }
         if( opstr[2].second != opstr[1].second ){
-            println("j!=k");
+            //println("j!=k");
             SStmp *= psi.A( opstr[1].second );
             SStmp *= opj;
             SStmp *= dag(prime(prime(psi.A(opstr[1].second),Site),Link));
@@ -72,7 +59,7 @@ mfourbody(MPSt<Tensor>& psi,
                 SStmp *= dag(prime(psi.A(i2),Link));
             }
             if( opstr[3].second != opstr[2].second ){
-                println("k!=l");
+                //println("k!=l");
                 SStmp *= psi.A( opstr[2].second );
                 SStmp *= opk;
                 SStmp *= dag(prime(prime(psi.A(opstr[2].second),Site),Link));
@@ -87,7 +74,7 @@ mfourbody(MPSt<Tensor>& psi,
                 SStmp *= dag(prime(prime(psi.A(opstr[3].second),Site),ir3)); // return i!=j!=k!=l
             }
             else { // opstr[3].second == opstr[2].second
-                println("k=l");
+                //println("k=l");
                 SStmp *= psi.A( opstr[2].second );
                 SStmp *= opk;
                 //auto SStmp_tmp = SStmp*opl;
@@ -98,9 +85,9 @@ mfourbody(MPSt<Tensor>& psi,
             }
         }
         else { // opstr[2].second == opstr[1].second
-            println("j=k");
+            //println("j=k");
             if( opstr[3].second != opstr[2].second ){  // opstr[3].second != opstr[2].second == opstr[1].second
-                println("k!=l");
+                //println("k!=l");
                 SStmp *= psi.A( opstr[1].second );
                 SStmp *= opj;
                 //auto SStmp_tmp = SStmp*opk;
@@ -118,7 +105,7 @@ mfourbody(MPSt<Tensor>& psi,
                 SStmp *= dag(prime(prime(psi.A(opstr[3].second),Site),ir3)); // return i!=j=k!=l
             }
             else { // opstr[3].second == opstr[2].second == opstr[1].second
-                println("k=l");
+                //println("k=l");
                 SStmp *= psi.A( opstr[1].second );
                 SStmp *= opj;
                 //SStmp *= opk;
@@ -131,9 +118,9 @@ mfourbody(MPSt<Tensor>& psi,
         }
     }
     else{ // opstr[1].second == opstr[0].second
-        println("i=j");
+        //println("i=j");
         if( opstr[2].second != opstr[1].second ){ // opstr[2].second != opstr[1].second == sites[0]
-            println("j!=k");
+            //println("j!=k");
             SStmp *= opi;
             //auto SStmp_tmp = SStmp*opj;
             //SStmp = prime(SStmp_tmp,Site);
@@ -146,7 +133,7 @@ mfourbody(MPSt<Tensor>& psi,
                 SStmp *= dag(prime(psi.A(i2),Link));
             }
             if( opstr[3].second != opstr[2].second ){
-                println("k!=l");
+                //println("k!=l");
                 SStmp *= psi.A( opstr[2].second );
                 SStmp *= opk;
                 SStmp *= dag(prime(prime(psi.A(opstr[2].second),Site),Link));
@@ -161,7 +148,7 @@ mfourbody(MPSt<Tensor>& psi,
                 SStmp *= dag(prime(prime(psi.A(opstr[3].second),Site),ir3)); // return i=j!=k!=l
             }
             else { // opstr[3].second == opstr[2].second
-                println("k=l");
+                //println("k=l");
                 SStmp *= psi.A( opstr[2].second );
                 SStmp *= opk;
                 //auto SStmp_tmp = SStmp*opl;
@@ -172,9 +159,9 @@ mfourbody(MPSt<Tensor>& psi,
             }
         }
         else{ // opstr[2].second == opstr[1].second == opstr[0].second
-            println("j=k");
+            //println("j=k");
             if( opstr[3].second != opstr[2].second ){ // opstr[3].second != opstr[2].second == opstr[1].second == opstr[0].second
-                println("k!=l");
+                //println("k!=l");
                 SStmp *= opi;
                 //SStmp *= opj;
                 //SStmp *= opk;
@@ -193,7 +180,7 @@ mfourbody(MPSt<Tensor>& psi,
                 SStmp *= dag(prime(prime(psi.A(opstr[3].second),Site),ir3)); // return i=j=k!=l
             }
             else{ // opstr[3].second = opstr[2].second == opstr[1].second == opstr[0].second
-                println("k=l");
+                //println("k=l");
                 SStmp *= opi;
                 //SStmp *= opj;
                 //SStmp *= opk;
@@ -208,11 +195,6 @@ mfourbody(MPSt<Tensor>& psi,
             }
         }
     }
-    println( "<sisjsksl> =", SStmp.real() );
-    println( "<psi|psi> =", overlap(psi,psi));
-    println(" ");
-
-
     return SStmp.real();
     }
 } //namespace itensor
