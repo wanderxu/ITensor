@@ -380,27 +380,37 @@ int main(int argc, char* argv[])
                     DDmpo += 0.5,"S-",x_dimer[i].s1,"S+",x_dimer[i].s2;
                     DDmpo += 1.0,"Sz",x_dimer[i].s1,"Sz",x_dimer[i].s2;
                     DDcorr = IQMPO(DDmpo);
-                    ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
-                    printfln("ddcorr_meas = %.8f\n", ddcorr_meas); 
-                    dxdx_meas.emplace_back(ddcorr_meas);
+                ////    ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
+                ////    printfln("ddcorr_meas = %.8f\n", ddcorr_meas); 
+                ////    dxdx_meas.emplace_back(ddcorr_meas);
                     dx_meas.emplace_back(overlap(psi,DDcorr,psi));
                 }
-                else {
-                    DDmpo = AutoMPO(sites);
-                    DDmpo += 0.25,"S+",x_dimer[i].s1,"S-",x_dimer[i].s2,"S+",x_dimer[j].s1,"S-",x_dimer[j].s2;
-                    DDmpo += 0.25,"S+",x_dimer[i].s1,"S-",x_dimer[i].s2,"S-",x_dimer[j].s1,"S+",x_dimer[j].s2;
-                    DDmpo += 0.50,"S+",x_dimer[i].s1,"S-",x_dimer[i].s2,"Sz",x_dimer[j].s1,"Sz",x_dimer[j].s2;
-                    DDmpo += 0.25,"S-",x_dimer[i].s1,"S+",x_dimer[i].s2,"S+",x_dimer[j].s1,"S-",x_dimer[j].s2;
-                    DDmpo += 0.25,"S-",x_dimer[i].s1,"S+",x_dimer[i].s2,"S-",x_dimer[j].s1,"S+",x_dimer[j].s2;
-                    DDmpo += 0.50,"S-",x_dimer[i].s1,"S+",x_dimer[i].s2,"Sz",x_dimer[j].s1,"Sz",x_dimer[j].s2;
-                    DDmpo += 0.50,"Sz",x_dimer[i].s1,"Sz",x_dimer[i].s2,"S+",x_dimer[j].s1,"S-",x_dimer[j].s2;
-                    DDmpo += 0.50,"Sz",x_dimer[i].s1,"Sz",x_dimer[i].s2,"S-",x_dimer[j].s1,"S+",x_dimer[j].s2;
-                    DDmpo += 1.00,"Sz",x_dimer[i].s1,"Sz",x_dimer[i].s2,"Sz",x_dimer[j].s1,"Sz",x_dimer[j].s2;
-                    DDcorr = IQMPO(DDmpo);
-                    ddcorr_meas = overlap(psi,DDcorr,psi);
+                ////else {
+                ////    DDmpo = AutoMPO(sites);
+                ////    DDmpo += 0.25,"S+",x_dimer[i].s1,"S-",x_dimer[i].s2,"S+",x_dimer[j].s1,"S-",x_dimer[j].s2;
+                ////    DDmpo += 0.25,"S+",x_dimer[i].s1,"S-",x_dimer[i].s2,"S-",x_dimer[j].s1,"S+",x_dimer[j].s2;
+                ////    DDmpo += 0.50,"S+",x_dimer[i].s1,"S-",x_dimer[i].s2,"Sz",x_dimer[j].s1,"Sz",x_dimer[j].s2;
+                ////    DDmpo += 0.25,"S-",x_dimer[i].s1,"S+",x_dimer[i].s2,"S+",x_dimer[j].s1,"S-",x_dimer[j].s2;
+                ////    DDmpo += 0.25,"S-",x_dimer[i].s1,"S+",x_dimer[i].s2,"S-",x_dimer[j].s1,"S+",x_dimer[j].s2;
+                ////    DDmpo += 0.50,"S-",x_dimer[i].s1,"S+",x_dimer[i].s2,"Sz",x_dimer[j].s1,"Sz",x_dimer[j].s2;
+                ////    DDmpo += 0.50,"Sz",x_dimer[i].s1,"Sz",x_dimer[i].s2,"S+",x_dimer[j].s1,"S-",x_dimer[j].s2;
+                ////    DDmpo += 0.50,"Sz",x_dimer[i].s1,"Sz",x_dimer[i].s2,"S-",x_dimer[j].s1,"S+",x_dimer[j].s2;
+                ////    DDmpo += 1.00,"Sz",x_dimer[i].s1,"Sz",x_dimer[i].s2,"Sz",x_dimer[j].s1,"Sz",x_dimer[j].s2;
+                ////    DDcorr = IQMPO(DDmpo);
+                ////    ddcorr_meas = overlap(psi,DDcorr,psi);
+                    ddcorr_meas = 0.0;
+                    ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S+","S-","S+","S-");
+                    ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S+","S-","S-","S+");
+                    ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S+","S-","Sz","Sz");
+                    ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S-","S+","S+","S-");
+                    ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S-","S+","S-","S+");
+                    ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S-","S+","Sz","Sz");
+                    ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S+","S-");
+                    ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S-","S+");
+                    ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","Sz","Sz");
                     printfln("ddcorr_meas = %.8f\n", ddcorr_meas);
                     dxdx_meas.emplace_back(ddcorr_meas);
-                }
+                ////}
             }
         }
         std::ofstream fdxdxout("DxiDxj.out",std::ios::out);
@@ -435,42 +445,52 @@ int main(int argc, char* argv[])
                     DDmpo += 0.5,"S-",y_dimer[i].s1,"S+",y_dimer[i].s2;
                     DDmpo += 1.0,"Sz",y_dimer[i].s1,"Sz",y_dimer[i].s2;
                     DDcorr = IQMPO(DDmpo);
-                    ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
-                    printfln("ddcorr_meas = %.8f\n", ddcorr_meas); 
-                    dydy_meas.emplace_back(ddcorr_meas);
+                ////    ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
+                ////    printfln("ddcorr_meas = %.8f\n", ddcorr_meas); 
+                ////    dydy_meas.emplace_back(ddcorr_meas);
                     dy_meas.emplace_back(overlap(psi,DDcorr,psi));
                 }
-                else if( yperiodic && ((i+2)%Ny==0) && ((j+1)%Ny==0)) { //this is a specical case accross the y-boundary
-                    Dmpoi = AutoMPO(sites);
-                    Dmpoi += 0.5,"S+",y_dimer[i].s1,"S-",y_dimer[i].s2;
-                    Dmpoi += 0.5,"S-",y_dimer[i].s1,"S+",y_dimer[i].s2;
-                    Dmpoi += 1.0,"Sz",y_dimer[i].s1,"Sz",y_dimer[i].s2;
-                    Dmpoj = AutoMPO(sites);
-                    Dmpoj += 0.5,"S+",y_dimer[j].s1,"S-",y_dimer[j].s2;
-                    Dmpoj += 0.5,"S-",y_dimer[j].s1,"S+",y_dimer[j].s2;
-                    Dmpoj += 1.0,"Sz",y_dimer[j].s1,"Sz",y_dimer[j].s2;
-                    Diop = IQMPO(Dmpoi);
-                    Djop = IQMPO(Dmpoj);
-                    ddcorr_meas = overlap(psi,Diop,Djop,psi);
-                    printfln("ddcorr_meas = %.8f\n", ddcorr_meas); 
-                    dydy_meas.emplace_back(ddcorr_meas);
-                }
-                else {
-                    DDmpo = AutoMPO(sites);
-                    DDmpo += 0.25,"S+",y_dimer[i].s1,"S-",y_dimer[i].s2,"S+",y_dimer[j].s1,"S-",y_dimer[j].s2;
-                    DDmpo += 0.25,"S+",y_dimer[i].s1,"S-",y_dimer[i].s2,"S-",y_dimer[j].s1,"S+",y_dimer[j].s2;
-                    DDmpo += 0.50,"S+",y_dimer[i].s1,"S-",y_dimer[i].s2,"Sz",y_dimer[j].s1,"Sz",y_dimer[j].s2;
-                    DDmpo += 0.25,"S-",y_dimer[i].s1,"S+",y_dimer[i].s2,"S+",y_dimer[j].s1,"S-",y_dimer[j].s2;
-                    DDmpo += 0.25,"S-",y_dimer[i].s1,"S+",y_dimer[i].s2,"S-",y_dimer[j].s1,"S+",y_dimer[j].s2;
-                    DDmpo += 0.50,"S-",y_dimer[i].s1,"S+",y_dimer[i].s2,"Sz",y_dimer[j].s1,"Sz",y_dimer[j].s2;
-                    DDmpo += 0.50,"Sz",y_dimer[i].s1,"Sz",y_dimer[i].s2,"S+",y_dimer[j].s1,"S-",y_dimer[j].s2;
-                    DDmpo += 0.50,"Sz",y_dimer[i].s1,"Sz",y_dimer[i].s2,"S-",y_dimer[j].s1,"S+",y_dimer[j].s2;
-                    DDmpo += 1.00,"Sz",y_dimer[i].s1,"Sz",y_dimer[i].s2,"Sz",y_dimer[j].s1,"Sz",y_dimer[j].s2;
-                    DDcorr = IQMPO(DDmpo);
-                    ddcorr_meas = overlap(psi,DDcorr,psi);
+                ////else if( yperiodic && ((i+2)%Ny==0) && ((j+1)%Ny==0)) { //this is a specical case accross the y-boundary
+                ////    Dmpoi = AutoMPO(sites);
+                ////    Dmpoi += 0.5,"S+",y_dimer[i].s1,"S-",y_dimer[i].s2;
+                ////    Dmpoi += 0.5,"S-",y_dimer[i].s1,"S+",y_dimer[i].s2;
+                ////    Dmpoi += 1.0,"Sz",y_dimer[i].s1,"Sz",y_dimer[i].s2;
+                ////    Dmpoj = AutoMPO(sites);
+                ////    Dmpoj += 0.5,"S+",y_dimer[j].s1,"S-",y_dimer[j].s2;
+                ////    Dmpoj += 0.5,"S-",y_dimer[j].s1,"S+",y_dimer[j].s2;
+                ////    Dmpoj += 1.0,"Sz",y_dimer[j].s1,"Sz",y_dimer[j].s2;
+                ////    Diop = IQMPO(Dmpoi);
+                ////    Djop = IQMPO(Dmpoj);
+                ////    ddcorr_meas = overlap(psi,Diop,Djop,psi);
+                ////    printfln("ddcorr_meas = %.8f\n", ddcorr_meas); 
+                ////    dydy_meas.emplace_back(ddcorr_meas);
+                ////}
+                ////else {
+                ////    DDmpo = AutoMPO(sites);
+                ////    DDmpo += 0.25,"S+",y_dimer[i].s1,"S-",y_dimer[i].s2,"S+",y_dimer[j].s1,"S-",y_dimer[j].s2;
+                ////    DDmpo += 0.25,"S+",y_dimer[i].s1,"S-",y_dimer[i].s2,"S-",y_dimer[j].s1,"S+",y_dimer[j].s2;
+                ////    DDmpo += 0.50,"S+",y_dimer[i].s1,"S-",y_dimer[i].s2,"Sz",y_dimer[j].s1,"Sz",y_dimer[j].s2;
+                ////    DDmpo += 0.25,"S-",y_dimer[i].s1,"S+",y_dimer[i].s2,"S+",y_dimer[j].s1,"S-",y_dimer[j].s2;
+                ////    DDmpo += 0.25,"S-",y_dimer[i].s1,"S+",y_dimer[i].s2,"S-",y_dimer[j].s1,"S+",y_dimer[j].s2;
+                ////    DDmpo += 0.50,"S-",y_dimer[i].s1,"S+",y_dimer[i].s2,"Sz",y_dimer[j].s1,"Sz",y_dimer[j].s2;
+                ////    DDmpo += 0.50,"Sz",y_dimer[i].s1,"Sz",y_dimer[i].s2,"S+",y_dimer[j].s1,"S-",y_dimer[j].s2;
+                ////    DDmpo += 0.50,"Sz",y_dimer[i].s1,"Sz",y_dimer[i].s2,"S-",y_dimer[j].s1,"S+",y_dimer[j].s2;
+                ////    DDmpo += 1.00,"Sz",y_dimer[i].s1,"Sz",y_dimer[i].s2,"Sz",y_dimer[j].s1,"Sz",y_dimer[j].s2;
+                ////    DDcorr = IQMPO(DDmpo);
+                ////    ddcorr_meas = overlap(psi,DDcorr,psi);
+                    ddcorr_meas = 0.0;
+                    ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S+","S-","S+","S-");
+                    ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S+","S-","S-","S+");
+                    ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S+","S-","Sz","Sz");
+                    ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S-","S+","S+","S-");
+                    ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S-","S+","S-","S+");
+                    ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S-","S+","Sz","Sz");
+                    ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S+","S-");
+                    ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S-","S+");
+                    ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","Sz","Sz");
                     printfln("ddcorr_meas = %.8f\n", ddcorr_meas);
                     dydy_meas.emplace_back(ddcorr_meas);
-                }
+                ////}
             }
         }
         std::ofstream fdydyout("DyiDyj.out",std::ios::out);
@@ -500,27 +520,40 @@ int main(int argc, char* argv[])
                     DDmpo += 0.5,"S-",xy_dimer[i].s1,"S+",xy_dimer[i].s2;
                     DDmpo += 1.0,"Sz",xy_dimer[i].s1,"Sz",xy_dimer[i].s2;
                     DDcorr = IQMPO(DDmpo);
-                    ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
-                    printfln("ddcorr_meas = %.8f\n", ddcorr_meas); 
-                    dxydxy_meas.emplace_back(ddcorr_meas);
+                ////    ddcorr_meas = overlap(psi,DDcorr,DDcorr,psi);
+                ////    printfln("ddcorr_meas = %.8f\n", ddcorr_meas); 
+                ////    dxydxy_meas.emplace_back(ddcorr_meas);
                     dxy_meas.emplace_back(overlap(psi,DDcorr,psi));
                 }
-                else {
-                    DDmpo = AutoMPO(sites);
-                    DDmpo += 0.25,"S+",xy_dimer[i].s1,"S-",xy_dimer[i].s2,"S+",xy_dimer[j].s1,"S-",xy_dimer[j].s2;
-                    DDmpo += 0.25,"S+",xy_dimer[i].s1,"S-",xy_dimer[i].s2,"S-",xy_dimer[j].s1,"S+",xy_dimer[j].s2;
-                    DDmpo += 0.50,"S+",xy_dimer[i].s1,"S-",xy_dimer[i].s2,"Sz",xy_dimer[j].s1,"Sz",xy_dimer[j].s2;
-                    DDmpo += 0.25,"S-",xy_dimer[i].s1,"S+",xy_dimer[i].s2,"S+",xy_dimer[j].s1,"S-",xy_dimer[j].s2;
-                    DDmpo += 0.25,"S-",xy_dimer[i].s1,"S+",xy_dimer[i].s2,"S-",xy_dimer[j].s1,"S+",xy_dimer[j].s2;
-                    DDmpo += 0.50,"S-",xy_dimer[i].s1,"S+",xy_dimer[i].s2,"Sz",xy_dimer[j].s1,"Sz",xy_dimer[j].s2;
-                    DDmpo += 0.50,"Sz",xy_dimer[i].s1,"Sz",xy_dimer[i].s2,"S+",xy_dimer[j].s1,"S-",xy_dimer[j].s2;
-                    DDmpo += 0.50,"Sz",xy_dimer[i].s1,"Sz",xy_dimer[i].s2,"S-",xy_dimer[j].s1,"S+",xy_dimer[j].s2;
-                    DDmpo += 1.00,"Sz",xy_dimer[i].s1,"Sz",xy_dimer[i].s2,"Sz",xy_dimer[j].s1,"Sz",xy_dimer[j].s2;
-                    DDcorr = IQMPO(DDmpo);
-                    ddcorr_meas = overlap(psi,DDcorr,psi);
+                ////else {
+                ////    DDmpo = AutoMPO(sites);
+                ////    DDmpo += 0.25,"S+",xy_dimer[i].s1,"S-",xy_dimer[i].s2,"S+",xy_dimer[j].s1,"S-",xy_dimer[j].s2;
+                ////    DDmpo += 0.25,"S+",xy_dimer[i].s1,"S-",xy_dimer[i].s2,"S-",xy_dimer[j].s1,"S+",xy_dimer[j].s2;
+                ////    DDmpo += 0.50,"S+",xy_dimer[i].s1,"S-",xy_dimer[i].s2,"Sz",xy_dimer[j].s1,"Sz",xy_dimer[j].s2;
+                ////    DDmpo += 0.25,"S-",xy_dimer[i].s1,"S+",xy_dimer[i].s2,"S+",xy_dimer[j].s1,"S-",xy_dimer[j].s2;
+                ////    DDmpo += 0.25,"S-",xy_dimer[i].s1,"S+",xy_dimer[i].s2,"S-",xy_dimer[j].s1,"S+",xy_dimer[j].s2;
+                ////    DDmpo += 0.50,"S-",xy_dimer[i].s1,"S+",xy_dimer[i].s2,"Sz",xy_dimer[j].s1,"Sz",xy_dimer[j].s2;
+                ////    DDmpo += 0.50,"Sz",xy_dimer[i].s1,"Sz",xy_dimer[i].s2,"S+",xy_dimer[j].s1,"S-",xy_dimer[j].s2;
+                ////    DDmpo += 0.50,"Sz",xy_dimer[i].s1,"Sz",xy_dimer[i].s2,"S-",xy_dimer[j].s1,"S+",xy_dimer[j].s2;
+                ////    DDmpo += 1.00,"Sz",xy_dimer[i].s1,"Sz",xy_dimer[i].s2,"Sz",xy_dimer[j].s1,"Sz",xy_dimer[j].s2;
+                ////    DDcorr = IQMPO(DDmpo);
+                ////    ddcorr_meas = overlap(psi,DDcorr,psi);
+
+                    ddcorr_meas = 0.0;
+
+                    ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S+","S-","S+","S-");
+                    ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S+","S-","S-","S+");
+                    ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S+","S-","Sz","Sz");
+                    ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S-","S+","S+","S-");
+                    ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S-","S+","S-","S+");
+                    ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S-","S+","Sz","Sz");
+                    ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S+","S-");
+                    ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S-","S+");
+                    ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","Sz","Sz");
+
                     printfln("ddcorr_meas = %.8f\n", ddcorr_meas);
                     dxydxy_meas.emplace_back(ddcorr_meas);
-                }
+                ////}
             }
         }
         std::ofstream fdxydxyout("DxyiDxyj.out",std::ios::out);
@@ -607,6 +640,13 @@ int main(int argc, char* argv[])
         for (std::vector<double>::const_iterator i = Xi_meas.begin(); i != Xi_meas.end(); ++i)
                 fXiout << *i << ' ';
     }
+    ////// test
+    ////srand (time(NULL));
+    ////std::vector<int> sites_tmp={rand()%N+1,rand()%N+1,rand()%N+1,rand()%N+1};
+    ////sites_tmp = {1,7,1,7};
+    ////for (auto n : sites_tmp ) { std::cout << n <<" "; }
+    ////std::cout << '\n';
+    ////mfourbody(psi,sites,sites_tmp,"S+","S-","S+","S-");
 
     println( "\nRUNNING FINISHED ^_^ !!! " );
 
