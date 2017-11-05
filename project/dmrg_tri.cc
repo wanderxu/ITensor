@@ -607,7 +607,195 @@ int main(int argc, char* argv[])
                 fXiout << *i << ' ';
     }
 
+    // test
+    srand (time(NULL));
+    for( int iii=1; iii<500; ++iii){
+    std::vector<int> sites_tmp={rand()%N+1,rand()%N+1,rand()%N+1,rand()%N+1};
+    //sites_tmp={8,9,8,9};
+    //sites_tmp={8,9,10,15};
+    //sites_tmp={1,2,3,4};
+    //sites_tmp={3,3,3,3};
+    //sites_tmp={3,5,5,14};
+    std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
+    //println( sites_tmp );
+    for (auto n : sites_tmp ) { std::cout << n <<" "; }
+    std::cout << '\n';
+    auto szi = sites.op("Sz",sites_tmp[0]);
+    auto szj = sites.op("Sz",sites_tmp[1]);
+    auto szk = sites.op("Sz",sites_tmp[2]);
+    auto szl = sites.op("Sz",sites_tmp[3]);
+
+    auto tmp_mpo = AutoMPO(sites);
+    tmp_mpo += 1.0,"Sz",sites_tmp[0], 1.0,"Sz",sites_tmp[1], 1.0,"Sz",sites_tmp[2], 1.0,"Sz",sites_tmp[3];
+    auto tmp_corr = IQMPO(tmp_mpo);
+    println( "with overlap <sisjsksl> =", overlap(psi,tmp_corr,psi));
+
+    psi.position(sites_tmp[0]);
+    IQTensor SStmp=psi.A(sites_tmp[0]);
+    if( sites_tmp[1] != sites_tmp[0] ) {
+        println("i!=j");
+        SStmp *= szi;
+        auto ir1 = commonIndex(psi.A(sites_tmp[0]), psi.A(sites_tmp[0]+1),Link);
+        SStmp *= dag(prime(prime(psi.A(sites_tmp[0]),Site),ir1));
+        // propogate until szj
+        for ( int i1 = sites_tmp[0]+1; i1<sites_tmp[1]; ++i1) { 
+            SStmp *= psi.A(i1);
+            SStmp *= dag(prime(psi.A(i1),Link));
+        }
+        if( sites_tmp[2] != sites_tmp[1] ){
+            println("j!=k");
+            SStmp *= psi.A( sites_tmp[1] );
+            SStmp *= szj;
+            SStmp *= dag(prime(prime(psi.A(sites_tmp[1]),Site),Link));
+            // propogate until szk
+            for ( int i2 = sites_tmp[1]+1; i2<sites_tmp[2]; ++i2) { 
+                SStmp *= psi.A(i2);
+                SStmp *= dag(prime(psi.A(i2),Link));
+            }
+            if( sites_tmp[3] != sites_tmp[2] ){
+                println("k!=l");
+                SStmp *= psi.A( sites_tmp[2] );
+                SStmp *= szk;
+                SStmp *= dag(prime(prime(psi.A(sites_tmp[2]),Site),Link));
+                // propogate until szl
+                for ( int i3 = sites_tmp[2]+1; i3<sites_tmp[3]; ++i3) { 
+                    SStmp *= psi.A(i3);
+                    SStmp *= dag(prime(psi.A(i3),Link));
+                }
+                SStmp *= psi.A( sites_tmp[3] );
+                SStmp *= szl;
+                auto ir3 = commonIndex(psi.A(sites_tmp[3]), psi.A(sites_tmp[3]-1),Link);
+                SStmp *= dag(prime(prime(psi.A(sites_tmp[3]),Site),ir3)); // return i!=j!=k!=l
+            }
+            else { // sites_tmp[3] == sites_tmp[2]
+                println("k=l");
+                SStmp *= psi.A( sites_tmp[2] );
+                SStmp *= szk;
+                //auto SStmp_tmp = SStmp*szl;
+                //SStmp = prime(SStmp_tmp, Site);
+                SStmp = noprime(SStmp,Site)*szl;
+                auto ir3 = commonIndex(psi.A(sites_tmp[3]), psi.A(sites_tmp[3]-1),Link);
+                SStmp *= dag(prime(prime(psi.A(sites_tmp[3]),Site),ir3)); // return i!=j!=k=l
+            }
+        }
+        else { // sites_tmp[2] == sites_tmp[1]
+            println("j=k");
+            if( sites_tmp[3] != sites_tmp[2] ){  // sites_tmp[3] != sites_tmp[2] == sites_tmp[1]
+                println("k!=l");
+                SStmp *= psi.A( sites_tmp[1] );
+                SStmp *= szj;
+                //auto SStmp_tmp = SStmp*szk;
+                //SStmp = prime(SStmp_tmp, Site);
+                SStmp = noprime(SStmp,Site)*szk;
+                SStmp *= dag(prime(prime(psi.A(sites_tmp[2]),Site),Link));
+                // propogate until szl
+                for ( int i3 = sites_tmp[2]+1; i3<sites_tmp[3]; ++i3) { 
+                    SStmp *= psi.A(i3);
+                    SStmp *= dag(prime(psi.A(i3),Link));
+                }
+                SStmp *= psi.A( sites_tmp[3] );
+                SStmp *= szl;
+                auto ir3 = commonIndex(psi.A(sites_tmp[3]), psi.A(sites_tmp[3]-1),Link);
+                SStmp *= dag(prime(prime(psi.A(sites_tmp[3]),Site),ir3)); // return i!=j=k!=l
+            }
+            else { // sites_tmp[3] == sites_tmp[2] == sites_tmp[1]
+                println("k=l");
+                SStmp *= psi.A( sites_tmp[1] );
+                SStmp *= szj;
+                //SStmp *= szk;
+                //SStmp *= szl;
+                SStmp = noprime(SStmp,Site)*szk;
+                SStmp = noprime(SStmp,Site)*szl;
+                auto ir3 = commonIndex(psi.A(sites_tmp[3]), psi.A(sites_tmp[3]-1),Link);
+                SStmp *= dag(prime(prime(psi.A(sites_tmp[3]),Site),ir3));  // return i!=j=k=l
+            }
+        }
+    }
+    else{ // sites_tmp[1] == sites_tmp[0]
+        println("i=j");
+        if( sites_tmp[2] != sites_tmp[1] ){ // sites_tmp[2] != sites_tmp[1] == sites[0]
+            println("j!=k");
+            SStmp *= szi;
+            //auto SStmp_tmp = SStmp*szj;
+            //SStmp = prime(SStmp_tmp,Site);
+            SStmp = noprime(SStmp,Site)*szj;
+            auto ir1 = commonIndex(psi.A(sites_tmp[1]), psi.A(sites_tmp[1]+1),Link);
+            SStmp *= dag(prime(prime(psi.A(sites_tmp[1]),Site),ir1));
+            // propogate until szk
+            for ( int i2 = sites_tmp[1]+1; i2<sites_tmp[2]; ++i2) { 
+                SStmp *= psi.A(i2);
+                SStmp *= dag(prime(psi.A(i2),Link));
+            }
+            if( sites_tmp[3] != sites_tmp[2] ){
+                println("k!=l");
+                SStmp *= psi.A( sites_tmp[2] );
+                SStmp *= szk;
+                SStmp *= dag(prime(prime(psi.A(sites_tmp[2]),Site),Link));
+                // propogate until szl
+                for ( int i3 = sites_tmp[2]+1; i3<sites_tmp[3]; ++i3) { 
+                    SStmp *= psi.A(i3);
+                    SStmp *= dag(prime(psi.A(i3),Link));
+                }
+                SStmp *= psi.A( sites_tmp[3] );
+                SStmp *= szl;
+                auto ir3 = commonIndex(psi.A(sites_tmp[3]), psi.A(sites_tmp[3]-1),Link);
+                SStmp *= dag(prime(prime(psi.A(sites_tmp[3]),Site),ir3)); // return i=j!=k!=l
+            }
+            else { // sites_tmp[3] == sites_tmp[2]
+                println("k=l");
+                SStmp *= psi.A( sites_tmp[2] );
+                SStmp *= szk;
+                //auto SStmp_tmp = SStmp*szl;
+                //SStmp = prime(SStmp_tmp, Site);
+                SStmp = noprime(SStmp,Site)*szl;
+                auto ir3 = commonIndex(psi.A(sites_tmp[3]), psi.A(sites_tmp[3]-1),Link);
+                SStmp *= dag(prime(prime(psi.A(sites_tmp[3]),Site),ir3)); // return i=j!=k=l
+            }
+        }
+        else{ // sites_tmp[2] == sites_tmp[1] == sites_tmp[0]
+            println("j=k");
+            if( sites_tmp[3] != sites_tmp[2] ){ // sites_tmp[3] != sites_tmp[2] == sites_tmp[1] == sites_tmp[0]
+                println("k!=l");
+                SStmp *= szi;
+                //SStmp *= szj;
+                //SStmp *= szk;
+                SStmp = noprime(SStmp,Site)*szj;
+                SStmp = noprime(SStmp,Site)*szk;
+                auto ir2 = commonIndex(psi.A(sites_tmp[2]), psi.A(sites_tmp[2]+1),Link);
+                SStmp *= dag(prime(prime(psi.A(sites_tmp[2]),Site),ir2));
+                // propogate until szl
+                for ( int i3 = sites_tmp[2]+1; i3<sites_tmp[3]; ++i3) { 
+                    SStmp *= psi.A(i3);
+                    SStmp *= dag(prime(psi.A(i3),Link));
+                }
+                SStmp *= psi.A( sites_tmp[3] );
+                SStmp *= szl;
+                auto ir3 = commonIndex(psi.A(sites_tmp[3]), psi.A(sites_tmp[3]-1),Link);
+                SStmp *= dag(prime(prime(psi.A(sites_tmp[3]),Site),ir3)); // return i=j=k!=l
+            }
+            else{ // sites_tmp[3] = sites_tmp[2] == sites_tmp[1] == sites_tmp[0]
+                println("k=l");
+                SStmp *= szi;
+                //SStmp *= szj;
+                //SStmp *= szk;
+                //auto SStmp_tmp = SStmp*szl;
+                //SStmp = prime(SStmp_tmp, Site);
+                SStmp = noprime(SStmp,Site)*szj;
+                SStmp = noprime(SStmp,Site)*szk;
+                SStmp = noprime(SStmp,Site)*szl;
+                //auto ir3 = commonIndex(psi.A(sites_tmp[3]), psi.A(sites_tmp[3]-1),Link);
+                //SStmp *= dag(prime(prime(psi.A(sites_tmp[3]),Site),ir3)); // return i=j=k=l
+                SStmp *= dag(prime(psi.A(sites_tmp[3]),Site)); // return i=j=k=l
+            }
+        }
+    }
+    println( "<sisjsksl> =", SStmp.real() );
+    println( "<psi|psi> =", overlap(psi,psi));
+    println(" ");
+
+    }
+
     println( "\nRUNNING FINISHED ^_^ !!! " );
 
-    return 0; 
+    return 0;
     }
