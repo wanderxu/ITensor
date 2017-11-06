@@ -291,14 +291,13 @@ mfourbody_str(MPSt<Tensor>& psi,
     // sort by site index of first operator
     std::sort( opstr_34_array.begin(), opstr_34_array.end(), cmp_by_value_of_1st_element_of_struct);
 
-    // for test
-    println( "(i,j)=", opstr_12[0].second, opstr_12[1].second );
-    for ( int kli = 0; kli < sites_34_array.size(); ++kli ){
-        println( "(k,l), ind =", opstr_34_array[kli].op_pair[0].second," ",
-                                 opstr_34_array[kli].op_pair[1].second," ", 
-                                 opstr_34_array[kli].ind );
-    }
-
+    ////// for test
+    ////println( "(i,j)=", opstr_12[0].second, opstr_12[1].second );
+    ////for ( int kli = 0; kli < sites_34_array.size(); ++kli ){
+    ////    println( "(k,l), ind =", opstr_34_array[kli].op_pair[0].second," ",
+    ////                             opstr_34_array[kli].op_pair[1].second," ", 
+    ////                             opstr_34_array[kli].ind );
+    ////}
 
     psi.position(opstr_12[0].second);
     IQTensor SStmp=psi.A(opstr_12[0].second);
