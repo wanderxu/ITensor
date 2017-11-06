@@ -620,85 +620,212 @@ int main(int argc, char* argv[])
         std::ofstream fdxyout("Dxyi.out",std::ios::out);
         for (std::vector<double>::const_iterator i = dxy_meas.begin(); i != dxy_meas.end(); ++i)
                 fdxyout << *i << ' ';
-
-
-    ////if(domeas && meas_chiralcorr) {
-    ////    println("\n////////////////////////////");
-    ////    println("Start to perform measurement of chiral correlation\n");
-    ////    // 
-    ////    // measure chiral correlation
-    ////    //
-
-    ////    // make the chiral table
-    ////    auto num_tri_plaq = 2*(Nx-1)*(yperiodic ? Ny : Ny-1);
-    ////    Lattice3PlaqueGraph tri_plaq;
-    ////    tri_plaq.reserve(num_tri_plaq);
-    ////    for(int n = 1; n <= N; ++n) {
-    ////        int x = (n-1)/Ny+1;
-    ////        int y = (n-1)%Ny+1;
-
-    ////        if((x < Nx) && (y < Ny)) {
-    ////            tri_plaq.emplace_back(n, n+Ny+1, n+Ny); // x-direction plaq
-    ////            tri_plaq.emplace_back(n, n+1, n+Ny+1); // y-direction plaq
-    ////        }
-    ////        if((x < Nx) && (y == Ny) && yperiodic) {
-    ////            tri_plaq.emplace_back(n, n+1, n+Ny);
-    ////            tri_plaq.emplace_back(n, n-Ny+1, n+1);
-    ////        }
-
-    ////    }
-    ////    if(int(tri_plaq.size()) != num_tri_plaq) Error("Wrong number of tri_plaq");
-    ////    println( "tri_plaq: \n", tri_plaq );
-
-    ////    auto Xmpoi = AutoMPO(sites);
-    ////    auto Xmpoj = AutoMPO(sites);
-    ////    auto Xopi = IQMPO(Xmpoi);
-    ////    auto Xopj = IQMPO(Xmpoj);
-    ////    auto XXcorr_meas = overlap(psi,Xopi,psi);
-    ////    // measure chiral correlation
-    ////    std::vector<double> XiXj_meas={};
-    ////    std::vector<double> Xi_meas={};
-    ////    for(int i = 0; i < int(tri_plaq.size()); ++i) {
-    ////        Xmpoi = AutoMPO(sites);
-    ////        Xmpoi +=  0.5,"S+",tri_plaq[i].s1,"S-",tri_plaq[i].s2,"Sz",tri_plaq[i].s3;
-    ////        Xmpoi += -0.5,"S-",tri_plaq[i].s1,"S+",tri_plaq[i].s2,"Sz",tri_plaq[i].s3;
-    ////        Xmpoi +=  0.5,"S+",tri_plaq[i].s3,"S-",tri_plaq[i].s1,"Sz",tri_plaq[i].s2;
-    ////        Xmpoi += -0.5,"S-",tri_plaq[i].s3,"S+",tri_plaq[i].s1,"Sz",tri_plaq[i].s2;
-    ////        Xmpoi +=  0.5,"S+",tri_plaq[i].s2,"S-",tri_plaq[i].s3,"Sz",tri_plaq[i].s1;
-    ////        Xmpoi += -0.5,"S-",tri_plaq[i].s2,"S+",tri_plaq[i].s3,"Sz",tri_plaq[i].s1;
-    ////        Xopi = IQMPO(Xmpoi);
-    ////        for(int j = i; j < int(tri_plaq.size()); ++j) {
-    ////            std::vector<int> sites_tmp = { tri_plaq[i].s1, tri_plaq[i].s2, tri_plaq[i].s3, tri_plaq[j].s1, tri_plaq[j].s2, tri_plaq[j].s3 };
-    ////            //std::sort( sites_tmp.begin(), sites_tmp.end() ); // sort the pair
-    ////            //println( sites_tmp );
-    ////            for (auto n : sites_tmp ) { std::cout << n <<" "; }
-    ////            std::cout << '\n';
-
-    ////            // calculate correlation, Si*Sj*Sk*Sl
-    ////            Xmpoj = AutoMPO(sites);
-    ////            Xmpoj +=  0.5,"S+",tri_plaq[j].s1,"S-",tri_plaq[j].s2,"Sz",tri_plaq[j].s3;
-    ////            Xmpoj += -0.5,"S-",tri_plaq[j].s1,"S+",tri_plaq[j].s2,"Sz",tri_plaq[j].s3;
-    ////            Xmpoj +=  0.5,"S+",tri_plaq[j].s3,"S-",tri_plaq[j].s1,"Sz",tri_plaq[j].s2;
-    ////            Xmpoj += -0.5,"S-",tri_plaq[j].s3,"S+",tri_plaq[j].s1,"Sz",tri_plaq[j].s2;
-    ////            Xmpoj +=  0.5,"S+",tri_plaq[j].s2,"S-",tri_plaq[j].s3,"Sz",tri_plaq[j].s1;
-    ////            Xmpoj += -0.5,"S-",tri_plaq[j].s2,"S+",tri_plaq[j].s3,"Sz",tri_plaq[j].s1;
-    ////            Xopj = IQMPO(Xmpoj);
-    ////            XXcorr_meas = -overlap(psi,Xopi,Xopj,psi);  // Note that "-" comes of i^2
-    ////            printfln("XXcorr_meas = %.8f\n", XXcorr_meas); 
-    ////            XiXj_meas.emplace_back(XXcorr_meas);
-    ////            if(j==i) Xi_meas.emplace_back(overlap(psi,Xopi,psi));
-    ////        }
-    ////    }
-    ////    std::ofstream fXiXjout("XiXj.out",std::ios::out);
-    ////    for (std::vector<double>::const_iterator i = XiXj_meas.begin(); i != XiXj_meas.end(); ++i)
-    ////            fXiXjout << *i << ' ';
-
-    ////    std::ofstream fXiout("Xi.out",std::ios::out);
-    ////    for (std::vector<double>::const_iterator i = Xi_meas.begin(); i != Xi_meas.end(); ++i)
-    ////            fXiout << *i << ' ';
     }
 
-    //// test
+    if(domeas && meas_chiralcorr) {
+        println("\n////////////////////////////");
+        println("Start to perform measurement of chiral correlation\n");
+        // 
+        // measure chiral correlation
+        //
+
+        // make the chiral table
+        auto num_tri_plaq = 2*(Nx-1)*(yperiodic ? Ny : Ny-1);
+        Lattice3PlaqueGraph tri_plaq;
+        tri_plaq.reserve(num_tri_plaq);
+        for(int n = 1; n <= N; ++n) {
+            int x = (n-1)/Ny+1;
+            int y = (n-1)%Ny+1;
+
+            if((x < Nx) && (y < Ny)) {
+                tri_plaq.emplace_back(n, n+Ny+1, n+Ny); // x-direction plaq
+                tri_plaq.emplace_back(n, n+1, n+Ny+1); // y-direction plaq
+            }
+            if((x < Nx) && (y == Ny) && yperiodic) {
+                tri_plaq.emplace_back(n, n+1, n+Ny);
+                tri_plaq.emplace_back(n, n-Ny+1, n+1);
+            }
+
+        }
+        if(int(tri_plaq.size()) != num_tri_plaq) Error("Wrong number of tri_plaq");
+        println( "tri_plaq: \n", tri_plaq );
+
+        // measure chiral correlation
+        println("measure chiral correlation");
+        std::vector<double> XiXj_meas( tri_plaq.size()*(tri_plaq.size()+1)/2 ); // store <XiXj>
+        std::vector<double> Xi_meas={}; // store <Xi>
+        for(int i = 0; i < int(tri_plaq.size()); ++i) {
+            std::vector< std::vector<int> > op456vec_vec ={}; // store (opl,opm,opn) pair
+            std::vector<int> corr_ind = {};  // index in XiXj_meas
+            for(int j = i; j < int(tri_plaq.size()); ++j) {
+                std::vector<int> sites_tmp = { tri_plaq[i].s1, tri_plaq[i].s2, tri_plaq[i].s3, tri_plaq[j].s1, tri_plaq[j].s2, tri_plaq[j].s3 };
+                // i,j,k,l,m,n, only select i!=j!=k < l!=m!=n
+                for (auto n : sites_tmp ) { std::cout << n <<" "; }
+                std::cout << '\n';
+                if( (sites_tmp[0] != sites_tmp[1]) &&
+                    (sites_tmp[1] != sites_tmp[2]) &&
+                    (sites_tmp[2] != sites_tmp[0]) &&
+                    (sites_tmp[0] <  sites_tmp[3]) &&
+                    (sites_tmp[0] <  sites_tmp[4]) &&
+                    (sites_tmp[0] <  sites_tmp[5]) &&
+                    (sites_tmp[1] <  sites_tmp[3]) &&
+                    (sites_tmp[1] <  sites_tmp[4]) &&
+                    (sites_tmp[1] <  sites_tmp[5]) &&
+                    (sites_tmp[2] <  sites_tmp[3]) &&
+                    (sites_tmp[2] <  sites_tmp[4]) &&
+                    (sites_tmp[2] <  sites_tmp[5]) &&
+                    (sites_tmp[3] != sites_tmp[4]) &&
+                    (sites_tmp[4] != sites_tmp[5]) &&
+                    (sites_tmp[5] != sites_tmp[3]) ) {
+                    op456vec_vec.emplace_back( std::initializer_list<int>{sites_tmp[3], sites_tmp[4], sites_tmp[5] } );
+                    int ind_meas = ( tri_plaq.size() + tri_plaq.size() - i + 1)*i/2 + j-i;
+                    XiXj_meas[ind_meas] = 0.0; // initial the obserator
+                    corr_ind.emplace_back( ind_meas );
+                    std::cout << "XXcorr_meas = \n";
+                    std::cout << '\n';
+                    //std::cout << " j = " << j <<std::endl;
+                    //std::cout << " ind_meas = " << ind_meas <<std::endl;
+                }
+                else {
+                    // use ordinary method
+                    // calculate correlation, Si*Sj*Sk*Sl*Sm*Sn
+                    if(i == j){
+                        auto chiral_meas = 0.0;
+                        // note conjugation codition is used, assume s1!=s2!=s3, and it is really the case here
+                        // after you using the conjugate codition, you will find chiral_meas always equals 0, thus do not need it.
+                        //chiral_meas +=  0.5*mthreebody(psi,sites,{tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3},"S+","S-","Sz");
+                        //chiral_meas += -0.5*mthreebody(psi,sites,{tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3},"S-","S+","Sz");
+                        //chiral_meas +=  0.5*mthreebody(psi,sites,{tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3},"S-","Sz","S+");
+                        //chiral_meas += -0.5*mthreebody(psi,sites,{tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3},"S+","Sz","S-");
+                        //chiral_meas +=  0.5*mthreebody(psi,sites,{tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3},"Sz","S+","S-");
+                        //chiral_meas += -0.5*mthreebody(psi,sites,{tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3},"Sz","S-","S+");
+                        Xi_meas.emplace_back(chiral_meas);
+                    }
+                    auto XXcorr_meas = 0.0;
+                    if( (sites_tmp[0] == sites_tmp[1]) ||
+                        (sites_tmp[0] == sites_tmp[2]) ||
+                        (sites_tmp[0] == sites_tmp[3]) ||
+                        (sites_tmp[0] == sites_tmp[4]) ||
+                        (sites_tmp[0] == sites_tmp[5]) ||
+                        (sites_tmp[1] == sites_tmp[2]) ||
+                        (sites_tmp[1] == sites_tmp[3]) ||
+                        (sites_tmp[1] == sites_tmp[4]) ||
+                        (sites_tmp[1] == sites_tmp[5]) ||
+                        (sites_tmp[2] == sites_tmp[3]) ||
+                        (sites_tmp[2] == sites_tmp[4]) ||
+                        (sites_tmp[2] == sites_tmp[5]) ||
+                        (sites_tmp[3] == sites_tmp[4]) ||
+                        (sites_tmp[3] == sites_tmp[5]) ||
+                        (sites_tmp[4] == sites_tmp[5]) ) {
+XXcorr_meas +=  0.25*msixbody(psi, sites, sites_tmp, "S+", "S-", "Sz", "S+", "S-", "Sz" );
+XXcorr_meas += -0.25*msixbody(psi, sites, sites_tmp, "S+", "S-", "Sz", "S-", "S+", "Sz" );
+XXcorr_meas +=  0.25*msixbody(psi, sites, sites_tmp, "S+", "S-", "Sz", "S-", "Sz", "S+" );
+XXcorr_meas += -0.25*msixbody(psi, sites, sites_tmp, "S+", "S-", "Sz", "S+", "Sz", "S-" );
+XXcorr_meas +=  0.25*msixbody(psi, sites, sites_tmp, "S+", "S-", "Sz", "Sz", "S+", "S-" );
+XXcorr_meas += -0.25*msixbody(psi, sites, sites_tmp, "S+", "S-", "Sz", "Sz", "S-", "S+" );
+
+XXcorr_meas += -0.25*msixbody(psi, sites, sites_tmp, "S-", "S+", "Sz", "S+", "S-", "Sz" );
+XXcorr_meas +=  0.25*msixbody(psi, sites, sites_tmp, "S-", "S+", "Sz", "S-", "S+", "Sz" );
+XXcorr_meas += -0.25*msixbody(psi, sites, sites_tmp, "S-", "S+", "Sz", "S-", "Sz", "S+" );
+XXcorr_meas +=  0.25*msixbody(psi, sites, sites_tmp, "S-", "S+", "Sz", "S+", "Sz", "S-" );
+XXcorr_meas += -0.25*msixbody(psi, sites, sites_tmp, "S-", "S+", "Sz", "Sz", "S+", "S-" );
+XXcorr_meas +=  0.25*msixbody(psi, sites, sites_tmp, "S-", "S+", "Sz", "Sz", "S-", "S+" );
+
+XXcorr_meas +=  0.25*msixbody(psi, sites, sites_tmp, "S-", "Sz", "S+", "S+", "S-", "Sz" );
+XXcorr_meas += -0.25*msixbody(psi, sites, sites_tmp, "S-", "Sz", "S+", "S-", "S+", "Sz" );
+XXcorr_meas +=  0.25*msixbody(psi, sites, sites_tmp, "S-", "Sz", "S+", "S-", "Sz", "S+" );
+XXcorr_meas += -0.25*msixbody(psi, sites, sites_tmp, "S-", "Sz", "S+", "S+", "Sz", "S-" );
+XXcorr_meas +=  0.25*msixbody(psi, sites, sites_tmp, "S-", "Sz", "S+", "Sz", "S+", "S-" );
+XXcorr_meas += -0.25*msixbody(psi, sites, sites_tmp, "S-", "Sz", "S+", "Sz", "S-", "S+" );
+
+XXcorr_meas += -0.25*msixbody(psi, sites, sites_tmp, "S+", "Sz", "S-", "S+", "S-", "Sz" );
+XXcorr_meas +=  0.25*msixbody(psi, sites, sites_tmp, "S+", "Sz", "S-", "S-", "S+", "Sz" );
+XXcorr_meas += -0.25*msixbody(psi, sites, sites_tmp, "S+", "Sz", "S-", "S-", "Sz", "S+" );
+XXcorr_meas +=  0.25*msixbody(psi, sites, sites_tmp, "S+", "Sz", "S-", "S+", "Sz", "S-" );
+XXcorr_meas += -0.25*msixbody(psi, sites, sites_tmp, "S+", "Sz", "S-", "Sz", "S+", "S-" );
+XXcorr_meas +=  0.25*msixbody(psi, sites, sites_tmp, "S+", "Sz", "S-", "Sz", "S-", "S+" );
+
+XXcorr_meas +=  0.25*msixbody(psi, sites, sites_tmp, "Sz", "S+", "S-", "S+", "S-", "Sz" );
+XXcorr_meas += -0.25*msixbody(psi, sites, sites_tmp, "Sz", "S+", "S-", "S-", "S+", "Sz" );
+XXcorr_meas +=  0.25*msixbody(psi, sites, sites_tmp, "Sz", "S+", "S-", "S-", "Sz", "S+" );
+XXcorr_meas += -0.25*msixbody(psi, sites, sites_tmp, "Sz", "S+", "S-", "S+", "Sz", "S-" );
+XXcorr_meas +=  0.25*msixbody(psi, sites, sites_tmp, "Sz", "S+", "S-", "Sz", "S+", "S-" );
+XXcorr_meas += -0.25*msixbody(psi, sites, sites_tmp, "Sz", "S+", "S-", "Sz", "S-", "S+" );
+
+XXcorr_meas += -0.25*msixbody(psi, sites, sites_tmp, "Sz", "S-", "S+", "S+", "S-", "Sz" );
+XXcorr_meas +=  0.25*msixbody(psi, sites, sites_tmp, "Sz", "S-", "S+", "S-", "S+", "Sz" );
+XXcorr_meas += -0.25*msixbody(psi, sites, sites_tmp, "Sz", "S-", "S+", "S-", "Sz", "S+" );
+XXcorr_meas +=  0.25*msixbody(psi, sites, sites_tmp, "Sz", "S-", "S+", "S+", "Sz", "S-" );
+XXcorr_meas += -0.25*msixbody(psi, sites, sites_tmp, "Sz", "S-", "S+", "Sz", "S+", "S-" );
+XXcorr_meas +=  0.25*msixbody(psi, sites, sites_tmp, "Sz", "S-", "S+", "Sz", "S-", "S+" );
+                    }
+                    // use conjugatation condition when i,j,k,l,m,n not equal
+                    else{
+XXcorr_meas +=  0.50*msixbody(psi, sites, sites_tmp, "S+", "S-", "Sz", "S+", "S-", "Sz" );
+XXcorr_meas += -0.50*msixbody(psi, sites, sites_tmp, "S+", "S-", "Sz", "S-", "S+", "Sz" );
+XXcorr_meas +=  0.50*msixbody(psi, sites, sites_tmp, "S+", "S-", "Sz", "S-", "Sz", "S+" );
+XXcorr_meas += -0.50*msixbody(psi, sites, sites_tmp, "S+", "S-", "Sz", "S+", "Sz", "S-" );
+XXcorr_meas +=  0.50*msixbody(psi, sites, sites_tmp, "S+", "S-", "Sz", "Sz", "S+", "S-" );
+XXcorr_meas += -0.50*msixbody(psi, sites, sites_tmp, "S+", "S-", "Sz", "Sz", "S-", "S+" );
+
+XXcorr_meas +=  0.50*msixbody(psi, sites, sites_tmp, "S-", "Sz", "S+", "S+", "S-", "Sz" );
+XXcorr_meas += -0.50*msixbody(psi, sites, sites_tmp, "S-", "Sz", "S+", "S-", "S+", "Sz" );
+XXcorr_meas +=  0.50*msixbody(psi, sites, sites_tmp, "S-", "Sz", "S+", "S-", "Sz", "S+" );
+XXcorr_meas += -0.50*msixbody(psi, sites, sites_tmp, "S-", "Sz", "S+", "S+", "Sz", "S-" );
+XXcorr_meas +=  0.50*msixbody(psi, sites, sites_tmp, "S-", "Sz", "S+", "Sz", "S+", "S-" );
+XXcorr_meas += -0.50*msixbody(psi, sites, sites_tmp, "S-", "Sz", "S+", "Sz", "S-", "S+" );
+
+XXcorr_meas +=  0.50*msixbody(psi, sites, sites_tmp, "Sz", "S+", "S-", "S+", "S-", "Sz" );
+XXcorr_meas += -0.50*msixbody(psi, sites, sites_tmp, "Sz", "S+", "S-", "S-", "S+", "Sz" );
+XXcorr_meas +=  0.50*msixbody(psi, sites, sites_tmp, "Sz", "S+", "S-", "S-", "Sz", "S+" );
+XXcorr_meas += -0.50*msixbody(psi, sites, sites_tmp, "Sz", "S+", "S-", "S+", "Sz", "S-" );
+XXcorr_meas +=  0.50*msixbody(psi, sites, sites_tmp, "Sz", "S+", "S-", "Sz", "S+", "S-" );
+XXcorr_meas += -0.50*msixbody(psi, sites, sites_tmp, "Sz", "S+", "S-", "Sz", "S-", "S+" );
+                    }
+                    int ind_meas = ( tri_plaq.size() + tri_plaq.size() - i + 1)*i/2 + j-i;
+                    //std::cout << " ind_meas = " << ind_meas <<std::endl;
+                    XXcorr_meas = -XXcorr_meas;   // Note that "-" comes from i^2
+                    printfln("XXcorr_meas = %.8f\n", XXcorr_meas);
+                    XiXj_meas[ind_meas]=XXcorr_meas;
+                }
+            } // end for(int j = i; j < int(tri_plaq.size()); ++j) {
+
+            if( op456vec_vec.size() > 0 ) {
+                //std::cout << " op456vec_vec = " <<std::endl;
+                //for (auto rr : op456vec_vec ) { std::cout << rr[0] <<" "<< rr[1] <<" "<< rr[2] << '\n'; }
+// use conjugate condition, also note the (-1.0) comes from i^2
+msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "S+", "S-", "Sz", op456vec_vec, "S+", "S-", "Sz", corr_ind, XiXj_meas, 0.50*(-1.0) );
+msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "S+", "S-", "Sz", op456vec_vec, "S-", "S+", "Sz", corr_ind, XiXj_meas,-0.50*(-1.0) );
+msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "S+", "S-", "Sz", op456vec_vec, "S-", "Sz", "S+", corr_ind, XiXj_meas, 0.50*(-1.0) );
+msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "S+", "S-", "Sz", op456vec_vec, "S+", "Sz", "S-", corr_ind, XiXj_meas,-0.50*(-1.0) );
+msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "S+", "S-", "Sz", op456vec_vec, "Sz", "S+", "S-", corr_ind, XiXj_meas, 0.50*(-1.0) );
+msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "S+", "S-", "Sz", op456vec_vec, "Sz", "S-", "S+", corr_ind, XiXj_meas,-0.50*(-1.0) );
+
+msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "S-", "Sz", "S+", op456vec_vec, "S+", "S-", "Sz", corr_ind, XiXj_meas, 0.50*(-1.0) );
+msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "S-", "Sz", "S+", op456vec_vec, "S-", "S+", "Sz", corr_ind, XiXj_meas,-0.50*(-1.0) );
+msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "S-", "Sz", "S+", op456vec_vec, "S-", "Sz", "S+", corr_ind, XiXj_meas, 0.50*(-1.0) );
+msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "S-", "Sz", "S+", op456vec_vec, "S+", "Sz", "S-", corr_ind, XiXj_meas,-0.50*(-1.0) );
+msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "S-", "Sz", "S+", op456vec_vec, "Sz", "S+", "S-", corr_ind, XiXj_meas, 0.50*(-1.0) );
+msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "S-", "Sz", "S+", op456vec_vec, "Sz", "S-", "S+", corr_ind, XiXj_meas,-0.50*(-1.0) );
+
+msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "S+", "S-", op456vec_vec, "S+", "S-", "Sz", corr_ind, XiXj_meas, 0.50*(-1.0) );
+msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "S+", "S-", op456vec_vec, "S-", "S+", "Sz", corr_ind, XiXj_meas,-0.50*(-1.0) );
+msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "S+", "S-", op456vec_vec, "S-", "Sz", "S+", corr_ind, XiXj_meas, 0.50*(-1.0) );
+msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "S+", "S-", op456vec_vec, "S+", "Sz", "S-", corr_ind, XiXj_meas,-0.50*(-1.0) );
+msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "S+", "S-", op456vec_vec, "Sz", "S+", "S-", corr_ind, XiXj_meas, 0.50*(-1.0) );
+msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "S+", "S-", op456vec_vec, "Sz", "S-", "S+", corr_ind, XiXj_meas,-0.50*(-1.0) );
+            }
+        } // end for(int i = 0; i < int(tri_plaq.size()); ++i) {
+        std::ofstream fXiXjout("XiXj.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = XiXj_meas.begin(); i != XiXj_meas.end(); ++i)
+                fXiXjout << *i << ' ';
+
+        std::ofstream fXiout("Xi.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = Xi_meas.begin(); i != Xi_meas.end(); ++i)
+                fXiout << *i << ' ';
+    }
+
+    //// test fourbody
     //srand (time(NULL));
     //std::vector<int> sites_tmp={rand()%N+1,rand()%N+1,rand()%N+1,rand()%N+1};
     //sites_tmp = {1,7,8,14};
@@ -717,7 +844,35 @@ int main(int argc, char* argv[])
     //for (auto rr : dxdx_meas ) { std::cout << rr <<" "; }
     //std::cout << '\n';
 
-    println( "\nRUNNING FINISHED ^_^ !!! " );
+    // test sixbody
+    std::vector<int> sites_tmp = {1,2,3,4,5,6};
+    for (auto n : sites_tmp ) { std::cout << n <<" "; }
+    std::cout << '\n';
+    println( "with msixbody <sijklmn> = ", msixbody(psi,sites,sites_tmp,"S+","S-","S+","S-","Sz","Sz") );
 
+    auto tmp_mpo = AutoMPO(sites);
+    tmp_mpo += 1.0,"S+",sites_tmp[0], "S-", sites_tmp[1],"S+",sites_tmp[2], "S-", sites_tmp[3],"Sz",sites_tmp[4], "Sz", sites_tmp[5];
+    auto tmp_corr = IQMPO(tmp_mpo);
+    println( "with overlap <sijklmn> =", overlap(psi,tmp_corr,psi));
+
+    ////sites_tmp = {3,3,3,3};
+    ////for (auto n : sites_tmp ) { std::cout << n <<" "; }
+    ////std::cout << '\n';
+    ////println( "with mfourbody <sijkl> = ", mfourbody(psi,sites,sites_tmp,"S+","S-","S+","S-") );
+
+    ////tmp_mpo = AutoMPO(sites);
+    ////tmp_mpo += 1.0,"S+",sites_tmp[0], "S-", sites_tmp[1],"S+",sites_tmp[2], "S-", sites_tmp[3];
+    ////tmp_corr = IQMPO(tmp_mpo);
+    ////println( "with overlap <sijkl> =", overlap(psi,tmp_corr,psi));
+
+    std::vector<double> tmp_meas(1);
+    std::vector<int> corr_ind = {};
+    tmp_meas[0]=0.0;
+    corr_ind.emplace_back(0);
+    msixbody_str(psi, sites, {sites_tmp[0],sites_tmp[1],sites_tmp[2]}, "S+", "S-", "S+",
+                               { {sites_tmp[3],sites_tmp[4],sites_tmp[5]} }, "S-", "Sz", "Sz", corr_ind, tmp_meas,1.0);
+    println( "with msixbody_str <sijklmn> =", tmp_meas[0]);
+
+    println( "\nRUNNING FINISHED ^_^ !!! " );
     return 0;
     }
