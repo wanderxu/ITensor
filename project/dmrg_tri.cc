@@ -379,7 +379,7 @@ int main(int argc, char* argv[])
                     int ind_meas = ( x_dimer.size() + x_dimer.size() - i + 1)*i/2 + j-i;
                     dxdx_meas[ind_meas] = 0.0; // initial the obserator
                     corr_ind.emplace_back( ind_meas );
-                    std::cout << '\n';
+                    std::cout << "ddcorr_meas = \n";
                     std::cout << '\n';
                     //std::cout << " j = " << j <<std::endl;
                     //std::cout << " ind_meas = " << ind_meas <<std::endl;
@@ -444,6 +444,182 @@ int main(int argc, char* argv[])
         std::ofstream fdxout("Dxi.out",std::ios::out);
         for (std::vector<double>::const_iterator i = dx_meas.begin(); i != dx_meas.end(); ++i)
                 fdxout << *i << ' ';
+
+        // measure y_dimer correlation
+        println("measure y_dimer correlation");
+        std::vector<double> dydy_meas( y_dimer.size()*(y_dimer.size()+1)/2 ); // store <DiDj>
+        std::vector<double> dy_meas={}; // store <Di>
+        for(int i = 0; i < int(y_dimer.size()); ++i) {
+            std::vector< std::pair<int,int> > op34pair_vec ={}; // store (opk,opl) pair
+            std::vector<int> corr_ind = {};  // index in dydy_meas
+            for(int j = i; j < int(y_dimer.size()); ++j) {
+                std::vector<int> sites_tmp = { y_dimer[i].s1, y_dimer[i].s2, y_dimer[j].s1, y_dimer[j].s2 };
+                // i,j,k,l, only select i!=j < k!=l
+                for (auto n : sites_tmp ) { std::cout << n <<" "; }
+                std::cout << '\n';
+                if( (sites_tmp[0] != sites_tmp[1]) &&
+                    (sites_tmp[0] <  sites_tmp[2]) &&
+                    (sites_tmp[0] <  sites_tmp[3]) &&
+                    (sites_tmp[1] <  sites_tmp[2]) &&
+                    (sites_tmp[1] <  sites_tmp[3]) &&
+                    (sites_tmp[2] != sites_tmp[3]) ) {
+                    op34pair_vec.emplace_back( std::make_pair( sites_tmp[2], sites_tmp[3] ) );
+                    int ind_meas = ( y_dimer.size() + y_dimer.size() - i + 1)*i/2 + j-i;
+                    dydy_meas[ind_meas] = 0.0; // initial the obserator
+                    corr_ind.emplace_back( ind_meas );
+                    std::cout << "ddcorr_meas = \n";
+                    std::cout << '\n';
+                    //std::cout << " j = " << j <<std::endl;
+                    //std::cout << " ind_meas = " << ind_meas <<std::endl;
+                }
+                else {
+                    // use ordinary method
+                    // calculate correlation, Si*Sj*Sk*Sl
+                    if(i == j){
+                        auto dimer_meas = 0.0;
+                        // note conjugation codition is used, assume s1!=s2, and it is really the case here
+                        dimer_meas += mtwobody(psi,sites,{y_dimer[i].s1, y_dimer[i].s2}, "S+", "S-");
+                        dimer_meas += mtwobody(psi,sites,{y_dimer[i].s1, y_dimer[i].s2}, "Sz", "Sz");
+                        dy_meas.emplace_back(dimer_meas);
+                    }
+                    auto ddcorr_meas = 0.0;
+                    if( (sites_tmp[0] == sites_tmp[1]) ||
+                        (sites_tmp[0] == sites_tmp[2]) ||
+                        (sites_tmp[0] == sites_tmp[3]) ||
+                        (sites_tmp[1] == sites_tmp[2]) ||
+                        (sites_tmp[1] == sites_tmp[3]) ||
+                        (sites_tmp[2] == sites_tmp[3]) ) {
+                        ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S+","S-","S+","S-");
+                        ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S+","S-","S-","S+");
+                        ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S+","S-","Sz","Sz");
+                        ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S-","S+","S+","S-");
+                        ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S-","S+","S-","S+");
+                        ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S-","S+","Sz","Sz");
+                        ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S+","S-");
+                        ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S-","S+");
+                        ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","Sz","Sz"); 
+                    }
+                    // use conjugatation condition when i,j,k,l not equal
+                    else{
+                        ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S+","S-","S+","S-");
+                        ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S+","S-","S-","S+");
+                        ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"S+","S-","Sz","Sz");
+                        ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S+","S-");
+                        ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","Sz","Sz"); 
+                    }
+                    int ind_meas = ( y_dimer.size() + y_dimer.size() - i + 1)*i/2 + j-i;
+                    //std::cout << " ind_meas = " << ind_meas <<std::endl;
+                    printfln("ddcorr_meas = %.8f\n", ddcorr_meas);
+                    dydy_meas[ind_meas]=ddcorr_meas;
+                }
+            } // end for(int j = i; j < int(y_dimer.size()); ++j) {
+
+            if( op34pair_vec.size() > 0 ) {
+                //std::cout << " op34pair_vec = " <<std::endl;
+                //for (auto rr : op34pair_vec ) { std::cout << rr.first <<" "<< rr.second << '\n'; }
+                mfourbody_str(psi, sites, {y_dimer[i].s1,y_dimer[i].s2}, "S+", "S-", op34pair_vec, "S+", "S-", corr_ind, dydy_meas, 0.50 );
+                mfourbody_str(psi, sites, {y_dimer[i].s1,y_dimer[i].s2}, "S+", "S-", op34pair_vec, "S-", "S+", corr_ind, dydy_meas, 0.50 );
+                mfourbody_str(psi, sites, {y_dimer[i].s1,y_dimer[i].s2}, "S+", "S-", op34pair_vec, "Sz", "Sz", corr_ind, dydy_meas, 1.00 );
+                mfourbody_str(psi, sites, {y_dimer[i].s1,y_dimer[i].s2}, "Sz", "Sz", op34pair_vec, "S+", "S-", corr_ind, dydy_meas, 1.00 );
+                mfourbody_str(psi, sites, {y_dimer[i].s1,y_dimer[i].s2}, "Sz", "Sz", op34pair_vec, "Sz", "Sz", corr_ind, dydy_meas, 1.00 );
+            }
+        }
+        // output to file
+        std::ofstream fdydyout("DyiDyj.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = dydy_meas.begin(); i != dydy_meas.end(); ++i)
+                fdydyout << *i << ' ';
+
+        std::ofstream fdyout("Dyi.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = dy_meas.begin(); i != dy_meas.end(); ++i)
+                fdyout << *i << ' ';
+
+        // measure xy_dimer correlation
+        println("measure xy_dimer correlation");
+        std::vector<double> dxydxy_meas( xy_dimer.size()*(xy_dimer.size()+1)/2 ); // store <DiDj>
+        std::vector<double> dxy_meas={}; // store <Di>
+        for(int i = 0; i < int(xy_dimer.size()); ++i) {
+            std::vector< std::pair<int,int> > op34pair_vec ={}; // store (opk,opl) pair
+            std::vector<int> corr_ind = {};  // index in dxydxy_meas
+            for(int j = i; j < int(xy_dimer.size()); ++j) {
+                std::vector<int> sites_tmp = { xy_dimer[i].s1, xy_dimer[i].s2, xy_dimer[j].s1, xy_dimer[j].s2 };
+                // i,j,k,l, only select i!=j < k!=l
+                for (auto n : sites_tmp ) { std::cout << n <<" "; }
+                std::cout << '\n';
+                if( (sites_tmp[0] != sites_tmp[1]) &&
+                    (sites_tmp[0] <  sites_tmp[2]) &&
+                    (sites_tmp[0] <  sites_tmp[3]) &&
+                    (sites_tmp[1] <  sites_tmp[2]) &&
+                    (sites_tmp[1] <  sites_tmp[3]) &&
+                    (sites_tmp[2] != sites_tmp[3]) ) {
+                    op34pair_vec.emplace_back( std::make_pair( sites_tmp[2], sites_tmp[3] ) );
+                    int ind_meas = ( xy_dimer.size() + xy_dimer.size() - i + 1)*i/2 + j-i;
+                    dxydxy_meas[ind_meas] = 0.0; // initial the obserator
+                    corr_ind.emplace_back( ind_meas );
+                    std::cout << "ddcorr_meas = \n";
+                    std::cout << '\n';
+                    //std::cout << " j = " << j <<std::endl;
+                    //std::cout << " ind_meas = " << ind_meas <<std::endl;
+                }
+                else {
+                    // use ordinary method
+                    // calculate correlation, Si*Sj*Sk*Sl
+                    if(i == j){
+                        auto dimer_meas = 0.0;
+                        // note conjugation codition is used, assume s1!=s2, and it is really the case here
+                        dimer_meas += mtwobody(psi,sites,{xy_dimer[i].s1, xy_dimer[i].s2}, "S+", "S-");
+                        dimer_meas += mtwobody(psi,sites,{xy_dimer[i].s1, xy_dimer[i].s2}, "Sz", "Sz");
+                        dxy_meas.emplace_back(dimer_meas);
+                    }
+                    auto ddcorr_meas = 0.0;
+                    if( (sites_tmp[0] == sites_tmp[1]) ||
+                        (sites_tmp[0] == sites_tmp[2]) ||
+                        (sites_tmp[0] == sites_tmp[3]) ||
+                        (sites_tmp[1] == sites_tmp[2]) ||
+                        (sites_tmp[1] == sites_tmp[3]) ||
+                        (sites_tmp[2] == sites_tmp[3]) ) {
+                        ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S+","S-","S+","S-");
+                        ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S+","S-","S-","S+");
+                        ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S+","S-","Sz","Sz");
+                        ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S-","S+","S+","S-");
+                        ddcorr_meas += 0.25*mfourbody(psi,sites,sites_tmp,"S-","S+","S-","S+");
+                        ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S-","S+","Sz","Sz");
+                        ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S+","S-");
+                        ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S-","S+");
+                        ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","Sz","Sz"); 
+                    }
+                    // use conjugatation condition when i,j,k,l not equal
+                    else{
+                        ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S+","S-","S+","S-");
+                        ddcorr_meas += 0.50*mfourbody(psi,sites,sites_tmp,"S+","S-","S-","S+");
+                        ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"S+","S-","Sz","Sz");
+                        ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S+","S-");
+                        ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","Sz","Sz"); 
+                    }
+                    int ind_meas = ( xy_dimer.size() + xy_dimer.size() - i + 1)*i/2 + j-i;
+                    //std::cout << " ind_meas = " << ind_meas <<std::endl;
+                    printfln("ddcorr_meas = %.8f\n", ddcorr_meas);
+                    dxydxy_meas[ind_meas]=ddcorr_meas;
+                }
+            } // end for(int j = i; j < int(xy_dimer.size()); ++j) {
+
+            if( op34pair_vec.size() > 0 ) {
+                //std::cout << " op34pair_vec = " <<std::endl;
+                //for (auto rr : op34pair_vec ) { std::cout << rr.first <<" "<< rr.second << '\n'; }
+                mfourbody_str(psi, sites, {xy_dimer[i].s1,xy_dimer[i].s2}, "S+", "S-", op34pair_vec, "S+", "S-", corr_ind, dxydxy_meas, 0.50 );
+                mfourbody_str(psi, sites, {xy_dimer[i].s1,xy_dimer[i].s2}, "S+", "S-", op34pair_vec, "S-", "S+", corr_ind, dxydxy_meas, 0.50 );
+                mfourbody_str(psi, sites, {xy_dimer[i].s1,xy_dimer[i].s2}, "S+", "S-", op34pair_vec, "Sz", "Sz", corr_ind, dxydxy_meas, 1.00 );
+                mfourbody_str(psi, sites, {xy_dimer[i].s1,xy_dimer[i].s2}, "Sz", "Sz", op34pair_vec, "S+", "S-", corr_ind, dxydxy_meas, 1.00 );
+                mfourbody_str(psi, sites, {xy_dimer[i].s1,xy_dimer[i].s2}, "Sz", "Sz", op34pair_vec, "Sz", "Sz", corr_ind, dxydxy_meas, 1.00 );
+            }
+        }
+        // output to file
+        std::ofstream fdxydxyout("DxyiDxyj.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = dxydxy_meas.begin(); i != dxydxy_meas.end(); ++i)
+                fdxydxyout << *i << ' ';
+
+        std::ofstream fdxyout("Dxyi.out",std::ios::out);
+        for (std::vector<double>::const_iterator i = dxy_meas.begin(); i != dxy_meas.end(); ++i)
+                fdxyout << *i << ' ';
 
 
     ////if(domeas && meas_chiralcorr) {
