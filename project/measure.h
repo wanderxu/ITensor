@@ -350,6 +350,159 @@ mfourbody_str(MPSt<Tensor>& psi,
     }
   }
 
+template <class Tensor>
+Real
+msixbody(MPSt<Tensor>& psi, 
+     SpinHalf const& sites,
+     std::vector<int> const& sites_tmp,
+     std::string const& op1_label,
+     std::string const& op2_label,
+     std::string const& op3_label,
+     std::string const& op4_label,
+     std::string const& op5_label,
+     std::string const& op6_label )
+    {
+    std::vector<opair> opstr = { std::make_pair(op1_label,sites_tmp[0]),
+                                 std::make_pair(op2_label,sites_tmp[1]),
+                                 std::make_pair(op3_label,sites_tmp[2]),
+                                 std::make_pair(op4_label,sites_tmp[3]),
+                                 std::make_pair(op5_label,sites_tmp[4]),
+                                 std::make_pair(op6_label,sites_tmp[5])};
+    // sort by site index
+    std::sort(opstr.begin(), opstr.end(), cmp_by_value);
+
+    auto opi = sites.op(opstr[0].first,opstr[0].second);
+    auto opj = sites.op(opstr[1].first,opstr[1].second);
+    auto opk = sites.op(opstr[2].first,opstr[2].second);
+    auto opl = sites.op(opstr[3].first,opstr[3].second);
+    auto opm = sites.op(opstr[4].first,opstr[4].second);
+    auto opn = sites.op(opstr[5].first,opstr[5].second);
+
+    psi.position(opstr[0].second);
+    IQTensor SStmp=psi.A(opstr[0].second);
+    SStmp *= opi;
+    if( opstr[1].second != opstr[0].second ) {
+        println("i!=j");
+        auto ir1 = commonIndex(psi.A(opstr[0].second), psi.A(opstr[0].second+1),Link);
+        SStmp *= dag(prime(prime(psi.A(opstr[0].second),Site),ir1));
+        // propogate until opj
+        for ( int i1 = opstr[0].second+1; i1<opstr[1].second; ++i1) { 
+            SStmp *= psi.A(i1);
+            SStmp *= dag(prime(psi.A(i1),Link));
+        }
+        SStmp *= psi.A(opstr[1].second);
+        SStmp *= opj;
+    }
+    else {
+        println("i=j");
+        SStmp = noprime(SStmp,Site)*opj;
+    }
+
+    if ( opstr[2].second != opstr[1].second ){
+        println("j!=k");
+        if ( opstr[1].second == opstr[0].second ) {
+            auto ir2 = commonIndex(psi.A(opstr[1].second), psi.A(opstr[1].second+1),Link);
+            SStmp *= dag(prime(prime(psi.A(opstr[1].second),Site),ir2));
+        }
+        else {
+            SStmp *= dag(prime(prime(psi.A(opstr[1].second),Site),Link));
+        }
+        // propogate until opk
+        for ( int i2 = opstr[1].second+1; i2<opstr[2].second; ++i2) { 
+            SStmp *= psi.A(i2);
+            SStmp *= dag(prime(psi.A(i2),Link));
+        }
+        SStmp *= psi.A(opstr[2].second);
+        SStmp *= opk;
+    }
+    else{
+        println("j=k");
+        SStmp = noprime(SStmp,Site)*opk;
+    }
+
+    if ( opstr[3].second != opstr[2].second ){
+        println("k!=l");
+        if ( (opstr[1].second == opstr[0].second) && (opstr[2].second == opstr[1].second) ) {
+            auto ir3 = commonIndex(psi.A(opstr[2].second), psi.A(opstr[2].second+1),Link);
+            SStmp *= dag(prime(prime(psi.A(opstr[2].second),Site),ir3));
+        }
+        else{
+            SStmp *= dag(prime(prime(psi.A(opstr[2].second),Site),Link));
+        }
+        // propogate until opk
+        for ( int i3 = opstr[2].second+1; i3<opstr[3].second; ++i3) { 
+            SStmp *= psi.A(i3);
+            SStmp *= dag(prime(psi.A(i3),Link));
+        }
+        SStmp *= psi.A(opstr[3].second);
+        SStmp *= opl;
+    }
+    else{
+        println("k=l");
+        SStmp = noprime(SStmp,Site)*opl;
+    }
+
+    if ( opstr[4].second != opstr[3].second ){
+         println("l!=m");
+        if ( (opstr[1].second == opstr[0].second) && 
+             (opstr[2].second == opstr[1].second) &&
+             (opstr[3].second == opstr[2].second) ) {
+            auto ir4 = commonIndex(psi.A(opstr[3].second), psi.A(opstr[3].second+1),Link);
+            SStmp *= dag(prime(prime(psi.A(opstr[3].second),Site),ir4));
+        }
+        else{
+            SStmp *= dag(prime(prime(psi.A(opstr[3].second),Site),Link));
+        }
+        // propogate until opk
+        for ( int i4 = opstr[3].second+1; i4<opstr[4].second; ++i4) { 
+            SStmp *= psi.A(i4);
+            SStmp *= dag(prime(psi.A(i4),Link));
+        }
+        SStmp *= psi.A(opstr[4].second);
+        SStmp *= opm;
+    }
+    else{
+        println("l=m");
+        SStmp = noprime(SStmp,Site)*opm;
+    }
+
+    if ( opstr[5].second != opstr[4].second ){
+         println("m!=n");
+        if ( (opstr[1].second == opstr[0].second) && 
+             (opstr[2].second == opstr[1].second) &&
+             (opstr[3].second == opstr[2].second) &&
+             (opstr[4].second == opstr[3].second) ) {
+            auto ir5 = commonIndex(psi.A(opstr[4].second), psi.A(opstr[4].second+1),Link);
+            SStmp *= dag(prime(prime(psi.A(opstr[4].second),Site),ir5));
+        }
+        else {
+            SStmp *= dag(prime(prime(psi.A(opstr[4].second),Site),Link));
+        }
+        // propogate until opk
+        for ( int i5 = opstr[4].second+1; i5<opstr[5].second; ++i5) { 
+            SStmp *= psi.A(i5);
+            SStmp *= dag(prime(psi.A(i5),Link));
+        }
+        SStmp *= psi.A(opstr[5].second);
+        SStmp *= opn;
+    }
+    else{
+        println("m=n");
+        SStmp = noprime(SStmp,Site)*opn;
+    }
+    if ( (opstr[1].second == opstr[0].second) && 
+         (opstr[2].second == opstr[1].second) &&
+         (opstr[3].second == opstr[2].second) &&
+         (opstr[4].second == opstr[3].second) ) {
+        SStmp *= dag(prime(psi.A(opstr[5].second),Site)); // return
+    }
+    else {
+        auto ir5 = commonIndex(psi.A(opstr[5].second), psi.A(opstr[5].second-1),Link);
+        SStmp *= dag(prime(prime(psi.A(opstr[5].second),Site),ir5)); // return
+    }
+    return SStmp.real();
+  }
+
 } //namespace itensor
 
 #endif
