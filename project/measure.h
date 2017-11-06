@@ -12,7 +12,49 @@ typedef std::pair<std::string, int> opair;
 
 bool cmp_by_value(const opair& lhs, const opair& rhs) {  
       return lhs.second < rhs.second;  
-}
+  }
+
+template <class Tensor>
+Real
+mtwobody(MPSt<Tensor>& psi, 
+     SpinHalf const& sites,
+     std::vector<int> const& sites_tmp,
+     std::string const& op1_label,
+     std::string const& op2_label )
+    {
+    std::vector<opair> opstr = { std::make_pair(op1_label,sites_tmp[0]),
+                                 std::make_pair(op2_label,sites_tmp[1])};
+    // sort by site index
+    std::sort(opstr.begin(), opstr.end(), cmp_by_value);
+
+    auto opi = sites.op(opstr[0].first,opstr[0].second);
+    auto opj = sites.op(opstr[1].first,opstr[1].second);
+
+    psi.position(opstr[0].second);
+    IQTensor SStmp=psi.A(opstr[0].second);
+    if( opstr[1].second != opstr[0].second ) {
+        //println("i!=j");
+        SStmp *= opi;
+        auto ir1 = commonIndex(psi.A(opstr[0].second), psi.A(opstr[0].second+1),Link);
+        SStmp *= dag(prime(prime(psi.A(opstr[0].second),Site),ir1));
+        // propogate until opj
+        for ( int i1 = opstr[0].second+1; i1<opstr[1].second; ++i1) { 
+            SStmp *= psi.A(i1);
+            SStmp *= dag(prime(psi.A(i1),Link));
+        }
+        SStmp *= psi.A( opstr[1].second );
+        SStmp *= opj;
+        auto ir2 = commonIndex(psi.A(opstr[1].second), psi.A(opstr[1].second-1),Link);
+        SStmp *= dag(prime(prime(psi.A(opstr[1].second),Site),ir2)); // return i!=j
+    }
+    else{ // opstr[1].second == opstr[0].second
+        //println("i=j");
+        SStmp *= opi;
+        SStmp = noprime(SStmp,Site)*opj;
+        SStmp *= dag(prime(psi.A(opstr[1].second),Site));
+    }
+    return SStmp.real();
+  }
 
 template <class Tensor>
 Real
@@ -307,7 +349,7 @@ mfourbody_str(MPSt<Tensor>& psi,
             }
         }
     }
-    }
+  }
 
 } //namespace itensor
 
