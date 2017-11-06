@@ -844,34 +844,34 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
     //for (auto rr : dxdx_meas ) { std::cout << rr <<" "; }
     //std::cout << '\n';
 
-    // test sixbody
-    std::vector<int> sites_tmp = {1,2,3,4,5,6};
-    for (auto n : sites_tmp ) { std::cout << n <<" "; }
-    std::cout << '\n';
-    println( "with msixbody <sijklmn> = ", msixbody(psi,sites,sites_tmp,"S+","S-","S+","S-","Sz","Sz") );
-
-    auto tmp_mpo = AutoMPO(sites);
-    tmp_mpo += 1.0,"S+",sites_tmp[0], "S-", sites_tmp[1],"S+",sites_tmp[2], "S-", sites_tmp[3],"Sz",sites_tmp[4], "Sz", sites_tmp[5];
-    auto tmp_corr = IQMPO(tmp_mpo);
-    println( "with overlap <sijklmn> =", overlap(psi,tmp_corr,psi));
-
-    ////sites_tmp = {3,3,3,3};
+    ////// test sixbody
+    ////std::vector<int> sites_tmp = {1,2,3,4,5,6};
     ////for (auto n : sites_tmp ) { std::cout << n <<" "; }
     ////std::cout << '\n';
-    ////println( "with mfourbody <sijkl> = ", mfourbody(psi,sites,sites_tmp,"S+","S-","S+","S-") );
+    ////println( "with msixbody <sijklmn> = ", msixbody(psi,sites,sites_tmp,"S+","S-","S+","S-","Sz","Sz") );
 
-    ////tmp_mpo = AutoMPO(sites);
-    ////tmp_mpo += 1.0,"S+",sites_tmp[0], "S-", sites_tmp[1],"S+",sites_tmp[2], "S-", sites_tmp[3];
-    ////tmp_corr = IQMPO(tmp_mpo);
-    ////println( "with overlap <sijkl> =", overlap(psi,tmp_corr,psi));
+    ////auto tmp_mpo = AutoMPO(sites);
+    ////tmp_mpo += 1.0,"S+",sites_tmp[0], "S-", sites_tmp[1],"S+",sites_tmp[2], "S-", sites_tmp[3],"Sz",sites_tmp[4], "Sz", sites_tmp[5];
+    ////auto tmp_corr = IQMPO(tmp_mpo);
+    ////println( "with overlap <sijklmn> =", overlap(psi,tmp_corr,psi));
 
-    std::vector<double> tmp_meas(1);
-    std::vector<int> corr_ind = {};
-    tmp_meas[0]=0.0;
-    corr_ind.emplace_back(0);
-    msixbody_str(psi, sites, {sites_tmp[0],sites_tmp[1],sites_tmp[2]}, "S+", "S-", "S+",
-                               { {sites_tmp[3],sites_tmp[4],sites_tmp[5]} }, "S-", "Sz", "Sz", corr_ind, tmp_meas,1.0);
-    println( "with msixbody_str <sijklmn> =", tmp_meas[0]);
+    ////////sites_tmp = {3,3,3,3};
+    ////////for (auto n : sites_tmp ) { std::cout << n <<" "; }
+    ////////std::cout << '\n';
+    ////////println( "with mfourbody <sijkl> = ", mfourbody(psi,sites,sites_tmp,"S+","S-","S+","S-") );
+
+    ////////tmp_mpo = AutoMPO(sites);
+    ////////tmp_mpo += 1.0,"S+",sites_tmp[0], "S-", sites_tmp[1],"S+",sites_tmp[2], "S-", sites_tmp[3];
+    ////////tmp_corr = IQMPO(tmp_mpo);
+    ////////println( "with overlap <sijkl> =", overlap(psi,tmp_corr,psi));
+
+    ////std::vector<double> tmp_meas(1);
+    ////std::vector<int> corr_ind = {};
+    ////tmp_meas[0]=0.0;
+    ////corr_ind.emplace_back(0);
+    ////msixbody_str(psi, sites, {sites_tmp[0],sites_tmp[1],sites_tmp[2]}, "S+", "S-", "S+",
+    ////                           { {sites_tmp[3],sites_tmp[4],sites_tmp[5]} }, "S-", "Sz", "Sz", corr_ind, tmp_meas,1.0);
+    ////println( "with msixbody_str <sijklmn> =", tmp_meas[0]);
 
     println( "\nRUNNING FINISHED ^_^ !!! " );
     return 0;
