@@ -43,19 +43,27 @@ else:
 N *= yfold
 Ny *= yfold
 
-# set fourier phase
-expirk = np.zeros((N,N),dtype=complex)
+# k point coordinate, consider full boundary for better plot
+Nk = (Nx+1)*(Ny+1)
+kxv = np.zeros(Nk)
+kyv = np.zeros(Nk)
+for i in range(Nx+1):
+    for j in range(Ny+1):
+        kxv[(Ny+1)*i+j] = float(i) - float(Nx)/2.0
+        kyv[(Ny+1)*i+j] = float(j) - float(Ny)/2.0
+
+# real space coordinate
 xv = np.zeros(N)
 yv = np.zeros(N)
 for i in range(Nx):
     for j in range(Ny):
         xv[Ny*i+j] = float(i)
         yv[Ny*i+j] = float(j)
-kxv = xv - Nx/2
-kyv = yv - Ny/2
 
+# set fourier phase
+expirk = np.zeros((N,Nk),dtype=complex)
 for ri in range(N):
-    for kj in range(N):
+    for kj in range(Nk):
         expirk[ri,kj] = np.exp( 1.j*(xv[ri]*kxv[kj]/Nx+yv[ri]*kyv[kj]/Ny)*2.0*np.pi )
         ##print "expirk[ri,kj]=", expirk[ri,kj]
 
@@ -86,12 +94,12 @@ for i in range(N):
 
 # perform fourier transformation
 with open(tag+"k.dat","w") as f:
-    for ki in range(N):
+    for ki in range(Nk):
         ssk = 0.+0.j
         for rimj in range(N):
             ssk += simj[rimj]*expirk[rimj,ki]
         ssk /= N
-        if ki%Ny == 0 :
+        if ki%(Ny+1) == 0 and ki!=0 :
             f.write( "\n" )
         #f.write( "{: .8f} {: .8f} {: .8f} {: .8f}\n".format(kxv[ki]/Nx*2.0*np.pi, kyv[ki]/Ny*2.0*np.pi, ssk.real, ssk.imag) )
         f.write( "{: .8f} {: .8f} {: .8f} {: .8f}\n".format(kxv[ki]/Nx, kyv[ki]/Ny, ssk.real, ssk.imag) )
