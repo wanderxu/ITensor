@@ -692,13 +692,10 @@ int main(int argc, char* argv[])
                     if(i == j){
                         auto chiral_meas = 0.0;
                         // note conjugation codition is used, assume s1!=s2!=s3, and it is really the case here
-                        // after you using the conjugate codition, you will find chiral_meas always equals 0, thus do not need it.
-                        //chiral_meas +=  0.5*mthreebody(psi,sites,{tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3},"S+","S-","Sz");
-                        //chiral_meas += -0.5*mthreebody(psi,sites,{tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3},"S-","S+","Sz");
-                        //chiral_meas +=  0.5*mthreebody(psi,sites,{tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3},"S-","Sz","S+");
-                        //chiral_meas += -0.5*mthreebody(psi,sites,{tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3},"S+","Sz","S-");
-                        //chiral_meas +=  0.5*mthreebody(psi,sites,{tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3},"Sz","S+","S-");
-                        //chiral_meas += -0.5*mthreebody(psi,sites,{tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3},"Sz","S-","S+");
+                        // using the conjugate codition
+                        chiral_meas +=  (Cplx_i*mthreebodyC(psi,sites,{tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3},"S+","S-","Sz")).real();
+                        chiral_meas +=  (Cplx_i*mthreebodyC(psi,sites,{tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3},"S-","Sz","S+")).real();
+                        chiral_meas +=  (Cplx_i*mthreebodyC(psi,sites,{tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3},"Sz","S+","S-")).real();
                         Xi_meas.emplace_back(chiral_meas);
                     }
                     auto XXcorr_meas = 0.0;
