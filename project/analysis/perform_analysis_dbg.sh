@@ -75,8 +75,67 @@ set cbrange[0:1]
 splot "${tag}dbgk.dat" u 1:2:(\$3/$maxv) notitle
 endin
             gnuplot plot${tag}k.gnu
+
+            awk '{if(NR>1) print $0}' ${tag}dbgij_xdirec.dat > ${tag}dbg0j_xdirec.dat
+            awk '{if(NR>1) print $0}' ${tag}dbgij_ydirec.dat > ${tag}dbg0j_ydirec.dat
+            if [ $tag == 'X' ]; then
+                echo "cut Xdbgij_xdirec.dat to get Xdbgij_sametri_xdirec.dat"
+                awk '{if((NR%2==1)&&(NR>1)) print $1/2, $2}' Xdbgij_xdirec.dat > Xdbg0j_sametri_xdirec.dat
+
+                echo "cut Xdbgij_ydirec.dat to get Xdbgij_sametri_ydirec.dat"
+                awk '{if((NR%2==1)&&(NR>1)) print $1/2, $2}' Xdbgij_ydirec.dat > Xdbg0j_sametri_ydirec.dat
+            fi
         fi
-    done
+      done
+      if [ -f $pretag/project/analysis/${maindir}/Sdbg0j_xdirec.dat ]; then
+          cd $pretag/project/analysis/${maindir}
+cat>plotloglog.gnu<<endin
+set terminal postscript eps enhanced color
+set output "loglog.eps"
+set bmargin 5
+set lmargin 12
+set xtics font ',20'
+set ytics font ',20'
+set xlabel font 'Times-Roman, 24' offset 0,-1
+set ylabel font 'Times-Roman, 24' offset -2,0
+set key Left right reverse font 'Times-Roman,22' spacing 1.5
+set logscale x
+set logscale y
+set format y "10^{%L}"
+set xlabel '|i-j|'
+plot \\
+         "Sdbg0j_xdirec.dat" u 1:(abs(\$2)) w lp ps 2 lw 1.5 title "C_S(i,j)", \\
+        "Dxdbg0j_xdirec.dat" u 1:(abs(\$2)) w lp ps 2 lw 1.5 title "C_{D_x}(i,j)", \\
+        "Dydbg0j_xdirec.dat" u 1:(abs(\$2)) w lp ps 2 lw 1.5 title "C_{D_y}(i,j)", \\
+       "Dxydbg0j_xdirec.dat" u 1:(abs(\$2)) w lp ps 2 lw 1.5 title "C_{D_{xy}}(i,j)", \\
+ "Xdbg0j_sametri_xdirec.dat" u 1:(abs(\$2)) w lp ps 2 lw 1.5 title "C_X(i,j)", \\
+ 1.0/x**4 lc -1 dt 2 lw 1.5 title "r^{-4}
+endin
+     gnuplot plotloglog.gnu
+
+cat>plotlogy.gnu<<endin
+set terminal postscript eps enhanced color
+set output "logC.eps"
+set bmargin 5
+set lmargin 12
+set xtics font ',20'
+set ytics font ',20'
+set xlabel font 'Times-Roman, 24' offset 0,-1
+set ylabel font 'Times-Roman, 24' offset -2,0
+set key Left right reverse font 'Times-Roman,22' spacing 1.5
+set logscale y
+set format y "10^{%L}"
+set xlabel '|i-j|'
+plot \\
+         "Sdbg0j_xdirec.dat" u 1:(abs(\$2)) w lp ps 2 lw 1.5 title "C_S(i,j)", \\
+        "Dxdbg0j_xdirec.dat" u 1:(abs(\$2)) w lp ps 2 lw 1.5 title "C_{D_x}(i,j)", \\
+        "Dydbg0j_xdirec.dat" u 1:(abs(\$2)) w lp ps 2 lw 1.5 title "C_{D_y}(i,j)", \\
+       "Dxydbg0j_xdirec.dat" u 1:(abs(\$2)) w lp ps 2 lw 1.5 title "C_{D_{xy}}(i,j)", \\
+ "Xdbg0j_sametri_xdirec.dat" u 1:(abs(\$2)) w lp ps 2 lw 1.5 title "C_X(i,j)", \\
+ 1.0/x**4 lc -1 dt 2 lw 1.5 title "r^{-4}
+endin
+     gnuplot plotlogy.gnu
+     fi
 
    done
   done
