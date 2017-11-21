@@ -29,28 +29,67 @@ print "len(indati) = ", numsi
 
 ## check SiSj.out, to take care different cases
 yfold = 1 # a factor for taking care of chiral correlation
-if numsij == N*(N+1)/2:
-    Neff = N  ## for spin correaltion, y_dimer correaltion
-elif numsij == (N-Ny)*(N-Ny+1)/2:
-    Neff = N-Ny ## for x_dimer, xy_dimer correaltion
-elif numsij == (N-Ny)*(2*N-2*Ny+1):
-    Neff = 2*(N-Ny) ## for chiral correlation
-    yfold = 2 ## two tri_plaq for one unit cell, we count it in y direction
-else:
-    print "Wrong number of SiSj, please check your SiSj.out"
+if yperiodic :
+    if numsij == N*(N+1)/2:
+        Neff = N  ## for spin correlation, y_dimer correlation
+    elif numsij == (N-Ny)*(N-Ny+1)/2:
+        Neff = N-Ny ## for x_dimer, xy_dimer correlation
+    elif numsij == (N-Ny)*(2*N-2*Ny+1):
+        Neff = 2*(N-Ny) ## for chiral correlation
+        yfold = 2 ## two tri_plaq for one unit cell, we count it in y direction
+    else:
+        print "Wrong number of SiSj, please check your SiSj.out"
+elif Ny > 2: # y-direction open boundary case, and not the ladder
+    if numsij == N*(N+1)/2:
+        Neff = N  ## for spin correlation
+    elif numsij == (N-Ny)*(N-Ny+1)/2:
+        Neff = N-Ny ## for x_dimer correlation
+    elif numsij == (N-Nx)*(N-Nx+1)/2:
+        Neff = N-Nx ## for y_dimer correlation
+    elif numsij == (N-Nx-Ny+1)*(N-Nx-Ny+2)/2:
+        Neff = N-Nx-Ny+1 ## for xy_dimer correlation
+    elif numsij == (N-Nx-Ny+1)*(2*N-2*Nx-2*Ny+3):
+        Neff = 2*(N-Nx-Ny+1) ## for chiral correlation
+        yfold = 2 ## two tri_plaq for one unit cell, we count it in y direction
+    else:
+        print "Wrong number of SiSj, please check your SiSj.out"
+else : # ladder case
+    if numsij == N*(N+1)/2:
+        Neff = N  ## for spin correlation
+    elif numsij == (N-Ny)*(N-Ny+1)/2:
+        Neff = N-Ny ## for x_dimer correlation
+    elif numsij == (N-Nx)*(N-Nx+1)/2:
+        Neff = N-Nx ## for y_dimer correlation
+    elif numsij == (N-Nx-Ny+1)*(N-Nx-Ny+2)/2:
+        Neff = N-Nx-Ny+1 ## for xy_dimer correlation
+    elif numsij == (N-Nx-Ny+1)*(2*N-2*Nx-2*Ny+3):
+        Neff = 2*(N-Nx-Ny+1) ## for chiral correlation
+    else:
+        print "Wrong number of SiSj, please check your SiSj.out"
 
 ## redefine N and Ny
 N *= yfold
 Ny *= yfold
-
+if Ny == 2 and (not yperiodic) :
+    Ny /= 2
+    Nx *= 2
 # k point coordinate, consider full boundary for better plot
-Nk = (Nx+1)*(Ny+1)
-kxv = np.zeros(Nk)
-kyv = np.zeros(Nk)
-for j in range(Ny+1):
-    for i in range(Nx+1):
-        kxv[(Nx+1)*j+i] = float(i) - float(Nx)/2.0
-        kyv[(Nx+1)*j+i] = float(j) - float(Ny)/2.0
+    Nk = (Nx+1)*Ny
+    kxv = np.zeros(Nk)
+    kyv = np.zeros(Nk)
+    for j in range(Ny):
+        for i in range(Nx+1):
+            kxv[(Nx+1)*j+i] = float(i) - float(Nx)/2.0
+            kyv[(Nx+1)*j+i] = 0.0
+else :
+# k point coordinate, consider full boundary for better plot
+    Nk = (Nx+1)*(Ny+1)
+    kxv = np.zeros(Nk)
+    kyv = np.zeros(Nk)
+    for j in range(Ny+1):
+        for i in range(Nx+1):
+            kxv[(Nx+1)*j+i] = float(i) - float(Nx)/2.0
+            kyv[(Nx+1)*j+i] = float(j) - float(Ny)/2.0
 
 # real space coordinate
 xv = np.zeros(N)
