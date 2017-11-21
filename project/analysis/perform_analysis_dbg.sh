@@ -45,7 +45,7 @@ cat>model_para.py<<endin
 Nx = $Nx
 Ny = $Ny
 N = Nx*Ny
-yperiodic = True
+yperiodic = $yperiodic
 J1 = $J1
 J2 = $J2
 gamma1 = $gamma1
