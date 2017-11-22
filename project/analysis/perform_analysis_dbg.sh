@@ -16,8 +16,9 @@ for Ny in ${Nyarray}; do
 
       ##  rename several files for automatically processing
       if [ -f $pretag/project/run/${maindir}/Siz.out ]; then
-          cp -f $pretag/project/run/${maindir}/Siz.out $pretag/project/run/${maindir}/Si.out
-          cp -f $pretag/project/run/${maindir}/Siz.out $pretag/project/run/${maindir}/Szi.out
+          #cp -f $pretag/project/run/${maindir}/Siz.out $pretag/project/run/${maindir}/Si.out
+          #cp -f $pretag/project/run/${maindir}/Siz.out $pretag/project/run/${maindir}/Szi.out
+          echo ""
       fi
       if [ -f $pretag/project/run/${maindir}/SiSjzz.out ]; then
           mv $pretag/project/run/${maindir}/SiSjzz.out $pretag/project/run/${maindir}/SziSzj.out
@@ -25,6 +26,11 @@ for Ny in ${Nyarray}; do
       if [ -f $pretag/project/run/${maindir}/SiSjpm.out ]; then
           mv -f $pretag/project/run/${maindir}/SiSjpm.out $pretag/project/run/${maindir}/SpomiSpomj.out
           mv -f $pretag/project/run/${maindir}/Sip.out $pretag/project/run/${maindir}/Spomi.out
+      fi
+      if [ -f $pretag/project/run/${maindir}/Siz.out ]; then
+          ## attention here, use Spomi.out (which is zero), equals not deduct background
+          cp -f $pretag/project/run/${maindir}/Spomi.out $pretag/project/run/${maindir}/Si.out
+          cp -f $pretag/project/run/${maindir}/Spomi.out $pretag/project/run/${maindir}/Szi.out
       fi
 
       tagarray=$( echo "S Sz Spom Dx Dy Dxy X")
