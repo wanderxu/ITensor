@@ -18,6 +18,8 @@ for Ny in ${Nyarray}; do
       if [ -f $pretag/project/run/${maindir}/Siz.out ]; then
           #cp -f $pretag/project/run/${maindir}/Siz.out $pretag/project/run/${maindir}/Si.out
           #cp -f $pretag/project/run/${maindir}/Siz.out $pretag/project/run/${maindir}/Szi.out
+          cp -f $pretag/project/run/${maindir}/Sip.out $pretag/project/run/${maindir}/Si.out  # as <s+>=0, use it not to deduct background
+          cp -f $pretag/project/run/${maindir}/Sip.out $pretag/project/run/${maindir}/Szi.out  # as <s+>=0, use it not to deduct background
           echo ""
       fi
       if [ -f $pretag/project/run/${maindir}/SiSjzz.out ]; then
