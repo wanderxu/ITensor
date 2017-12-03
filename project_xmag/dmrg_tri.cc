@@ -22,6 +22,9 @@ int main(int argc, char* argv[])
     double J2 = input.getReal("J2");
     double gamma1 = input.getReal("gamma1");
     double gamma2 = input.getReal("gamma2");
+    double xmag = input.getReal("xmag");
+    double ymag = input.getReal("ymag");
+    double zmag = input.getReal("zmag");
     auto readmps = input.getYesNo("readmps",false);
     auto eneropt = input.getYesNo("eneropt",true);
     auto domeas = input.getYesNo("domeas",false);
@@ -44,6 +47,9 @@ int main(int argc, char* argv[])
     runlogfile += "_J2="; runlogfile += std::to_string(J2);
     runlogfile += "_g1="; runlogfile += std::to_string(gamma1);
     runlogfile += "_g2="; runlogfile += std::to_string(gamma2);
+    runlogfile += "_xm="; runlogfile += std::to_string(xmag);
+    runlogfile += "_ym="; runlogfile += std::to_string(ymag);
+    runlogfile += "_zm="; runlogfile += std::to_string(zmag);
     runlogfile += ".out";
 
     println("output file name suggested: ", runlogfile);
@@ -53,8 +59,8 @@ int main(int argc, char* argv[])
     println(sweeps);
 
     SpinHalf sites;
-    IQMPS psi;
-    IQMPO H;
+    MPS psi;
+    MPO H;
 
     // check whether "psi_file" exists
     {
@@ -72,11 +78,11 @@ int main(int argc, char* argv[])
         println("Reading basis, wavefunction and H from files ......");
         //SpinHalf sites;
         readFromFile("sites_file", sites);
-        //IQMPS psi(sites);
-        psi=IQMPS(sites);
+        //MPS psi(sites);
+        psi=MPS(sites);
         readFromFile("psi_file", psi);
-        //IQMPO H(sites);
-        H=IQMPO(sites);
+        //MPO H(sites);
+        H=MPO(sites);
         readFromFile("H_file", H);
         //auto psiHpsi = overlap(psi,H,psi);
         ////auto psiHHpsi = overlap(psi,H,H,psi);
@@ -111,6 +117,28 @@ int main(int argc, char* argv[])
         println("\nPlaque:\n", lattice4plaque);
         println("Total number of plaques: ", lattice4plaque.size());
 
+        // single-body term, xmag, ymag, zmag
+        if ( xmag != 0.0 ) {
+            println(" setting xmag term ... ");
+            for(int i = 1; i <= N; ++i) {
+                ampo += -xmag*2.0, "Sx", i; // put minus here, positive xmag in input file
+            }
+        }
+
+        if ( ymag != 0.0 ) {
+            println(" setting ymag term ... ");
+            for(int i = 1; i <= N; ++i) {
+                ampo += -ymag*2.0, "Sy", i; // put minus here, positive ymag in input file
+            }
+        }
+
+        if ( zmag != 0.0 ) {
+            println(" setting zmag term ... ");
+            for(int i = 1; i <= N; ++i) {
+                ampo += -zmag*2.0, "Sz", i; // put minus here, positive zmag in input file
+            }
+        }
+
         // two-body term, nearest neighbor
         for(auto bnd : lattice)
             {
@@ -140,15 +168,13 @@ int main(int argc, char* argv[])
             ampo += J2*(2.0*gamma2*gamma2-1.0)*16.0,"Sz",bnd.s1,"Sz",bnd.s2,"Sz",bnd.s3,"Sz",bnd.s4;
             }
 
-        //auto H = IQMPO(ampo);
-        H = IQMPO(ampo);
+        //auto H = MPO(ampo);
+        H = MPO(ampo);
 
         // Set the initial wavefunction matrix product state
         // to be a Neel state.
-        //
-        // This choice implicitly sets the global Sz quantum number
-        // of the wavefunction to zero. Since it is an IQMPS
-        // it will remain in this quantum number sector.
+        // 
+        // with external magnetic field, we use general MPS and MPO.
         //
         auto state = InitState(sites);
         for(int i = 1; i <= N; ++i) 
@@ -159,8 +185,8 @@ int main(int argc, char* argv[])
                 state.set(i,"Dn");
             }
 
-        //auto psi = IQMPS(state);
-        psi = IQMPS(state);
+        //auto psi = MPS(state);
+        psi = MPS(state);
 
         //
         // overlap calculates matrix elements of MPO's with respect to MPS's
@@ -186,7 +212,7 @@ int main(int argc, char* argv[])
         //
         // Print the final energy reported by DMRG
         //
-        println("\nTotal QN of Ground State = ",totalQN(psi));
+        //println("\nTotal QN of Ground State = ",totalQN(psi));
         printfln("\nGround State Energy = %.10f", energy);
         printfln("\n<psi|H|psi> / N = %.10f", energy/N );
 
@@ -849,7 +875,7 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
 
     ////auto tmp_mpo = AutoMPO(sites);
     ////tmp_mpo += 1.0,"S+",sites_tmp[0], "S-", sites_tmp[1],"S+",sites_tmp[2], "S-", sites_tmp[3],"Sz",sites_tmp[4], "Sz", sites_tmp[5];
-    ////auto tmp_corr = IQMPO(tmp_mpo);
+    ////auto tmp_corr = MPO(tmp_mpo);
     ////println( "with overlap <sijklmn> =", overlap(psi,tmp_corr,psi));
 
     ////////sites_tmp = {3,3,3,3};
@@ -859,7 +885,7 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
 
     ////////tmp_mpo = AutoMPO(sites);
     ////////tmp_mpo += 1.0,"S+",sites_tmp[0], "S-", sites_tmp[1],"S+",sites_tmp[2], "S-", sites_tmp[3];
-    ////////tmp_corr = IQMPO(tmp_mpo);
+    ////////tmp_corr = MPO(tmp_mpo);
     ////////println( "with overlap <sijkl> =", overlap(psi,tmp_corr,psi));
 
     ////std::vector<double> tmp_meas(1);
