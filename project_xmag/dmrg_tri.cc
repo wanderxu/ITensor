@@ -239,8 +239,8 @@ int main(int argc, char* argv[])
         std::vector<double> SiSjzz_meas={};
         std::vector<double> SiSjpm_meas={};
         std::vector<double> Sz_meas={};
-        std::vector<double> Sp_meas={};
-        std::vector<double> Sm_meas={};
+        std::vector<Cplx> Sp_meas={};
+        std::vector<Cplx> Sm_meas={};
         for ( int i = 1; i <= N; ++i ) {
             //'gauge' the MPS to site i
             psi.position(i); 
@@ -255,10 +255,11 @@ int main(int argc, char* argv[])
             auto sz_tmp = (bra*sites.op("Sz",i)*ket).real();
             Sz_meas.emplace_back(sz_tmp);
             totalM +=  sz_tmp;
+            printfln("i am here, i =", i);
 
-            auto sp_tmp = (bra*sites.op("S+",i)*ket).real();
+            auto sp_tmp = (bra*sites.op("S+",i)*ket).cplx();
             Sp_meas.emplace_back(sp_tmp);
-            auto sm_tmp = (bra*sites.op("S-",i)*ket).real();
+            auto sm_tmp = (bra*sites.op("S-",i)*ket).cplx();
             Sm_meas.emplace_back(sm_tmp);
 
             auto ss_tmp = 0.0;
@@ -288,10 +289,10 @@ int main(int argc, char* argv[])
 
                     auto op_jm = sites.op("S-",j);
                     auto ss_tmp = 0.0;
-                    ss_tmp += 0.5*( (Cpm*op_jm)*dag(prime(psi.A(j),jl,Site)) ).real();
+                    ss_tmp += 0.5*(( (Cpm*op_jm)*dag(prime(psi.A(j),jl,Site)) ).cplx()).real();
 
                     auto op_jp = sites.op("S+",j);
-                    ss_tmp += 0.5*( (Cmp*op_jp)*dag(prime(psi.A(j),jl,Site)) ).real();
+                    ss_tmp += 0.5*(( (Cmp*op_jp)*dag(prime(psi.A(j),jl,Site)) ).cplx()).real();
 
                     auto spm_tmp = ss_tmp;
                     SiSjpm_meas.emplace_back(ss_tmp);
@@ -319,11 +320,11 @@ int main(int argc, char* argv[])
                 fSzout << *i << ' ';
 
         std::ofstream fSpout("Sip.out",std::ios::out);
-        for (std::vector<double>::const_iterator i = Sp_meas.begin(); i != Sp_meas.end(); ++i)
+        for (std::vector<Cplx>::const_iterator i = Sp_meas.begin(); i != Sp_meas.end(); ++i)
                 fSpout << *i << ' ';
 
         std::ofstream fSmout("Sim.out",std::ios::out);
-        for (std::vector<double>::const_iterator i = Sm_meas.begin(); i != Sm_meas.end(); ++i)
+        for (std::vector<Cplx>::const_iterator i = Sm_meas.begin(); i != Sm_meas.end(); ++i)
                 fSmout << *i << ' ';
 
         std::ofstream fSiSjout("SiSj.out",std::ios::out);
