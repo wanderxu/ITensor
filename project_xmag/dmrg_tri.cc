@@ -234,7 +234,9 @@ int main(int argc, char* argv[])
         //
         // Measure Si.Sj of every {i,j}, and total M
         //
-        auto totalM = 0.0;
+        auto totalMz = 0.0;
+        Cplx totalMp(0.0,0.0);
+        Cplx totalMm(0.0,0.0);
         std::vector<double> SiSj_meas={};
         std::vector<double> SiSjzz_meas={};
         std::vector<double> SiSjpm_meas={};
@@ -254,13 +256,15 @@ int main(int argc, char* argv[])
             auto bra = dag(prime(ket,Site));
             auto sz_tmp = (bra*sites.op("Sz",i)*ket).real();
             Sz_meas.emplace_back(sz_tmp);
-            totalM +=  sz_tmp;
+            totalMz +=  sz_tmp;
             printfln("i am here, i =", i);
 
             auto sp_tmp = (bra*sites.op("S+",i)*ket).cplx();
             Sp_meas.emplace_back(sp_tmp);
+            totalMp +=  sp_tmp;
             auto sm_tmp = (bra*sites.op("S-",i)*ket).cplx();
             Sm_meas.emplace_back(sm_tmp);
+            totalMm +=  sm_tmp;
 
             auto ss_tmp = 0.0;
             ss_tmp += 0.75*((dag(ket)*ket).real());
@@ -313,7 +317,12 @@ int main(int argc, char* argv[])
                 }
             }
         }
-        printfln("Total M = %.10e", totalM );
+        printfln("Total Mz = %.10e", totalMz );
+        printfln("Total Mx = %.10e, %.10e", (totalMp+totalMm)/2.0 );
+        printfln("Total My = %.10e, %.10e", (totalMp-totalMm)/Cplx(0.0,2.0) );
+        printfln("mz_persite = %.10e", totalMz/double(N) );
+        printfln("mx_persite = %.10e, %.10e", (totalMp+totalMm)/2.0/double(N) );
+        printfln("my_persite = %.10e, %.10e", (totalMp-totalMm)/Cplx(0.0,2.0)/double(N) );
 
         std::ofstream fSzout("Siz.out",std::ios::out);
         for (std::vector<double>::const_iterator i = Sz_meas.begin(); i != Sz_meas.end(); ++i)

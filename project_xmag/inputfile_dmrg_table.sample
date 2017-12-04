@@ -1,12 +1,15 @@
 input
     {
     Nx = 4
-    Ny = 2
-    yperiodic = no 
-    J1 = 2.01110
-    J2 = 1.0
-    gamma1 = 1.0
-    gamma2 = 1.0
+    Ny = 4
+    yperiodic = yes
+    J1 = 1.0
+    J2 = 0.01
+    gamma1 = 1.1
+    gamma2 = 1.1
+    xmag   = 0.00
+    ymag   = 1.00
+    zmag   = 0.00
     readmps = no
     eneropt = yes
     domeas  = yes // if domeas=no, then following meas* tag will not work
@@ -14,15 +17,14 @@ input
     meas_dimercorr = yes
     meas_chiralcorr = yes
 
-    nsweeps = 5
+    nsweeps = 4
     sweeps
         {
         maxm  minm  cutoff  niter  noise
-        50    20    1E-6    4      1E-7
-        80    20    1E-8    3      1E-8
-        100   10    1E-10   2      1E-10
-        150   10    1E-12   2      0
-        150   10    1E-12   2      0
+        20    20    1E-6    4      1E-7
+        40    20    1E-8    3      1E-8
+        80    10    1E-10   2      1E-10
+        80    10    1E-12   2      0
         }
 
     quiet = yes
