@@ -257,7 +257,6 @@ int main(int argc, char* argv[])
             auto sz_tmp = (bra*sites.op("Sz",i)*ket).real();
             Sz_meas.emplace_back(sz_tmp);
             totalMz +=  sz_tmp;
-            printfln("i am here, i =", i);
 
             auto sp_tmp = (bra*sites.op("S+",i)*ket).cplx();
             Sp_meas.emplace_back(sp_tmp);
@@ -302,7 +301,7 @@ int main(int argc, char* argv[])
                     SiSjpm_meas.emplace_back(ss_tmp);
 
                     auto op_jz = sites.op("Sz",j);
-                    ss_tmp += ( (Czz*op_jz)*dag(prime(psi.A(j),jl,Site)) ).real();
+                    ss_tmp += (( (Czz*op_jz)*dag(prime(psi.A(j),jl,Site)) ).cplx()).real();
 
                     SiSjzz_meas.emplace_back(ss_tmp-spm_tmp);
                     
