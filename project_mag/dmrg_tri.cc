@@ -216,8 +216,9 @@ int main(int argc, char* argv[])
         printfln("\nGround State Energy = %.10f", energy);
         printfln("\n<psi|H|psi> / N = %.10f", energy/N );
 
-        // since calculate overlap(psi,H,H,psi) is extremely memory expensive, we only calculate it when maxm <= max(640, 2560*16/N)
-        if( sweeps.maxm( sweeps.nsweep() ) <= std::max(640, 2560*16/N) ) { 
+        // since calculate overlap(psi,H,H,psi) is extremely memory expensive, we only calculate it when maxm <= max(640, 2560*16/N) with IQtensor
+        // since calculate overlap(psi,H,H,psi) is extremely memory expensive, we only calculate it when maxm <= max(160, 1280*16/N) with Itensor
+        if( sweeps.maxm( sweeps.nsweep() ) <= std::max(160, 640*16/N) ) { 
             auto psiHHpsi = overlap(psi,H,H,psi);
             printfln("\n<psi|H^2|psi> = %.10f", psiHHpsi );
             printfln("\n<psi|H^2|psi> - <psi|H|psi>^2 = %.10f", psiHHpsi-energy*energy);
@@ -254,7 +255,7 @@ int main(int argc, char* argv[])
             // magnetization
             auto ket = psi.A(i);
             auto bra = dag(prime(ket,Site));
-            auto sz_tmp = (bra*sites.op("Sz",i)*ket).real();
+            auto sz_tmp = ((bra*sites.op("Sz",i)*ket).cplx()).real();
             Sz_meas.emplace_back(sz_tmp);
             totalMz +=  sz_tmp;
 
@@ -266,7 +267,7 @@ int main(int argc, char* argv[])
             totalMm +=  sm_tmp;
 
             auto ss_tmp = 0.0;
-            ss_tmp += 0.75*((dag(ket)*ket).real());
+            ss_tmp += 0.75*(((dag(ket)*ket).cplx()).real());
             SiSj_meas.emplace_back(ss_tmp);
             SiSjzz_meas.emplace_back(0.25);
             SiSjpm_meas.emplace_back(ss_tmp-0.25);
