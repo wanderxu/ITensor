@@ -227,6 +227,44 @@ int main(int argc, char* argv[])
             printfln("\nsqrt( | <psi|H^2|psi> - <psi|H|psi>^2 | ) / N = %.10f", sqrt(abs(psiHHpsi-energy*energy))/N );
         }
 
+        // measure magnetism
+        auto totalMz = 0.0;
+        Cplx totalMp(0.0,0.0);
+        Cplx totalMm(0.0,0.0);
+        std::vector<double> SiSj_meas={};
+        std::vector<double> SiSjzz_meas={};
+        std::vector<double> SiSjpm_meas={};
+        std::vector<double> Sz_meas={};
+        std::vector<Cplx> Sp_meas={};
+        std::vector<Cplx> Sm_meas={};
+        for ( int i = 1; i <= N; ++i ) {
+            //'gauge' the MPS to site i
+            psi.position(i); 
+            
+            //psi.Anc(1) *= psi.A(0); //Uncomment if doing iDMRG calculation
+
+            // measure magnetization
+            auto ket = psi.A(i);
+            auto bra = dag(prime(ket,Site));
+            auto sz_tmp = ((bra*sites.op("Sz",i)*ket).cplx()).real();
+            Sz_meas.emplace_back(sz_tmp);
+            totalMz +=  sz_tmp;
+
+            auto sp_tmp = (bra*sites.op("S+",i)*ket).cplx();
+            Sp_meas.emplace_back(sp_tmp);
+            totalMp +=  sp_tmp;
+
+            auto sm_tmp = (bra*sites.op("S-",i)*ket).cplx();
+            Sm_meas.emplace_back(sm_tmp);
+            totalMm +=  sm_tmp;
+        }
+        printfln("Total Mz = %.10e", totalMz );
+        printfln("Total Mx = %.10e, %.10e", (totalMp+totalMm)/2.0 );
+        printfln("Total My = %.10e, %.10e", (totalMp-totalMm)/Cplx(0.0,2.0) );
+        printfln("mz_persite = %.10e", totalMz/double(N) );
+        printfln("mx_persite = %.10e, %.10e", (totalMp+totalMm)/2.0/double(N) );
+        printfln("my_persite = %.10e, %.10e", (totalMp-totalMm)/Cplx(0.0,2.0)/double(N) );
+        println("\n");
     }
 
     if(domeas && meas_spincorr) {

@@ -12,7 +12,7 @@ input
     zmag   = 0.00
     readmps = no
     eneropt = yes
-    domeas  = yes // if domeas=no, then following meas* tag will not work
+    domeas  = no // if domeas=no, then following meas* tag will not work
     meas_spincorr = yes
     meas_dimercorr = yes
     meas_chiralcorr = yes
@@ -21,10 +21,10 @@ input
     sweeps
         {
         maxm  minm  cutoff  niter  noise
-        20    20    1E-6    4      1E-7
-        40    20    1E-8    3      1E-8
-        80    10    1E-10   2      1E-10
-        80    10    1E-12   2      0
+        10    20    1E-6    4      1E-7
+        20    20    1E-8    3      1E-8
+        30    10    1E-10   2      1E-10
+        40    10    1E-12   2      0
         }
 
     quiet = yes
