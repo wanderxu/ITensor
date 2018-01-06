@@ -191,7 +191,7 @@ int main(int argc, char* argv[])
         printfln("\n<psi|H|psi> / N = %.10f", energy/N );
 
         // since calculate overlap(psi,H,H,psi) is extremely memory expensive, we only calculate it when maxm <= max(640, 2560*16/N)
-        if( sweeps.maxm( sweeps.nsweep() ) <= std::max(640, 2560*16/N) ) { 
+        if( sweeps.maxm( sweeps.nsweep() ) <= std::max(160, 640*16/N) ) { 
             auto psiHHpsi = overlap(psi,H,H,psi);
             printfln("\n<psi|H^2|psi> = %.10f", psiHHpsi );
             printfln("\n<psi|H^2|psi> - <psi|H|psi>^2 = %.10f", psiHHpsi-energy*energy);
