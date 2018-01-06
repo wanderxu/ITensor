@@ -27,6 +27,8 @@ int main(int argc, char* argv[])
     double zmag = input.getReal("zmag");
     auto readmps = input.getYesNo("readmps",false);
     auto eneropt = input.getYesNo("eneropt",true);
+    auto twist_ybc = input.getYesNo("twist_ybc",false);
+    Cplx expitheta = std::exp( Cplx(0.0,std::acos(-1))* input.getReal("ytheta") );
     auto domeas = input.getYesNo("domeas",false);
     auto meas_spincorr = input.getYesNo("meas_spincorr",false);
     auto meas_dimercorr = input.getYesNo("meas_dimercorr",false);
@@ -53,6 +55,7 @@ int main(int argc, char* argv[])
     runlogfile += ".out";
 
     println("output file name suggested: ", runlogfile);
+    println("expitheta = ", expitheta);
 
     //Create the sweeps class & print
     auto sweeps = Sweeps(nsweeps,table);
@@ -107,7 +110,7 @@ int main(int argc, char* argv[])
         //
 
         auto ampo = AutoMPO(sites);
-        auto lattice = triangularLattice(Nx,Ny,{"YPeriodic=",yperiodic});
+        auto lattice = triangularLatticev2(Nx,Ny,{"YPeriodic=",yperiodic});
         auto lattice4plaque = triangularLattice4Plaque(Nx,Ny,{"YPeriodic=",yperiodic});
 
         println("H is made up of ");
@@ -141,11 +144,19 @@ int main(int argc, char* argv[])
 
         // two-body term, nearest neighbor
         for(auto bnd : lattice)
-            {
-            ampo += J1*2.0,"S+",bnd.s1,"S-",bnd.s2;
-            ampo += J1*2.0,"S-",bnd.s1,"S+",bnd.s2;
-            ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
+        {
+            if( (not bnd.isbd) or (not twist_ybc) ) {
+                ampo += J1*2.0,"S+",bnd.s1,"S-",bnd.s2;
+                ampo += J1*2.0,"S-",bnd.s1,"S+",bnd.s2;
+                ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
             }
+            else {
+                println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
+                ampo += J1*2.0*expitheta,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta}
+                ampo += J1*2.0/expitheta,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
+                ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
+            }
+        }
 
 
         // ring-exchange term

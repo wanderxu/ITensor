@@ -7,11 +7,13 @@ input
     J2 = 0.01
     gamma1 = 1.1
     gamma2 = 1.1
-    xmag   = 0.00
-    ymag   = 1.00
+    xmag   = 0.10
+    ymag   = 0.00
     zmag   = 0.00
     readmps = no
     eneropt = yes
+    twist_ybc = yes
+    ytheta = 1.0
     domeas  = no // if domeas=no, then following meas* tag will not work
     meas_spincorr = yes
     meas_dimercorr = yes
