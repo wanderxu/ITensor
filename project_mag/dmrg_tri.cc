@@ -28,7 +28,8 @@ int main(int argc, char* argv[])
     auto readmps = input.getYesNo("readmps",false);
     auto eneropt = input.getYesNo("eneropt",true);
     auto twist_ybc = input.getYesNo("twist_ybc",false);
-    Cplx expitheta = std::exp( Cplx(0.0,std::acos(-1))* input.getReal("ytheta") );
+    double ytheta = input.getReal("ytheta");
+    Cplx expitheta = std::exp( Cplx(0.0,std::acos(-1))* ytheta );
     auto domeas = input.getYesNo("domeas",false);
     auto meas_spincorr = input.getYesNo("meas_spincorr",false);
     auto meas_dimercorr = input.getYesNo("meas_dimercorr",false);
@@ -148,6 +149,12 @@ int main(int argc, char* argv[])
             if( (not bnd.isbd) or (not twist_ybc) ) {
                 ampo += J1*2.0,"S+",bnd.s1,"S-",bnd.s2;
                 ampo += J1*2.0,"S-",bnd.s1,"S+",bnd.s2;
+                ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
+            }
+            else if ( ytheta == 1.0 ) {
+                println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
+                ampo += -J1*2.0,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta}
+                ampo += -J1*2.0,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
                 ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
             }
             else {
