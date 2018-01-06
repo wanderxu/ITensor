@@ -53,7 +53,7 @@ mtwobody(MPSt<Tensor>& psi,
         SStmp = noprime(SStmp,Site)*opj;
         SStmp *= dag(prime(psi.A(opstr[1].second),Site));
     }
-    return SStmp.real();
+    return (SStmp.cplx()).real();
   }
 
 template <class Tensor>
@@ -125,7 +125,7 @@ mthreebody(MPSt<Tensor>& psi,
         auto ir2 = commonIndex(psi.A(opstr[2].second), psi.A(opstr[2].second-1),Link);
         SStmp *= dag(prime(prime(psi.A(opstr[2].second),Site),ir2)); // return
     }
-    return SStmp.real();
+    return (SStmp.cplx()).real();
   }
 
 template <class Tensor>
@@ -295,7 +295,7 @@ mfourbody(MPSt<Tensor>& psi,
         auto ir3 = commonIndex(psi.A(opstr[3].second), psi.A(opstr[3].second-1),Link);
         SStmp *= dag(prime(prime(psi.A(opstr[3].second),Site),ir3)); // return
     }
-    return SStmp.real();
+    return (SStmp.cplx()).real();
   }
 
 struct opairstruct {
@@ -398,7 +398,7 @@ mfourbody_str(MPSt<Tensor>& psi,
         SStmp2 *= opl;
         auto ir3 = commonIndex(psi.A(l), psi.A(l-1),Link);
         SStmp2 *= dag(prime(prime(psi.A(l),Site),ir3)); // i!=j!=k!=l
-        corr_meas[ opstr_34_array[kli].ind ] += cfac*SStmp2.real(); // add measurement to corr_meas
+        corr_meas[ opstr_34_array[kli].ind ] += cfac*(SStmp2.cplx()).real(); // add measurement to corr_meas
         if( kli+1 < sites_34_array.size() ) {
             for ( int i3 = k; i3<opstr_34_array[kli+1].op_pair[0].second; ++i3 ){
                 SStmp *= psi.A(i3);
@@ -559,7 +559,7 @@ msixbody(MPSt<Tensor>& psi,
         auto ir5 = commonIndex(psi.A(opstr[5].second), psi.A(opstr[5].second-1),Link);
         SStmp *= dag(prime(prime(psi.A(opstr[5].second),Site),ir5)); // return
     }
-    return SStmp.real();
+    return (SStmp.cplx()).real();
   }
 
 // a serials of sixbody correlation, (op1,op2,op3) is fixed, (op4,op5,op6) in range op456array
@@ -682,7 +682,7 @@ msixbody_str(MPSt<Tensor>& psi,
         SStmp2 *= opn;
         auto ir3 = commonIndex(psi.A(n), psi.A(n-1),Link);
         SStmp2 *= dag(prime(prime(psi.A(n),Site),ir3)); // i!=j!=k!=l!=m!=n
-        corr_meas[ opstr_456_array[kli].ind ] += cfac*SStmp2.real(); // add measurement to corr_meas
+        corr_meas[ opstr_456_array[kli].ind ] += cfac*(SStmp2.cplx()).real(); // add measurement to corr_meas
 
         if( kli+1 < sites_456_array.size() ) {
             for ( int i3 = l; i3<opstr_456_array[kli+1].op_pair[0].second; ++i3 ){

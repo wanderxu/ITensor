@@ -24,6 +24,9 @@ int main(int argc, char* argv[])
     double gamma2 = input.getReal("gamma2");
     auto readmps = input.getYesNo("readmps",false);
     auto eneropt = input.getYesNo("eneropt",true);
+    auto twist_ybc = input.getYesNo("twist_ybc",false);
+    double ytheta = input.getReal("ytheta");
+    Cplx expitheta = std::exp( Cplx(0.0,std::acos(-1))* ytheta );
     auto domeas = input.getYesNo("domeas",false);
     auto meas_spincorr = input.getYesNo("meas_spincorr",false);
     auto meas_dimercorr = input.getYesNo("meas_dimercorr",false);
@@ -47,6 +50,7 @@ int main(int argc, char* argv[])
     runlogfile += ".out";
 
     println("output file name suggested: ", runlogfile);
+    println("expitheta = ", expitheta);
 
     //Create the sweeps class & print
     auto sweeps = Sweeps(nsweeps,table);
@@ -101,7 +105,7 @@ int main(int argc, char* argv[])
         //
 
         auto ampo = AutoMPO(sites);
-        auto lattice = triangularLattice(Nx,Ny,{"YPeriodic=",yperiodic});
+        auto lattice = triangularLatticev2(Nx,Ny,{"YPeriodic=",yperiodic});
         auto lattice4plaque = triangularLattice4Plaque(Nx,Ny,{"YPeriodic=",yperiodic});
 
         println("H is made up of ");
@@ -111,13 +115,28 @@ int main(int argc, char* argv[])
         println("\nPlaque:\n", lattice4plaque);
         println("Total number of plaques: ", lattice4plaque.size());
 
+
         // two-body term, nearest neighbor
         for(auto bnd : lattice)
-            {
-            ampo += J1*2.0,"S+",bnd.s1,"S-",bnd.s2;
-            ampo += J1*2.0,"S-",bnd.s1,"S+",bnd.s2;
-            ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
+        {
+            if( (not bnd.isbd) or (not twist_ybc) ) {
+                ampo += J1*2.0,"S+",bnd.s1,"S-",bnd.s2;
+                ampo += J1*2.0,"S-",bnd.s1,"S+",bnd.s2;
+                ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
             }
+            else if ( ytheta == 1.0 ) {
+                println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
+                ampo += -J1*2.0,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta}
+                ampo += -J1*2.0,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
+                ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
+            }
+            else {
+                println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
+                ampo += J1*2.0*expitheta,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta}
+                ampo += J1*2.0/expitheta,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
+                ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
+            }
+        }
 
 
         // ring-exchange term
@@ -213,8 +232,8 @@ int main(int argc, char* argv[])
         std::vector<double> SiSjzz_meas={};
         std::vector<double> SiSjpm_meas={};
         std::vector<double> Sz_meas={};
-        std::vector<double> Sp_meas={};
-        std::vector<double> Sm_meas={};
+        std::vector<Cplx> Sp_meas={};
+        std::vector<Cplx> Sm_meas={};
         for ( int i = 1; i <= N; ++i ) {
             //'gauge' the MPS to site i
             psi.position(i); 
@@ -226,17 +245,17 @@ int main(int argc, char* argv[])
             // magnetization
             auto ket = psi.A(i);
             auto bra = dag(prime(ket,Site));
-            auto sz_tmp = (bra*sites.op("Sz",i)*ket).real();
+            auto sz_tmp = ((bra*sites.op("Sz",i)*ket).cplx()).real();
             Sz_meas.emplace_back(sz_tmp);
             totalM +=  sz_tmp;
 
-            auto sp_tmp = (bra*sites.op("S+",i)*ket).real();
+            auto sp_tmp = (bra*sites.op("S+",i)*ket).cplx();
             Sp_meas.emplace_back(sp_tmp);
-            auto sm_tmp = (bra*sites.op("S-",i)*ket).real();
+            auto sm_tmp = (bra*sites.op("S-",i)*ket).cplx();
             Sm_meas.emplace_back(sm_tmp);
 
             auto ss_tmp = 0.0;
-            ss_tmp += 0.75*((dag(ket)*ket).real());
+            ss_tmp += 0.75*(((dag(ket)*ket).cplx()).real());
             SiSj_meas.emplace_back(ss_tmp);
             SiSjzz_meas.emplace_back(0.25);
             SiSjpm_meas.emplace_back(ss_tmp-0.25);
@@ -262,16 +281,16 @@ int main(int argc, char* argv[])
 
                     auto op_jm = sites.op("S-",j);
                     auto ss_tmp = 0.0;
-                    ss_tmp += 0.5*( (Cpm*op_jm)*dag(prime(psi.A(j),jl,Site)) ).real();
+                    ss_tmp += 0.5*(( (Cpm*op_jm)*dag(prime(psi.A(j),jl,Site)) ).cplx()).real();
 
                     auto op_jp = sites.op("S+",j);
-                    ss_tmp += 0.5*( (Cmp*op_jp)*dag(prime(psi.A(j),jl,Site)) ).real();
+                    ss_tmp += 0.5*(( (Cmp*op_jp)*dag(prime(psi.A(j),jl,Site)) ).cplx()).real();
 
                     auto spm_tmp = ss_tmp;
                     SiSjpm_meas.emplace_back(ss_tmp);
 
                     auto op_jz = sites.op("Sz",j);
-                    ss_tmp += ( (Czz*op_jz)*dag(prime(psi.A(j),jl,Site)) ).real();
+                    ss_tmp += (( (Czz*op_jz)*dag(prime(psi.A(j),jl,Site)) ).cplx()).real();
 
                     SiSjzz_meas.emplace_back(ss_tmp-spm_tmp);
                     
@@ -293,11 +312,11 @@ int main(int argc, char* argv[])
                 fSzout << *i << ' ';
 
         std::ofstream fSpout("Sip.out",std::ios::out);
-        for (std::vector<double>::const_iterator i = Sp_meas.begin(); i != Sp_meas.end(); ++i)
+        for (std::vector<Cplx>::const_iterator i = Sp_meas.begin(); i != Sp_meas.end(); ++i)
                 fSpout << *i << ' ';
 
         std::ofstream fSmout("Sim.out",std::ios::out);
-        for (std::vector<double>::const_iterator i = Sm_meas.begin(); i != Sm_meas.end(); ++i)
+        for (std::vector<Cplx>::const_iterator i = Sm_meas.begin(); i != Sm_meas.end(); ++i)
                 fSmout << *i << ' ';
 
         std::ofstream fSiSjout("SiSj.out",std::ios::out);
