@@ -30,8 +30,14 @@ int main(int argc, char* argv[])
     auto domeas = input.getYesNo("domeas",false);
     auto meas_spincorr = input.getYesNo("meas_spincorr",false);
     auto meas_dimercorr = input.getYesNo("meas_dimercorr",false);
+    auto meas_dxcorr = input.getYesNo("meas_dxcorr",false);
+    auto meas_dycorr = input.getYesNo("meas_dycorr",false);
+    auto meas_dxycorr = input.getYesNo("meas_dxycorr",false);
     auto meas_chiralcorr = input.getYesNo("meas_chiralcorr",false);
     auto quiet = input.getYesNo("quiet",true);
+    // as the measurement usually very slow, we divide it into Npart, submit Npart jobs, each one deals with its ithpart
+    auto ithpart = input.getInt("ithpart");
+    auto Npart = input.getInt("Npart");
 
     // Read the sweeps parameters
     auto nsweeps = input.getInt("nsweeps");
@@ -377,10 +383,22 @@ int main(int argc, char* argv[])
         println( "xy_dimer: \n", xy_dimer );
 
         // measure x_dimer correlation
+    if( meas_dxcorr) {
         println("measure x_dimer correlation");
-        std::vector<double> dxdx_meas( x_dimer.size()*(x_dimer.size()+1)/2 ); // store <DiDj>
+        int i_start = 0;
+        int i_end = int(x_dimer.size());
+        if( Npart > 1 ) {
+            i_start = ( int(x_dimer.size())/Npart )*(ithpart-1);
+            i_end =  ( int(x_dimer.size())/Npart )*ithpart;
+            if( ithpart==Npart ) { i_end =  int(x_dimer.size()); }
+        }
+        println("tot_numer = ", int(x_dimer.size()), " is divided into ", Npart, " part");
+        println("i_start = ", i_start, "  i_end = ", i_end);
+
+        std::vector<double> dxdx_meas( (i_end-i_start)*(x_dimer.size()-i_start+x_dimer.size()-i_end+1)/2 ); // store <DiDj>
         std::vector<double> dx_meas={}; // store <Di>
-        for(int i = 0; i < int(x_dimer.size()); ++i) {
+        //for(int i = 0; i < int(x_dimer.size()); ++i) {
+        for(int i = i_start; i < i_end; ++i) {
             std::vector< std::pair<int,int> > op34pair_vec ={}; // store (opk,opl) pair
             std::vector<int> corr_ind = {};  // index in dxdx_meas
             for(int j = i; j < int(x_dimer.size()); ++j) {
@@ -395,7 +413,7 @@ int main(int argc, char* argv[])
                     (sites_tmp[1] <  sites_tmp[3]) &&
                     (sites_tmp[2] != sites_tmp[3]) ) {
                     op34pair_vec.emplace_back( std::make_pair( sites_tmp[2], sites_tmp[3] ) );
-                    int ind_meas = ( x_dimer.size() + x_dimer.size() - i + 1)*i/2 + j-i;
+                    int ind_meas = ( x_dimer.size()-i_start + x_dimer.size() - i + 1)*(i-i_start)/2 + j-i;
                     dxdx_meas[ind_meas] = 0.0; // initial the obserator
                     corr_ind.emplace_back( ind_meas );
                     std::cout << "ddcorr_meas = \n";
@@ -438,7 +456,7 @@ int main(int argc, char* argv[])
                         ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S+","S-");
                         ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","Sz","Sz"); 
                     }
-                    int ind_meas = ( x_dimer.size() + x_dimer.size() - i + 1)*i/2 + j-i;
+                    int ind_meas = ( x_dimer.size()-i_start + x_dimer.size() - i + 1)*(i-i_start)/2 + j-i;
                     //std::cout << " ind_meas = " << ind_meas <<std::endl;
                     printfln("ddcorr_meas = %.8f\n", ddcorr_meas);
                     dxdx_meas[ind_meas]=ddcorr_meas;
@@ -463,12 +481,24 @@ int main(int argc, char* argv[])
         std::ofstream fdxout("Dxi.out",std::ios::out);
         for (std::vector<double>::const_iterator i = dx_meas.begin(); i != dx_meas.end(); ++i)
                 fdxout << *i << ' ';
+    } // end if( meas_dxcorr) {
 
+    if( meas_dycorr) {
         // measure y_dimer correlation
         println("measure y_dimer correlation");
-        std::vector<double> dydy_meas( y_dimer.size()*(y_dimer.size()+1)/2 ); // store <DiDj>
+        int i_start = 0;
+        int i_end = int(y_dimer.size());
+        if( Npart > 1 ) {
+            i_start = ( int(y_dimer.size())/Npart )*(ithpart-1);
+            i_end =  ( int(y_dimer.size())/Npart )*ithpart;
+            if( ithpart==Npart ) { i_end =  int(y_dimer.size()); }
+        }
+        println("tot_numer = ", int(y_dimer.size()), " is divided into ", Npart, " part");
+        println("i_start = ", i_start, "  i_end = ", i_end);
+
+        std::vector<double> dydy_meas( (i_end-i_start)*(y_dimer.size()-i_start+y_dimer.size()-i_end+1)/2 ); // store <DiDj>
         std::vector<double> dy_meas={}; // store <Di>
-        for(int i = 0; i < int(y_dimer.size()); ++i) {
+        for(int i = i_start; i < i_end; ++i) {
             std::vector< std::pair<int,int> > op34pair_vec ={}; // store (opk,opl) pair
             std::vector<int> corr_ind = {};  // index in dydy_meas
             for(int j = i; j < int(y_dimer.size()); ++j) {
@@ -483,7 +513,7 @@ int main(int argc, char* argv[])
                     (sites_tmp[1] <  sites_tmp[3]) &&
                     (sites_tmp[2] != sites_tmp[3]) ) {
                     op34pair_vec.emplace_back( std::make_pair( sites_tmp[2], sites_tmp[3] ) );
-                    int ind_meas = ( y_dimer.size() + y_dimer.size() - i + 1)*i/2 + j-i;
+                    int ind_meas = ( y_dimer.size()-i_start + y_dimer.size() - i + 1)*(i-i_start)/2 + j-i;
                     dydy_meas[ind_meas] = 0.0; // initial the obserator
                     corr_ind.emplace_back( ind_meas );
                     std::cout << "ddcorr_meas = \n";
@@ -526,7 +556,7 @@ int main(int argc, char* argv[])
                         ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S+","S-");
                         ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","Sz","Sz"); 
                     }
-                    int ind_meas = ( y_dimer.size() + y_dimer.size() - i + 1)*i/2 + j-i;
+                    int ind_meas = ( y_dimer.size()-i_start + y_dimer.size() - i + 1)*(i-i_start)/2 + j-i;
                     //std::cout << " ind_meas = " << ind_meas <<std::endl;
                     printfln("ddcorr_meas = %.8f\n", ddcorr_meas);
                     dydy_meas[ind_meas]=ddcorr_meas;
@@ -551,12 +581,24 @@ int main(int argc, char* argv[])
         std::ofstream fdyout("Dyi.out",std::ios::out);
         for (std::vector<double>::const_iterator i = dy_meas.begin(); i != dy_meas.end(); ++i)
                 fdyout << *i << ' ';
+    } // if( meas_dycorr) {
 
+    if( meas_dxycorr) {
         // measure xy_dimer correlation
         println("measure xy_dimer correlation");
-        std::vector<double> dxydxy_meas( xy_dimer.size()*(xy_dimer.size()+1)/2 ); // store <DiDj>
+        int i_start = 0;
+        int i_end = int(xy_dimer.size());
+        if( Npart > 1 ) {
+            i_start = ( int(xy_dimer.size())/Npart )*(ithpart-1);
+            i_end =  ( int(xy_dimer.size())/Npart )*ithpart;
+            if( ithpart==Npart ) { i_end =  int(xy_dimer.size()); }
+        }
+        println("tot_numer = ", int(xy_dimer.size()), " is divided into ", Npart, " part");
+        println("i_start = ", i_start, "  i_end = ", i_end);
+
+        std::vector<double> dxydxy_meas( (i_end-i_start)*(xy_dimer.size()-i_start+xy_dimer.size()-i_end+1)/2 ); // store <DiDj>
         std::vector<double> dxy_meas={}; // store <Di>
-        for(int i = 0; i < int(xy_dimer.size()); ++i) {
+        for(int i = i_start; i < i_end; ++i) {
             std::vector< std::pair<int,int> > op34pair_vec ={}; // store (opk,opl) pair
             std::vector<int> corr_ind = {};  // index in dxydxy_meas
             for(int j = i; j < int(xy_dimer.size()); ++j) {
@@ -571,7 +613,7 @@ int main(int argc, char* argv[])
                     (sites_tmp[1] <  sites_tmp[3]) &&
                     (sites_tmp[2] != sites_tmp[3]) ) {
                     op34pair_vec.emplace_back( std::make_pair( sites_tmp[2], sites_tmp[3] ) );
-                    int ind_meas = ( xy_dimer.size() + xy_dimer.size() - i + 1)*i/2 + j-i;
+                    int ind_meas = ( xy_dimer.size()-i_start + xy_dimer.size() - i + 1)*(i-i_start)/2 + j-i;
                     dxydxy_meas[ind_meas] = 0.0; // initial the obserator
                     corr_ind.emplace_back( ind_meas );
                     std::cout << "ddcorr_meas = \n";
@@ -614,7 +656,7 @@ int main(int argc, char* argv[])
                         ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","S+","S-");
                         ddcorr_meas += 1.00*mfourbody(psi,sites,sites_tmp,"Sz","Sz","Sz","Sz"); 
                     }
-                    int ind_meas = ( xy_dimer.size() + xy_dimer.size() - i + 1)*i/2 + j-i;
+                    int ind_meas = ( xy_dimer.size()-i_start + xy_dimer.size() - i + 1)*(i-i_start)/2 + j-i;
                     //std::cout << " ind_meas = " << ind_meas <<std::endl;
                     printfln("ddcorr_meas = %.8f\n", ddcorr_meas);
                     dxydxy_meas[ind_meas]=ddcorr_meas;
@@ -639,6 +681,7 @@ int main(int argc, char* argv[])
         std::ofstream fdxyout("Dxyi.out",std::ios::out);
         for (std::vector<double>::const_iterator i = dxy_meas.begin(); i != dxy_meas.end(); ++i)
                 fdxyout << *i << ' ';
+    }  // if( meas_dxycorr) {
     }
 
     if(domeas && meas_chiralcorr) {
@@ -671,9 +714,19 @@ int main(int argc, char* argv[])
 
         // measure chiral correlation
         println("measure chiral correlation");
-        std::vector<double> XiXj_meas( tri_plaq.size()*(tri_plaq.size()+1)/2 ); // store <XiXj>
+        int i_start = 0;
+        int i_end = int(tri_plaq.size());
+        if( Npart > 1 ) {
+            i_start = ( int(tri_plaq.size())/Npart )*(ithpart-1);
+            i_end =  ( int(tri_plaq.size())/Npart )*ithpart;
+            if( ithpart==Npart ) { i_end =  int(tri_plaq.size()); }
+        }
+        println("tot_numer = ", int(tri_plaq.size()), " is divided into ", Npart, " part");
+        println("i_start = ", i_start, "  i_end = ", i_end);
+
+        std::vector<double> XiXj_meas( (i_end-i_start)*(tri_plaq.size()-i_start+tri_plaq.size()-i_end+1)/2 ); // store <DiDj>
         std::vector<double> Xi_meas={}; // store <Xi>
-        for(int i = 0; i < int(tri_plaq.size()); ++i) {
+        for(int i = i_start; i < i_end; ++i) {
             std::vector< std::vector<int> > op456vec_vec ={}; // store (opl,opm,opn) pair
             std::vector<int> corr_ind = {};  // index in XiXj_meas
             for(int j = i; j < int(tri_plaq.size()); ++j) {
@@ -697,7 +750,7 @@ int main(int argc, char* argv[])
                     (sites_tmp[4] != sites_tmp[5]) &&
                     (sites_tmp[5] != sites_tmp[3]) ) {
                     op456vec_vec.emplace_back( std::initializer_list<int>{sites_tmp[3], sites_tmp[4], sites_tmp[5] } );
-                    int ind_meas = ( tri_plaq.size() + tri_plaq.size() - i + 1)*i/2 + j-i;
+                    int ind_meas = ( tri_plaq.size()-i_start + tri_plaq.size() - i + 1)*(i-i_start)/2 + j-i;
                     XiXj_meas[ind_meas] = 0.0; // initial the obserator
                     corr_ind.emplace_back( ind_meas );
                     std::cout << "XXcorr_meas = \n";
@@ -798,7 +851,7 @@ XXcorr_meas += -0.50*msixbody(psi, sites, sites_tmp, "Sz", "S+", "S-", "S+", "Sz
 XXcorr_meas +=  0.50*msixbody(psi, sites, sites_tmp, "Sz", "S+", "S-", "Sz", "S+", "S-" );
 XXcorr_meas += -0.50*msixbody(psi, sites, sites_tmp, "Sz", "S+", "S-", "Sz", "S-", "S+" );
                     }
-                    int ind_meas = ( tri_plaq.size() + tri_plaq.size() - i + 1)*i/2 + j-i;
+                    int ind_meas = ( tri_plaq.size()-i_start + tri_plaq.size() - i + 1)*(i-i_start)/2 + j-i;
                     //std::cout << " ind_meas = " << ind_meas <<std::endl;
                     XXcorr_meas = -XXcorr_meas;   // Note that "-" comes from i^2
                     printfln("XXcorr_meas = %.8f\n", XXcorr_meas);

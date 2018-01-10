@@ -8,12 +8,17 @@ input
     gamma1 = 1.1
     gamma2 = 1.1
     readmps = yes
-    eneropt = yes
+    eneropt = no
     twist_ybc = yes
     ytheta = 0.5
     domeas  = yes // if domeas=no, then following meas* tag will not work
-    meas_spincorr = yes
+    Npart = 2
+    ithpart = 2
+    meas_spincorr = no
     meas_dimercorr = yes
+    meas_dxcorr = yes
+    meas_dycorr = yes
+    meas_dxycorr = yes
     meas_chiralcorr = yes
 
     nsweeps = 4

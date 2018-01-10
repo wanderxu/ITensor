@@ -67,6 +67,7 @@ else : # ladder case
     else:
         print "Wrong number of SiSj, please check your SiSj.out"
 
+kfac = 1
 ## redefine N and Ny
 N *= yfold
 Ny *= yfold
@@ -83,13 +84,13 @@ if Ny == 2 and (not yperiodic) :
             kyv[(Nx+1)*j+i] = 0.0
 else :
 # k point coordinate, consider full boundary for better plot
-    Nk = (Nx+1)*(Ny+1)
+    Nk = (kfac*Nx+1)*(kfac*Ny+1)
     kxv = np.zeros(Nk)
     kyv = np.zeros(Nk)
-    for j in range(Ny+1):
-        for i in range(Nx+1):
-            kxv[(Nx+1)*j+i] = float(i) - float(Nx)/2.0
-            kyv[(Nx+1)*j+i] = float(j) - float(Ny)/2.0
+    for j in range(kfac*Ny+1):
+        for i in range(kfac*Nx+1):
+            kxv[(kfac*Nx+1)*j+i] = float(i) - float(kfac*Nx)/2.0
+            kyv[(kfac*Nx+1)*j+i] = float(j) - float(kfac*Ny)/2.0
 
 # real space coordinate
 xv = np.zeros(N)
@@ -138,7 +139,7 @@ with open(tag+"k.dat","w") as f:
         for rimj in range(N):
             ssk += simj[rimj]*expirk[rimj,ki]
         ssk /= N
-        if ki%(Nx+1) == 0 and ki!=0 :
+        if ki%(kfac*Nx+1) == 0 and ki!=0 :
             f.write( "\n" )
         #f.write( "{: .8f} {: .8f} {: .8f} {: .8f}\n".format(kxv[ki]/Nx*2.0*np.pi, kyv[ki]/Ny*2.0*np.pi, ssk.real, ssk.imag) )
         f.write( "{: .8f} {: .8f} {: .8f} {: .8f}\n".format(kxv[ki]/Nx, kyv[ki]/Ny, ssk.real, ssk.imag) )
