@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
     auto readmps = input.getYesNo("readmps",false);
     auto eneropt = input.getYesNo("eneropt",true);
     auto twist_ybc = input.getYesNo("twist_ybc",false);
-    double ytheta = input.getReal("ytheta");
+    double ytheta = input.getReal("ytheta",0.0);
     Cplx expitheta = std::exp( Cplx(0.0,std::acos(-1))* ytheta );
     auto domeas = input.getYesNo("domeas",false);
     auto meas_spincorr = input.getYesNo("meas_spincorr",false);
