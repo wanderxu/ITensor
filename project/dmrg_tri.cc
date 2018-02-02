@@ -36,8 +36,8 @@ int main(int argc, char* argv[])
     auto meas_chiralcorr = input.getYesNo("meas_chiralcorr",false);
     auto quiet = input.getYesNo("quiet",true);
     // as the measurement usually very slow, we divide it into Npart, submit Npart jobs, each one deals with its ithpart
-    auto ithpart = input.getInt("ithpart");
-    auto Npart = input.getInt("Npart");
+    auto ithpart = input.getInt("ithpart",1);
+    auto Npart = input.getInt("Npart",1);
 
     // Read the sweeps parameters
     auto nsweeps = input.getInt("nsweeps");
@@ -207,6 +207,21 @@ int main(int argc, char* argv[])
         writeToFile("sites_file", sites);
         writeToFile("psi_file", psi);
         writeToFile("H_file", H);
+
+        //
+        // Calculate entanglement entropy
+        for ( int b = 1; b <= N-1; ++b ) {
+            psi.position(b);
+            auto wf = psi.A(b)*psi.A(b+1);
+            auto U = psi.A(b);
+            IQTensor S, V;
+            auto spectrum = svd(wf,U,S,V);
+            Real SvN = 0.;
+            for ( auto p : spectrum.eigs() ) {
+                if ( p > 1E-12 ) SvN += -p*log(p);
+            }
+            printfln("Across bond b=%d, SvN = %.10f", b, SvN);
+        }
 
         //
         // Print the final energy reported by DMRG
