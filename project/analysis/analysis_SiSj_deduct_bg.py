@@ -110,13 +110,18 @@ for ri in range(N):
 sisj = np.zeros((N,N))
 simj = np.zeros(N)
 
-# load indat to sisj
+# load indat to sisj, and calculate <s^2>
 icount = 0
+ss2=0.
 for i in range(Neff):
     for j in range(i,Neff):
         if icount < numsij:
             sisj[i,j] = indat[icount] - indati[i]*indati[j]
             sisj[j,i] = indat[icount] - indati[j]*indati[i]
+            if i == j:
+                ss2 += indat[icount]
+            else :
+                ss2 += indat[icount]*2.
             icount += 1
     np.set_printoptions(precision=2,linewidth=400)
     print( sisj[i][0:max(Neff,20)] )
@@ -124,6 +129,8 @@ for i in range(Neff):
     #print( sisj[i], end=" ")
     #print sisj[i],
     #print "16{: .8f}".format(sisj[i])
+with open(tag+"_square.dat","w") as f:
+    f.write( "{: .8f}".format( ss2 ) )
 
 # calculate simj
 for i in range(N):

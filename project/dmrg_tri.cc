@@ -249,6 +249,8 @@ int main(int argc, char* argv[])
         // Measure Si.Sj of every {i,j}, and total M
         //
         auto totalM = 0.0;
+        auto Msquare = 0.0;
+        auto Mzsquare = 0.0;
         std::vector<double> SiSj_meas={};
         std::vector<double> SiSjzz_meas={};
         std::vector<double> SiSjpm_meas={};
@@ -278,7 +280,9 @@ int main(int argc, char* argv[])
             auto ss_tmp = 0.0;
             ss_tmp += 0.75*(((dag(ket)*ket).cplx()).real());
             SiSj_meas.emplace_back(ss_tmp);
+            Msquare += ss_tmp;
             SiSjzz_meas.emplace_back(0.25);
+            Mzsquare += 0.25;
             SiSjpm_meas.emplace_back(ss_tmp-0.25);
             println( i, " ", i, " ", ss_tmp );
             
@@ -314,8 +318,10 @@ int main(int argc, char* argv[])
                     ss_tmp += (( (Czz*op_jz)*dag(prime(psi.A(j),jl,Site)) ).cplx()).real();
 
                     SiSjzz_meas.emplace_back(ss_tmp-spm_tmp);
+                    Mzsquare += (ss_tmp - spm_tmp)*2.0;
                     
                     SiSj_meas.emplace_back(ss_tmp);
+                    Msquare += ss_tmp*2.0;
                     println( i, " ", j, " ", ss_tmp ); 
 
                     if(j < N) {
@@ -327,6 +333,8 @@ int main(int argc, char* argv[])
             }
         }
         printfln("Total M = %.10e", totalM );
+        printfln("Msquare = %.10e", Msquare );
+        printfln("Mzsquare = %.10e", Mzsquare );
 
         std::ofstream fSzout("Siz.out",std::ios::out);
         for (std::vector<double>::const_iterator i = Sz_meas.begin(); i != Sz_meas.end(); ++i)
