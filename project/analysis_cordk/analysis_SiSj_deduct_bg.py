@@ -67,7 +67,7 @@ else : # ladder case
     else:
         print "Wrong number of SiSj, please check your SiSj.out"
 
-kfac = 2
+kfac = 1
 ## redefine N and Ny
 N *= yfold
 Ny *= yfold
@@ -155,12 +155,30 @@ ic=(Nx/2-1)*Ny+Ny/2-1
 # x-direction
 with open(tag+"ij_xdirec.dat","w") as f:
     for i in range(ic,N,Ny):
-        f.write( "{} {: .8f}\n".format((i/Ny-Nx/2+1)*yfold, sisj[ic][i]) )
+        #f.write( "{} {: .8f}\n".format((i/Ny-Nx/2+1)*yfold, sisj[ic][i]) )
+        f.write( "{} {: .8f}\n".format(((i-ic)/Ny)*yfold, sisj[ic][i]) )
         if yfold == 2 :
             ## in chiral case, you can also count plaq in x direction 
-            f.write( "{} {: .8f}\n".format((i/Ny-Nx/2+1)*yfold+1, sisj[ic][i-1]) )
+            #f.write( "{} {: .8f}\n".format((i/Ny-Nx/2+1)*yfold+1, sisj[ic][i-1]) )
+            f.write( "{} {: .8f}\n".format(((i-ic)/Ny)*yfold+1, sisj[ic][i-1]) )
 
 # y-direction
 with open(tag+"ij_ydirec.dat","w") as f:
     for i in range(ic,ic+Ny/2+1):
         f.write( "{} {: .8f}\n".format(i-ic, sisj[ic][i]) )
+
+# xy-direction
+with open(tag+"ij_xydirec.dat","w") as f:
+    for i in range(ic,N,Ny+1):
+        f.write( "{} {: .8f}\n".format(((i-ic)/(Ny+1))*yfold, sisj[ic][i]) )
+        if yfold == 2 :
+            ## in chiral case, you can also count plaq in xy direction 
+            f.write( "{} {: .8f}\n".format(((i-ic)/(Ny+1))*yfold+1, sisj[ic][i-1]) )
+
+# 21-direction
+with open(tag+"ij_21direc.dat","w") as f:
+    for i in range(ic,N,2*Ny+1):
+        f.write( "{} {: .8f}\n".format(((i-ic)/(2*Ny+1))*yfold, sisj[ic][i]) )
+        if yfold == 2 :
+            ## in chiral case, you can also count plaq in 21 direction 
+            f.write( "{} {: .8f}\n".format(((i-ic)/(2*Ny+1))*yfold+1, sisj[ic][i-1]) )

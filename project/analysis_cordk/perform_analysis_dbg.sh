@@ -68,6 +68,7 @@ endin
 cat>plot${tag}k.gnu<<endin
 set terminal postscript eps enhanced color
 set output "${tag}k.eps"
+set title "${tag}k" font 'Times-Roman, 24'
 set bmargin 5
 set lmargin 12
 set xtics font ',20'
@@ -104,12 +105,20 @@ endin
 
             awk '{if(NR>1) print $0}' ${tag}dbgij_xdirec.dat > ${tag}dbg0j_xdirec.dat
             awk '{if(NR>1) print $0}' ${tag}dbgij_ydirec.dat > ${tag}dbg0j_ydirec.dat
+            awk '{if(NR>1) print $0}' ${tag}dbgij_xydirec.dat > ${tag}dbg0j_xydirec.dat
+            awk '{if(NR>1) print $0}' ${tag}dbgij_21direc.dat > ${tag}dbg0j_21direc.dat
             if [ $tag == 'X' ]; then
                 echo "cut Xdbgij_xdirec.dat to get Xdbgij_sametri_xdirec.dat"
                 awk '{if((NR%2==1)&&(NR>1)) print $1/2, $2}' Xdbgij_xdirec.dat > Xdbg0j_sametri_xdirec.dat
 
                 echo "cut Xdbgij_ydirec.dat to get Xdbgij_sametri_ydirec.dat"
                 awk '{if((NR%2==1)&&(NR>1)) print $1/2, $2}' Xdbgij_ydirec.dat > Xdbg0j_sametri_ydirec.dat
+
+                echo "cut Xdbgij_xydirec.dat to get Xdbgij_sametri_xydirec.dat"
+                awk '{if((NR%2==1)&&(NR>1)) print $1/2, $2}' Xdbgij_xydirec.dat > Xdbg0j_sametri_xydirec.dat
+
+                echo "cut Xdbgij_21direc.dat to get Xdbgij_sametri_21direc.dat"
+                awk '{if((NR%2==1)&&(NR>1)) print $1/2, $2}' Xdbgij_21direc.dat > Xdbg0j_sametri_21direc.dat
             fi
         fi
       done
