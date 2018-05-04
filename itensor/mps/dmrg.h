@@ -232,7 +232,7 @@ DMRGWorker(MPSt<Tensor>& psi,
             {
             if(!quiet)
                 {
-                printfln("Sweep=%d, HS=%d, Bond=(%d,%d)",sw,ha,b,(b+1));
+                printfln("Sweep=%d, HS=%d, Bond=%d/%d",sw,ha,b,(N-1));
                 }
 
             PH.position(b,psi);
@@ -260,9 +260,9 @@ DMRGWorker(MPSt<Tensor>& psi,
             args.add("AtBond",b);
             args.add("HalfSweep",ha);
             args.add("Energy",energy); 
+            args.add("Truncerr",spec.truncerr()); 
 
             obs.measure(args);
-
 
             } //for loop over b
 
