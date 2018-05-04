@@ -110,15 +110,19 @@ endin
             if [ $tag == 'X' ]; then
                 echo "cut Xdbgij_xdirec.dat to get Xdbgij_sametri_xdirec.dat"
                 awk '{if((NR%2==1)&&(NR>1)) print $1/2, $2}' Xdbgij_xdirec.dat > Xdbg0j_sametri_xdirec.dat
+                awk '{if(NR%2==0) print $1/2, $2}' Xdbgij_xdirec.dat > Xdbgij_sametri_xdirec.dat
 
                 echo "cut Xdbgij_ydirec.dat to get Xdbgij_sametri_ydirec.dat"
                 awk '{if((NR%2==1)&&(NR>1)) print $1/2, $2}' Xdbgij_ydirec.dat > Xdbg0j_sametri_ydirec.dat
+                awk '{if(NR%2==0) print $1/2, $2}' Xdbgij_ydirec.dat > Xdbgij_sametri_ydirec.dat
 
                 echo "cut Xdbgij_xydirec.dat to get Xdbgij_sametri_xydirec.dat"
                 awk '{if((NR%2==1)&&(NR>1)) print $1/2, $2}' Xdbgij_xydirec.dat > Xdbg0j_sametri_xydirec.dat
+                awk '{if(NR%2==0) print $1/2, $2}' Xdbgij_xydirec.dat > Xdbgij_sametri_xydirec.dat
 
                 echo "cut Xdbgij_21direc.dat to get Xdbgij_sametri_21direc.dat"
                 awk '{if((NR%2==1)&&(NR>1)) print $1/2, $2}' Xdbgij_21direc.dat > Xdbg0j_sametri_21direc.dat
+                awk '{if(NR%2==0) print $1/2, $2}' Xdbgij_21direc.dat > Xdbgij_sametri_21direc.dat
             fi
         fi
       done

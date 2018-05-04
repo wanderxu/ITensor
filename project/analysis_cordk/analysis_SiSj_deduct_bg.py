@@ -149,8 +149,11 @@ with open(tag+"k.dat","w") as f:
         f.write( "{: .8f} {: .8f} {: .8f} {: .8f}\n".format(ktmp[0], ktmp[1], ssk.real, ssk.imag) )
 
 # output sisj in x-direction
-# pick the central point
-ic=(Nx/2-1)*Ny+Ny/2-1
+## pick the central point
+#ic=(Nx/2-1)*Ny+Ny/2-1
+
+# pick a point at x=3
+ic=3*Ny+2
 
 # x-direction
 with open(tag+"ij_xdirec.dat","w") as f:
@@ -182,3 +185,16 @@ with open(tag+"ij_21direc.dat","w") as f:
         if yfold == 2 :
             ## in chiral case, you can also count plaq in 21 direction 
             f.write( "{} {: .8f}\n".format(((i-ic)/(2*Ny+1))*yfold+1, sisj[ic][i-1]) )
+
+for icshiftx in range(Nx/2):
+    for icshifty in range(Ny/2):
+        ic=icshiftx*Ny + icshifty
+        # x-direction
+        with open(tag+str(icshiftx)+"_"+str(icshifty)+"j_xdirec.dat","w") as f:
+            for i in range(ic,N,Ny):
+                #f.write( "{} {: .8f}\n".format((i/Ny-Nx/2+1)*yfold, sisj[ic][i]) )
+                f.write( "{} {: .8f}\n".format(((i-ic)/Ny)*yfold, sisj[ic][i]) )
+                if yfold == 2 :
+                    ## in chiral case, you can also count plaq in x direction 
+                    #f.write( "{} {: .8f}\n".format((i/Ny-Nx/2+1)*yfold+1, sisj[ic][i-1]) )
+                    f.write( "{} {: .8f}\n".format(((i-ic)/Ny)*yfold+1, sisj[ic][i-1]) )
