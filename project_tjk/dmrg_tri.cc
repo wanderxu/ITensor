@@ -18,6 +18,8 @@ int main(int argc, char* argv[])
     auto Ny = input.getInt("Ny");
     auto N = Nx*Ny;
     auto yperiodic = input.getYesNo("yperiodic",true);
+    double t1 = input.getReal("t1");
+    double mu = input.getReal("mu");
     double J1 = input.getReal("J1");
     double J2 = input.getReal("J2");
     double gamma1 = input.getReal("gamma1");
@@ -62,7 +64,7 @@ int main(int argc, char* argv[])
     auto sweeps = Sweeps(nsweeps,table);
     println(sweeps);
 
-    SpinHalf sites;
+    tJ sites;
     IQMPS psi;
     IQMPO H;
 
@@ -80,7 +82,7 @@ int main(int argc, char* argv[])
     if(readmps) {
         println("\n//////////////////////////////////////////////////");
         println("Reading basis, wavefunction and H from files ......");
-        //SpinHalf sites;
+        //tJ sites;
         readFromFile("sites_file", sites);
         //IQMPS psi(sites);
         psi=IQMPS(sites);
@@ -102,8 +104,8 @@ int main(int argc, char* argv[])
         //
         // Initialize the site degrees of freedom.
         //
-        //auto sites = SpinHalf(N);
-        sites = SpinHalf(N);
+        //auto sites = tJ(N);
+        sites = tJ(N);
 
         //
         // Use the AutoMPO feature to create the 
@@ -121,6 +123,39 @@ int main(int argc, char* argv[])
         println("\nPlaque:\n", lattice4plaque);
         println("Total number of plaques: ", lattice4plaque.size());
 
+        // hopping term
+        for(auto bnd : lattice)
+        {
+            if( (not bnd.isbd) or (not twist_ybc) ) {
+                ampo += -t1,"Cdagup",bnd.s1,"Cup",bnd.s2;
+                ampo += -t1,"Cdagup",bnd.s2,"Cup",bnd.s1;
+                ampo += -t1,"Cdagdn",bnd.s1,"Cdn",bnd.s2;
+                ampo += -t1,"Cdagdn",bnd.s2,"Cdn",bnd.s1;
+            }
+            else if ( ytheta == 1.0 ) {
+                println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
+                ampo += t1,"Cdagup",bnd.s1,"Cup",bnd.s2; // Cup1^+ CupL e^{i\theta}
+                ampo += t1,"Cdagup",bnd.s2,"Cup",bnd.s1; // CupL^+ Cup1 e^{-i\theta}
+                ampo += t1,"Cdagdn",bnd.s1,"Cdn",bnd.s2; // Cdn1^+ CdnL e^{i\theta}
+                ampo += t1,"Cdagdn",bnd.s2,"Cdn",bnd.s1; // CdnL^+ Cdn1 e^{-i\theta}
+            }
+            else {
+                println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
+                ampo += -t1*expitheta,"Cdagup",bnd.s1,"Cup",bnd.s2; // Cup1^+ CupL e^{i\theta}
+                ampo += -t1/expitheta,"Cdagup",bnd.s2,"Cup",bnd.s1; // CupL^+ Cup1 e^{-i\theta}
+                ampo += -t1*expitheta,"Cdagdn",bnd.s1,"Cdn",bnd.s2; // Cdn1^+ CdnL e^{i\theta}
+                ampo += -t1/expitheta,"Cdagdn",bnd.s2,"Cdn",bnd.s1; // CdnL^+ Cdn1 e^{-i\theta}
+            }
+        }
+
+        // chemical potential term
+        if ( mu != 0.0 ) {
+            println(" setting chemical potential term ... ");
+            for(int i = 1; i <= N; ++i) {
+                ampo += -mu, "Nup", i;
+                ampo += -mu, "Ndn", i;
+            }
+        }
 
         // two-body term, nearest neighbor
         for(auto bnd : lattice)

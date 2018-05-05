@@ -17,7 +17,7 @@ bool cmp_by_value(const opair& lhs, const opair& rhs) {
 template <class Tensor>
 Real
 mtwobody(MPSt<Tensor>& psi, 
-     SpinHalf const& sites,
+     tJ const& sites,
      std::vector<int> const& sites_tmp,
      std::string const& op1_label,
      std::string const& op2_label )
@@ -59,7 +59,7 @@ mtwobody(MPSt<Tensor>& psi,
 template <class Tensor>
 Real
 mthreebody(MPSt<Tensor>& psi, 
-     SpinHalf const& sites,
+     tJ const& sites,
      std::vector<int> const& sites_tmp,
      std::string const& op1_label,
      std::string const& op2_label,
@@ -131,7 +131,7 @@ mthreebody(MPSt<Tensor>& psi,
 template <class Tensor>
 Cplx
 mthreebodyC(MPSt<Tensor>& psi, 
-     SpinHalf const& sites,
+     tJ const& sites,
      std::vector<int> const& sites_tmp,
      std::string const& op1_label,
      std::string const& op2_label,
@@ -203,7 +203,7 @@ mthreebodyC(MPSt<Tensor>& psi,
 template <class Tensor>
 Real
 mfourbody(MPSt<Tensor>& psi, 
-     SpinHalf const& sites,
+     tJ const& sites,
      std::vector<int> const& sites_tmp,
      std::string const& op1_label,
      std::string const& op2_label,
@@ -312,7 +312,7 @@ bool cmp_by_value_of_1st_element_of_struct(const opairstruct& lhs, const opairst
 template <class Tensor>
 void
 mfourbody_str(MPSt<Tensor>& psi,
-     SpinHalf const& sites,
+     tJ const& sites,
      std::vector<int> const& sites_12,
      std::string const& op1_label,
      std::string const& op2_label,
@@ -411,7 +411,7 @@ mfourbody_str(MPSt<Tensor>& psi,
 template <class Tensor>
 Real
 msixbody(MPSt<Tensor>& psi, 
-     SpinHalf const& sites,
+     tJ const& sites,
      std::vector<int> const& sites_tmp,
      std::string const& op1_label,
      std::string const& op2_label,
@@ -567,7 +567,7 @@ msixbody(MPSt<Tensor>& psi,
 template <class Tensor>
 void
 msixbody_str(MPSt<Tensor>& psi,
-     SpinHalf const& sites,
+     tJ const& sites,
      std::vector<int> const& sites_123,
      std::string const& op1_label,
      std::string const& op2_label,
