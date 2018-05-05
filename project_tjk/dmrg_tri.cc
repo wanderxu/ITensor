@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
     auto N = Nx*Ny;
     auto yperiodic = input.getYesNo("yperiodic",true);
     double t1 = input.getReal("t1");
-    double mu = input.getReal("mu");
+    auto idop = input.getInt("idop");
     double J1 = input.getReal("J1");
     double J2 = input.getReal("J2");
     double gamma1 = input.getReal("gamma1");
@@ -148,15 +148,6 @@ int main(int argc, char* argv[])
             }
         }
 
-        // chemical potential term
-        if ( mu != 0.0 ) {
-            println(" setting chemical potential term ... ");
-            for(int i = 1; i <= N; ++i) {
-                ampo += -mu, "Nup", i;
-                ampo += -mu, "Ndn", i;
-            }
-        }
-
         // two-body term, nearest neighbor
         for(auto bnd : lattice)
         {
@@ -207,17 +198,24 @@ int main(int argc, char* argv[])
         // to be a Neel state.
         //
         // This choice implicitly sets the global Sz quantum number
-        // of the wavefunction to zero. Since it is an IQMPS
-        // it will remain in this quantum number sector.
+        // of the wavefunction to zero when idop is even, and to one when idop is odd.
+        // Since it is an IQMPS, it will remain in this quantum number sector.
         //
         auto state = InitState(sites);
-        for(int i = 1; i <= N; ++i) 
-            {
-            if(i%2 == 1)
-                state.set(i,"Up");
-            else
-                state.set(i,"Dn");
-            }
+        int p = N-idop;
+        for(int i = N; i >= 1; --i) {
+          if(p > i) {
+            println("Doubly occupying site ",i);
+            state.set(i,"UpDn");
+            p -= 2;
+          } else if(p > 0) {
+            println("Singly occupying site ",i);
+            state.set(i,(i%2==1 ? "Up" : "Dn"));
+            p -= 1;
+          } else {
+            state.set(i,"Emp");
+          }
+        }
 
         //auto psi = IQMPS(state);
         psi = IQMPS(state);

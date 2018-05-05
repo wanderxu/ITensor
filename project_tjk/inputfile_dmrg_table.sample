@@ -4,7 +4,7 @@ input
     Ny = 4
     yperiodic = yes
     t1 = 1.0
-    mu = 0.0
+    idop = 2
     J1 = 1.0
     J2 = 0.1
     gamma1 = 1.1
