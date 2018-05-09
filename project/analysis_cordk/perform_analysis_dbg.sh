@@ -107,22 +107,40 @@ endin
             awk '{if(NR>1) print $0}' ${tag}dbgij_ydirec.dat > ${tag}dbg0j_ydirec.dat
             awk '{if(NR>1) print $0}' ${tag}dbgij_xydirec.dat > ${tag}dbg0j_xydirec.dat
             awk '{if(NR>1) print $0}' ${tag}dbgij_21direc.dat > ${tag}dbg0j_21direc.dat
+            # positive part
+            awk '{if((NR>1)&&($2>0)) print $0}' ${tag}dbgij_xdirec.dat > ${tag}dbg0j_xdirec_p.dat
+            awk '{if((NR>1)&&($2>0)) print $0}' ${tag}dbgij_ydirec.dat > ${tag}dbg0j_ydirec_p.dat
+            awk '{if((NR>1)&&($2>0)) print $0}' ${tag}dbgij_xydirec.dat > ${tag}dbg0j_xydirec_p.dat
+            awk '{if((NR>1)&&($2>0)) print $0}' ${tag}dbgij_21direc.dat > ${tag}dbg0j_21direc_p.dat
+            # negative part
+            awk '{if((NR>1)&&($2<=0)) print $0}' ${tag}dbgij_xdirec.dat > ${tag}dbg0j_xdirec_n.dat
+            awk '{if((NR>1)&&($2<=0)) print $0}' ${tag}dbgij_ydirec.dat > ${tag}dbg0j_ydirec_n.dat
+            awk '{if((NR>1)&&($2<=0)) print $0}' ${tag}dbgij_xydirec.dat > ${tag}dbg0j_xydirec_n.dat
+            awk '{if((NR>1)&&($2<=0)) print $0}' ${tag}dbgij_21direc.dat > ${tag}dbg0j_21direc_n.dat
             if [ $tag == 'X' ]; then
                 echo "cut Xdbgij_xdirec.dat to get Xdbgij_sametri_xdirec.dat"
                 awk '{if((NR%2==1)&&(NR>1)) print $1/2, $2}' Xdbgij_xdirec.dat > Xdbg0j_sametri_xdirec.dat
                 awk '{if(NR%2==0) print $1/2, $2}' Xdbgij_xdirec.dat > Xdbgij_sametri_xdirec.dat
+                awk '{if((NR%2==1)&&(NR>1)&&($2>0)) print $1/2, $2}' Xdbgij_xdirec.dat > Xdbg0j_sametri_xdirec_p.dat
+                awk '{if((NR%2==1)&&(NR>1)&&($2<=0)) print $1/2, $2}' Xdbgij_xdirec.dat > Xdbg0j_sametri_xdirec_n.dat
 
                 echo "cut Xdbgij_ydirec.dat to get Xdbgij_sametri_ydirec.dat"
                 awk '{if((NR%2==1)&&(NR>1)) print $1/2, $2}' Xdbgij_ydirec.dat > Xdbg0j_sametri_ydirec.dat
                 awk '{if(NR%2==0) print $1/2, $2}' Xdbgij_ydirec.dat > Xdbgij_sametri_ydirec.dat
+                awk '{if((NR%2==1)&&(NR>1)&&($2>0)) print $1/2, $2}' Xdbgij_ydirec.dat > Xdbg0j_sametri_ydirec_p.dat
+                awk '{if((NR%2==1)&&(NR>1)&&($2<=0)) print $1/2, $2}' Xdbgij_ydirec.dat > Xdbg0j_sametri_ydirec_n.dat
 
                 echo "cut Xdbgij_xydirec.dat to get Xdbgij_sametri_xydirec.dat"
                 awk '{if((NR%2==1)&&(NR>1)) print $1/2, $2}' Xdbgij_xydirec.dat > Xdbg0j_sametri_xydirec.dat
                 awk '{if(NR%2==0) print $1/2, $2}' Xdbgij_xydirec.dat > Xdbgij_sametri_xydirec.dat
+                awk '{if((NR%2==1)&&(NR>1)&&($2>0)) print $1/2, $2}' Xdbgij_xydirec.dat > Xdbg0j_sametri_xydirec_p.dat
+                awk '{if((NR%2==1)&&(NR>1)&&($2<=0)) print $1/2, $2}' Xdbgij_xydirec.dat > Xdbg0j_sametri_xydirec_n.dat
 
                 echo "cut Xdbgij_21direc.dat to get Xdbgij_sametri_21direc.dat"
                 awk '{if((NR%2==1)&&(NR>1)) print $1/2, $2}' Xdbgij_21direc.dat > Xdbg0j_sametri_21direc.dat
                 awk '{if(NR%2==0) print $1/2, $2}' Xdbgij_21direc.dat > Xdbgij_sametri_21direc.dat
+                awk '{if((NR%2==1)&&(NR>1)&&($2>0)) print $1/2, $2}' Xdbgij_21direc.dat > Xdbg0j_sametri_21direc_p.dat
+                awk '{if((NR%2==1)&&(NR>1)&&($2<=0)) print $1/2, $2}' Xdbgij_21direc.dat > Xdbg0j_sametri_21direc_n.dat
             fi
         fi
       done
