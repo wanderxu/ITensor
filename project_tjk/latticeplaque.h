@@ -11,9 +11,11 @@ namespace itensor {
 
 struct Lattice3Plaque;
 struct Lattice4Plaque;
+struct LatticeNeighbor;
 
 using Lattice3PlaqueGraph = std::vector<Lattice3Plaque>;
 using Lattice4PlaqueGraph = std::vector<Lattice4Plaque>;
+using LatticeNeighborGraph = std::vector<LatticeNeighbor>;
 
 struct Lattice3Plaque
     {
@@ -237,6 +239,31 @@ operator<<(std::ostream& s, Lattice4PlaqueGraph const& G)
         }
     return s;
     }
+
+struct LatticeNeighbor {
+    int s0 = 0;
+    std::vector<int> snn;
+    LatticeNeighbor() { }
+    LatticeNeighbor(int s0_, std::vector<int> snn_) : s0{s0_}, snn{snn_} { }
+};
+
+inline std::ostream& 
+operator<<(std::ostream & s, LatticeNeighbor const& b) { 
+    //s << format("(%*d,%*d",3,b.s1,3,b.s2);
+    s << format("(%d : ", b.s0);
+    for (std::vector<int>::const_iterator i = b.snn.begin(), j = --b.snn.end(); i != j; ++i)
+    s << format("%d, ",*i);
+    s << format("%d)", b.snn.back());
+    return s;
+}
+
+inline std::ostream& 
+operator<<(std::ostream& s, LatticeNeighborGraph const& G) { 
+    for(auto& b : G) {
+        s << b << "\n";
+    }
+    return s;
+}
 
 } //namespace itensor
 
