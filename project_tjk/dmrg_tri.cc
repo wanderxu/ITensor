@@ -974,6 +974,88 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
             nnlist.emplace_back( id0, nntmp );
         }
         println( "\nnnlist: \n", nnlist );
+
+        // measure pairing order parameter
+        std::vector<Cplx> pairodp={};
+        for(int n = 1; n <= N ; ++n) {
+            int i = nnlist[n-1].s0;
+            for (int id = 0; id<6; id++) {
+                int j = nnlist[n-1].snn[id];
+
+                // i < j case:
+                if(i < j ){
+                    // println( " i<j case ");
+                    psi.position(i); 
+                    // c_iup c_jdn = a_iup F_i ... F_j a_jdn
+                    auto ir = commonIndex(psi.A(i),psi.A(i+1),Link);
+                    auto cpair = noprime( psi.A(i)*sites.op("Aup",i), Site );
+                    cpair = cpair * sites.op("F",i) * dag(prime(psi.A(i),Site,ir));
+                    for (int k=i+1; k<j; ++k) {
+                        cpair *= psi.A(k);
+                        cpair = cpair*sites.op("F",k)*dag(prime(psi.A(k),Site,Link));
+                    }
+                    cpair *= psi.A(j);
+                    cpair = noprime(cpair*sites.op("F",j), Site);
+                    auto jl = commonIndex(psi.A(j),psi.A(j-1),Link);
+                    cpair = cpair*sites.op("Adn",j)*dag(prime(psi.A(j),Site,jl));
+                    pairodp.emplace_back(cpair.cplx()); // store it
+                    printfln(" %d, %d, pair = %.8f, %8.f\n", i,j, cpair.cplx());
+
+                    // c_idn c_jup = - c_jup c_idn = - a_jup F_{j-1} ... F_{i+1} a_idn
+                    psi.position(j);
+                    ir = commonIndex(psi.A(j),psi.A(j-1),Link);
+                    cpair = psi.A(j)*sites.op("Aup",j) * dag(prime(psi.A(j),Site,ir));
+                    for (int k=j-1; k>i; --k) {
+                        cpair *= psi.A(k);
+                        cpair = cpair*sites.op("F",k)*dag(prime(psi.A(k),Site,Link));
+                    }
+                    cpair *= psi.A(i);
+                    jl = commonIndex(psi.A(i+1),psi.A(i),Link);
+                    cpair = cpair*sites.op("Adn",i)*dag(prime(psi.A(i),Site,jl));
+                    pairodp.emplace_back(-cpair.cplx()); // store it
+                    printfln(" %d, %d, pair = %.8f, %8.f\n", i,j, -cpair.cplx());
+                // i > j case:
+                } else if ( i > j ) {
+                    //println( " i>j case ");
+                    // c_iup c_jdn = a_iup F_{i-1} ... F_{j+1} a_jdn
+                    psi.position(i);
+                    auto ir = commonIndex(psi.A(i),psi.A(i-1),Link);
+                    auto cpair = psi.A(i)*sites.op("Aup",i) * dag(prime(psi.A(i),Site,ir));
+                    for (int k=i-1; k>j; --k) {
+                        cpair *= psi.A(k);
+                        cpair = cpair*sites.op("F",k)*dag(prime(psi.A(k),Site,Link));
+                    }
+                    cpair *= psi.A(j);
+                    auto jl = commonIndex(psi.A(j+1),psi.A(j),Link);
+                    cpair = cpair*sites.op("Adn",j)*dag(prime(psi.A(j),Site,jl));
+                    pairodp.emplace_back(cpair.cplx()); // store it
+                    printfln(" %d, %d, pair = %.8f, %8.f\n", i,j, cpair.cplx());
+
+                    // c_idn c_jup > = - c_jup c_idn = - a_jup F_j ... F_i a_idn
+                    ir = commonIndex(psi.A(j),psi.A(j+1),Link);
+                    cpair = noprime( psi.A(j)*sites.op("Aup",j), Site );
+                    cpair = cpair * sites.op("F",j) * dag(prime(psi.A(j),Site,ir));
+                    for (int k=j+1; k<i; ++k) {
+                        cpair *= psi.A(k);
+                        cpair = cpair*sites.op("F",k)*dag(prime(psi.A(k),Site,Link));
+                    }
+                    cpair *= psi.A(i);
+                    cpair = noprime(cpair*sites.op("F",i), Site);
+                    jl = commonIndex(psi.A(i),psi.A(i-1),Link);
+                    cpair = cpair*sites.op("Adn",i)*dag(prime(psi.A(i),Site,jl));
+                    pairodp.emplace_back(-cpair.cplx()); // store it
+                    printfln(" %d, %d, pair = %.8f, %8.f\n", i,j, -cpair.cplx());
+
+                } else {
+                    Error("Error: i and j should be different!");
+                }
+            }
+        }
+
+        // output
+        std::ofstream pairodpout("pairodp.out",std::ios::out);
+        for (std::vector<Cplx>::const_iterator i = pairodp.begin(); i != pairodp.end(); ++i)
+                pairodpout << *i << ' ';
     }
 
     //// test fourbody
