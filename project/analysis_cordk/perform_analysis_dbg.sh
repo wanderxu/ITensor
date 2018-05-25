@@ -93,7 +93,7 @@ set linetype 2 lc -1
 set linetype 3 lc -1
 set linetype 4 lc 2
 splot "${tag}dbgk.dat" u 1:2:((\$3/$maxv)) notitle nocontour, \\
-"bz.dat" u 1:2:(\$0) w l nocontour notitle, \\
+"bz.dat" u 1:2:(\$0) w l dt 3 nocontour notitle, \\
 #"bz2.dat" u 1:2:(\$0) w l nocontour notitle, \\
 #-2*cos(x/2)-4*cos(x/4)*cos(sqrt(3.0)*y/4) nosurf notitle lw 2, \\
 #-2*cos((x-2*pi)/2)-4*cos((x-2*pi)/4)*cos(sqrt(3.0)*(y-2*pi/sqrt(3))/4) nosurf notitle lw 4 lc 3 dt 3

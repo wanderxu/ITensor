@@ -67,7 +67,7 @@ else : # ladder case
     else:
         print "Wrong number of SiSj, please check your SiSj.out"
 
-kfac = 1
+kfac = 3
 ## redefine N and Ny
 N *= yfold
 Ny *= yfold
