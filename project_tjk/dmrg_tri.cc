@@ -36,6 +36,7 @@ int main(int argc, char* argv[])
     auto meas_dycorr = input.getYesNo("meas_dycorr",false);
     auto meas_dxycorr = input.getYesNo("meas_dxycorr",false);
     auto meas_chiralcorr = input.getYesNo("meas_chiralcorr",false);
+    auto meas_pair = input.getYesNo("meas_pair",false);
     auto quiet = input.getYesNo("quiet",true);
     // as the measurement usually very slow, we divide it into Npart, submit Npart jobs, each one deals with its ithpart
     auto ithpart = input.getInt("ithpart",1);
@@ -948,6 +949,31 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
         std::ofstream fXiout("Xi.out",std::ios::out);
         for (std::vector<double>::const_iterator i = Xi_meas.begin(); i != Xi_meas.end(); ++i)
                 fXiout << *i << ' ';
+    }
+
+    if(domeas && meas_pair) {
+        println("\n////////////////////////////");
+        println("Start to perform measurement of dimer correlation");
+        // 
+        // measure pairing correlation
+        //
+
+        // set the nnlist
+        LatticeNeighborGraph nnlist;
+        for(int n = 1; n<=N; ++n) {
+            int x = (n-1)/Ny+1;
+            int y = (n-1)%Ny+1;
+            int id0 = n;
+            int id1 = (x<Nx ? n+Ny: n+Ny-N); // (1,0) dir
+            int id2 = (y>1 ? n-1: n-1+Ny); // (0,-1) dir
+            int id3 = (x>1 ? (y>1 ? n-Ny-1 : n-Ny-1+Ny) : ( y>1 ? n-Ny-1+N : n-Ny-1+Ny+N ) ); // (-1,-1) dir
+            int id4 = (x>1 ? n-Ny : n-Ny+N); // (-1,0) dir
+            int id5 = (y<Ny ? n+1: n+1-Ny); // (0,1) dir
+            int id6 = (x<Nx ? (y<Ny ? n+Ny+1 : n+Ny+1-Ny) : ( y<Ny ? n+Ny+1-N : n+Ny+1-N-Ny) ); // (1,1) dir
+            std::vector<int> nntmp = {id1, id2, id3, id4, id5, id6};
+            nnlist.emplace_back( id0, nntmp );
+        }
+        println( "\nnnlist: \n", nnlist );
     }
 
     //// test fourbody
