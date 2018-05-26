@@ -4,7 +4,7 @@ input
     Ny = 4
     yperiodic = yes
     t1 = 1.0
-    idop = 2
+    idop = 8
     J1 = 1.0
     J2 = 0.1
     gamma1 = 1.1
@@ -22,6 +22,9 @@ input
     meas_dycorr = no
     meas_dxycorr = no
     meas_chiralcorr = no
+    meas_pair = yes
+    meas_pairodp = yes
+    meas_paircorr = yes
 
     nsweeps = 4
     sweeps
