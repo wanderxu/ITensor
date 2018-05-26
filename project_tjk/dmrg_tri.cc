@@ -1284,21 +1284,20 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                                 }
                                 paircorr.emplace_back( pair1a4  );
                                 paircorr.emplace_back( pair2a3  );
-
-                                std::vector<int> sites_tmp = { j, i, k, l };
-                                auto pair1a4_tmp = mfourbodyf(psi,sites,sites_tmp,"Adagdn","Adagup","Aup","Adn") + 
-                                                   mfourbodyf(psi,sites,sites_tmp,"Adagup","Adagdn","Adn","Aup");
-                                auto pair2a3_tmp = mfourbodyf(psi,sites,sites_tmp,"Adagup","Adagdn","Aup","Adn") + 
-                                                   mfourbodyf(psi,sites,sites_tmp,"Adagdn","Adagup","Adn","Aup");
-
                                 printfln(" %d, %d, %d, %d, paircorr1a4 = %.12f, %.12f\n", j, i, k, l, pair1a4);
-                                printfln(" %d, %d, %d, %d, pair1a4_tmp = %.12f, %.12f\n", j, i, k, l, pair1a4_tmp);
                                 printfln(" %d, %d, %d, %d, paircorr2a3 = %.12f, %.12f\n", j, i, k, l, pair2a3);
-                                printfln(" %d, %d, %d, %d, pair2a3_tmp = %.12f, %.12f\n", j, i, k, l, pair2a3_tmp);
                             } // if( i<k && i<l && j<k && j<l) {
                             else {
-                                // use AutoMPO
-                                auto ampo = AutoMPO(sites);
+                                // use mfourbodyf
+                                std::vector<int> sites_tmp = { j, i, k, l };
+                                auto pair1a4 = mfourbodyf(psi,sites,sites_tmp,"Adagdn","Adagup","Aup","Adn") + 
+                                               mfourbodyf(psi,sites,sites_tmp,"Adagup","Adagdn","Adn","Aup");
+                                auto pair2a3 = mfourbodyf(psi,sites,sites_tmp,"Adagup","Adagdn","Aup","Adn") + 
+                                               mfourbodyf(psi,sites,sites_tmp,"Adagdn","Adagup","Adn","Aup");
+                                paircorr.emplace_back( pair1a4  );
+                                paircorr.emplace_back( pair2a3  );
+                                printfln(" %d, %d, %d, %d, paircorr1a4 = %.12f, %.12f\n", j, i, k, l, pair1a4);
+                                printfln(" %d, %d, %d, %d, paircorr2a3 = %.12f, %.12f\n", j, i, k, l, pair2a3);
                             }
                         }
                     }
