@@ -37,6 +37,8 @@ int main(int argc, char* argv[])
     auto meas_dxycorr = input.getYesNo("meas_dxycorr",false);
     auto meas_chiralcorr = input.getYesNo("meas_chiralcorr",false);
     auto meas_pair = input.getYesNo("meas_pair",false);
+    auto meas_pairodp = input.getYesNo("meas_pairodp",false);
+    auto meas_paircorr = input.getYesNo("meas_paircorr",false);
     auto quiet = input.getYesNo("quiet",true);
     // as the measurement usually very slow, we divide it into Npart, submit Npart jobs, each one deals with its ithpart
     auto ithpart = input.getInt("ithpart",1);
@@ -976,86 +978,181 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
         println( "\nnnlist: \n", nnlist );
 
         // measure pairing order parameter
-        std::vector<Cplx> pairodp={};
-        for(int n = 1; n <= N ; ++n) {
-            int i = nnlist[n-1].s0;
-            for (int id = 0; id<6; id++) {
-                int j = nnlist[n-1].snn[id];
+        if( meas_pairodp) {
+            std::vector<Cplx> pairodp={};
+            for(int n = 1; n <= N ; ++n) {
+                int i = nnlist[n-1].s0;
+                for (int id = 0; id<6; id++) {
+                    int j = nnlist[n-1].snn[id];
 
-                // i < j case:
-                if(i < j ){
-                    // println( " i<j case ");
-                    psi.position(i); 
-                    // c_iup c_jdn = a_iup F_i ... F_j a_jdn
-                    auto ir = commonIndex(psi.A(i),psi.A(i+1),Link);
-                    auto cpair = noprime( psi.A(i)*sites.op("Aup",i), Site );
-                    cpair = cpair * sites.op("F",i) * dag(prime(psi.A(i),Site,ir));
-                    for (int k=i+1; k<j; ++k) {
-                        cpair *= psi.A(k);
-                        cpair = cpair*sites.op("F",k)*dag(prime(psi.A(k),Site,Link));
-                    }
-                    cpair *= psi.A(j);
-                    cpair = noprime(cpair*sites.op("F",j), Site);
-                    auto jl = commonIndex(psi.A(j),psi.A(j-1),Link);
-                    cpair = cpair*sites.op("Adn",j)*dag(prime(psi.A(j),Site,jl));
-                    pairodp.emplace_back(cpair.cplx()); // store it
-                    printfln(" %d, %d, pair = %.8f, %8.f\n", i,j, cpair.cplx());
+                    // i < j case:
+                    if(i < j ){
+                        // println( " i<j case ");
+                        psi.position(i); 
+                        // c_iup c_jdn = a_iup F_i ... F_j a_jdn
+                        auto ir = commonIndex(psi.A(i),psi.A(i+1),Link);
+                        auto cpair = noprime( psi.A(i)*sites.op("Aup",i), Site );
+                        cpair = cpair * sites.op("F",i) * dag(prime(psi.A(i),Site,ir));
+                        for (int k=i+1; k<j; ++k) {
+                            cpair *= psi.A(k);
+                            cpair = cpair*sites.op("F",k)*dag(prime(psi.A(k),Site,Link));
+                        }
+                        cpair *= psi.A(j);
+                        cpair = noprime(cpair*sites.op("F",j), Site);
+                        auto jl = commonIndex(psi.A(j),psi.A(j-1),Link);
+                        cpair = cpair*sites.op("Adn",j)*dag(prime(psi.A(j),Site,jl));
+                        pairodp.emplace_back(cpair.cplx()); // store it
+                        printfln(" %d, %d, pair = %.8f, %8.f\n", i,j, cpair.cplx());
 
-                    // c_idn c_jup = - c_jup c_idn = - a_jup F_{j-1} ... F_{i+1} a_idn
-                    psi.position(j);
-                    ir = commonIndex(psi.A(j),psi.A(j-1),Link);
-                    cpair = psi.A(j)*sites.op("Aup",j) * dag(prime(psi.A(j),Site,ir));
-                    for (int k=j-1; k>i; --k) {
-                        cpair *= psi.A(k);
-                        cpair = cpair*sites.op("F",k)*dag(prime(psi.A(k),Site,Link));
-                    }
-                    cpair *= psi.A(i);
-                    jl = commonIndex(psi.A(i+1),psi.A(i),Link);
-                    cpair = cpair*sites.op("Adn",i)*dag(prime(psi.A(i),Site,jl));
-                    pairodp.emplace_back(-cpair.cplx()); // store it
-                    printfln(" %d, %d, pair = %.8f, %8.f\n", i,j, -cpair.cplx());
-                // i > j case:
-                } else if ( i > j ) {
-                    //println( " i>j case ");
-                    // c_iup c_jdn = a_iup F_{i-1} ... F_{j+1} a_jdn
-                    psi.position(i);
-                    auto ir = commonIndex(psi.A(i),psi.A(i-1),Link);
-                    auto cpair = psi.A(i)*sites.op("Aup",i) * dag(prime(psi.A(i),Site,ir));
-                    for (int k=i-1; k>j; --k) {
-                        cpair *= psi.A(k);
-                        cpair = cpair*sites.op("F",k)*dag(prime(psi.A(k),Site,Link));
-                    }
-                    cpair *= psi.A(j);
-                    auto jl = commonIndex(psi.A(j+1),psi.A(j),Link);
-                    cpair = cpair*sites.op("Adn",j)*dag(prime(psi.A(j),Site,jl));
-                    pairodp.emplace_back(cpair.cplx()); // store it
-                    printfln(" %d, %d, pair = %.8f, %8.f\n", i,j, cpair.cplx());
+                        // c_idn c_jup = - c_jup c_idn = - a_jup F_{j-1} ... F_{i+1} a_idn
+                        psi.position(j);
+                        ir = commonIndex(psi.A(j),psi.A(j-1),Link);
+                        cpair = psi.A(j)*sites.op("Aup",j) * dag(prime(psi.A(j),Site,ir));
+                        for (int k=j-1; k>i; --k) {
+                            cpair *= psi.A(k);
+                            cpair = cpair*sites.op("F",k)*dag(prime(psi.A(k),Site,Link));
+                        }
+                        cpair *= psi.A(i);
+                        jl = commonIndex(psi.A(i+1),psi.A(i),Link);
+                        cpair = cpair*sites.op("Adn",i)*dag(prime(psi.A(i),Site,jl));
+                        pairodp.emplace_back(-cpair.cplx()); // store it
+                        printfln(" %d, %d, pair = %.8f, %8.f\n", i,j, -cpair.cplx());
+                    // i > j case:
+                    } else if ( i > j ) {
+                        //println( " i>j case ");
+                        // c_iup c_jdn = a_iup F_{i-1} ... F_{j+1} a_jdn
+                        psi.position(i);
+                        auto ir = commonIndex(psi.A(i),psi.A(i-1),Link);
+                        auto cpair = psi.A(i)*sites.op("Aup",i) * dag(prime(psi.A(i),Site,ir));
+                        for (int k=i-1; k>j; --k) {
+                            cpair *= psi.A(k);
+                            cpair = cpair*sites.op("F",k)*dag(prime(psi.A(k),Site,Link));
+                        }
+                        cpair *= psi.A(j);
+                        auto jl = commonIndex(psi.A(j+1),psi.A(j),Link);
+                        cpair = cpair*sites.op("Adn",j)*dag(prime(psi.A(j),Site,jl));
+                        pairodp.emplace_back(cpair.cplx()); // store it
+                        printfln(" %d, %d, pair = %.8f, %8.f\n", i,j, cpair.cplx());
 
-                    // c_idn c_jup > = - c_jup c_idn = - a_jup F_j ... F_i a_idn
-                    ir = commonIndex(psi.A(j),psi.A(j+1),Link);
-                    cpair = noprime( psi.A(j)*sites.op("Aup",j), Site );
-                    cpair = cpair * sites.op("F",j) * dag(prime(psi.A(j),Site,ir));
-                    for (int k=j+1; k<i; ++k) {
-                        cpair *= psi.A(k);
-                        cpair = cpair*sites.op("F",k)*dag(prime(psi.A(k),Site,Link));
-                    }
-                    cpair *= psi.A(i);
-                    cpair = noprime(cpair*sites.op("F",i), Site);
-                    jl = commonIndex(psi.A(i),psi.A(i-1),Link);
-                    cpair = cpair*sites.op("Adn",i)*dag(prime(psi.A(i),Site,jl));
-                    pairodp.emplace_back(-cpair.cplx()); // store it
-                    printfln(" %d, %d, pair = %.8f, %8.f\n", i,j, -cpair.cplx());
+                        // c_idn c_jup > = - c_jup c_idn = - a_jup F_j ... F_i a_idn
+                        ir = commonIndex(psi.A(j),psi.A(j+1),Link);
+                        cpair = noprime( psi.A(j)*sites.op("Aup",j), Site );
+                        cpair = cpair * sites.op("F",j) * dag(prime(psi.A(j),Site,ir));
+                        for (int k=j+1; k<i; ++k) {
+                            cpair *= psi.A(k);
+                            cpair = cpair*sites.op("F",k)*dag(prime(psi.A(k),Site,Link));
+                        }
+                        cpair *= psi.A(i);
+                        cpair = noprime(cpair*sites.op("F",i), Site);
+                        jl = commonIndex(psi.A(i),psi.A(i-1),Link);
+                        cpair = cpair*sites.op("Adn",i)*dag(prime(psi.A(i),Site,jl));
+                        pairodp.emplace_back(-cpair.cplx()); // store it
+                        printfln(" %d, %d, pair = %.8f, %8.f\n", i,j, -cpair.cplx());
 
-                } else {
-                    Error("Error: i and j should be different!");
+                    } else {
+                        Error("Error: i and j should be different!");
+                    }
                 }
             }
+
+            // output
+            std::ofstream pairodpout("pairodp.out",std::ios::out);
+            for (std::vector<Cplx>::const_iterator i = pairodp.begin(); i != pairodp.end(); ++i)
+                    pairodpout << *i << ' ';
         }
 
-        // output
-        std::ofstream pairodpout("pairodp.out",std::ios::out);
-        for (std::vector<Cplx>::const_iterator i = pairodp.begin(); i != pairodp.end(); ++i)
-                pairodpout << *i << ' ';
+        // measure pairing correlation
+        if(meas_paircorr) {
+            std::vector<Cplx> paircorr={};
+            //for(int n1 = 1; n1 <= N ; ++n1) {
+                int n1 = 1;
+                int i = nnlist[n1-1].s0;
+                //for (int id1 = 0; id1<6; id1++) {
+                    int id1=0;
+                    int j = nnlist[n1-1].snn[id1];
+                    //for(int n2 = n1; n2 <= N ; ++n2) {
+                        int n2 = 8;
+                        int k = nnlist[n2-1].s0;
+                        //for (int id2 = 0; id2<6; id2++) {
+                            int id2=0;
+                            int l = nnlist[n2-1].snn[id2];
+                            // i,j < k,l
+                            if( i<k && i<l && j<k && j<l) {
+                                if(i<j && k<l) {
+                                    // i<j<k<l
+                                    printfln(" %d, %d, %d, %d, i<j<k<l case\n", i, j, k, l);
+                                    //   c^+_jdn c^+_iup c_kup c_ldn =-c^+_iup c^+_jdn c_kup c_ldn
+                                    // =-a^+_iup F_i ... F_{j-1} a^+_jdn F_j a_kup F_k ... F_l a_ldn
+                                    println("run to 0.1");
+                                    psi.position(i);
+                                    println("run to 0.2");
+                                    auto cpair = noprime(psi.A(i)*sites.op("Adagup",i), Site);
+                                    println("run to 0.3");
+                                    cpair *= sites.op("F",i);
+                                    println("run to 0.4");
+                                    auto ir = commonIndex(psi.A(i),psi.A(i+1),Link);
+                                    println("run to 0.5");
+                                    cpair = cpair*dag(prime(psi.A(i),Site,ir));
+                                    println("run to 0.6");
+                                    for( int i1 = i+1; i1<j; ++i1 ) {
+                                        cpair *= psi.A(i1);
+                                        println("run to 0.7");
+                                        cpair *= sites.op("F",i1);
+                                        println("run to 0.8");
+                                        cpair *= dag(prime(psi.A(i1),Site,Link));
+                                        println("run to 0.9");
+                                    }
+                                    cpair *= psi.A(j);
+                                    cpair = noprime(cpair*sites.op("Adagdn",j), Site);
+                                    println("run to 1.0");
+                                    cpair *= sites.op("F",j);
+                                    println("run to 1.1");
+                                    cpair *= dag(prime(psi.A(j),Site,Link));
+                                    println("run to 1.2");
+                                    for (int j1 = j+1; j1<k; ++j1) {
+                                        cpair *= psi.A(j1);
+                                        println("run to 1.3");
+                                        cpair *= dag(prime(psi.A(j1),Link));
+                                        println("run to 1.4");
+                                    }
+                                    cpair *= psi.A(k);
+                                    println("run to 1.5");
+                                    cpair = noprime(cpair*sites.op("Aup",k), Site);
+                                    println("run to 1.6");
+                                    cpair *= sites.op("F",k);
+                                    println("run to 1.7");
+                                    cpair *= dag(prime(psi.A(k),Site,Link));
+                                    println("run to 1.8");
+                                    for (int k1 = k+1; k1<l; ++k1) {
+                                        cpair *= psi.A(k1);
+                                        println("run to 1.9");
+                                        cpair *= sites.op("F",k1);
+                                        println("run to 2.0");
+                                        cpair *= dag(prime(psi.A(k1),Site,Link));
+                                        println("run to 2.1");
+                                    }
+                                    cpair *= psi.A(l);
+                                    cpair = noprime(cpair*sites.op("F",l),Site);
+                                    println("run to 2.2");
+                                    cpair *= sites.op("Adn",l);
+                                    println("run to 2.3");
+                                    ir = commonIndex(psi.A(l),psi.A(l-1),Link);
+                                    println("run to 2.4");
+                                    cpair *= dag(prime(psi.A(l),Site,ir));
+                                    println("run to 2.5");
+                                    paircorr.emplace_back(-cpair.cplx()); // store it
+                                    printfln(" %d, %d, %d, %d, paircorr = %.8f, %8.f\n", j, i, k, l, -cpair.cplx());
+                                } else if ( i>j && k<l ) {
+                                    // j<i<k<l
+                                    //   c^+_jdn c^+_iup c_kup c_ldn
+                                    // = a^+_jdn F_{j+1} ... F_{i-1} a^+_iup a_kup F_k ... F_l a_ldn
+                                }
+                            }
+                        //}
+                    //}
+                //} // for (int id1 = 0; id1<6; id1++) {
+            //} // for(int n1 = 1; n1 <= N ; ++n1) {
+        }
     }
 
     //// test fourbody
