@@ -1064,94 +1064,112 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
         // measure pairing correlation
         if(meas_paircorr) {
             std::vector<Cplx> paircorr={};
-            //for(int n1 = 1; n1 <= N ; ++n1) {
-                int n1 = 1;
+            for(int n1 = 1; n1 <= N ; ++n1) {
+                //int n1 = 1;
                 int i = nnlist[n1-1].s0;
-                //for (int id1 = 0; id1<6; id1++) {
-                    int id1=0;
+                for (int id1 = 0; id1<6; id1++) {
+                    //int id1=0;
                     int j = nnlist[n1-1].snn[id1];
-                    //for(int n2 = n1; n2 <= N ; ++n2) {
-                        int n2 = 8;
+                    for(int n2 = n1; n2 <= N ; ++n2) {
+                        //int n2 = 8;
                         int k = nnlist[n2-1].s0;
-                        //for (int id2 = 0; id2<6; id2++) {
-                            int id2=0;
+                        for (int id2 = 0; id2<6; id2++) {
+                            //int id2=0;
                             int l = nnlist[n2-1].snn[id2];
                             // i,j < k,l
+                            // printfln(" j,i,k,l = %d, %d, %d, %d ", j, i, k, l);
                             if( i<k && i<l && j<k && j<l) {
-                                if(i<j && k<l) {
-                                    // i<j<k<l
-                                    printfln(" %d, %d, %d, %d, i<j<k<l case\n", i, j, k, l);
-                                    //   c^+_jdn c^+_iup c_kup c_ldn =-c^+_iup c^+_jdn c_kup c_ldn
-                                    // =-a^+_iup F_i ... F_{j-1} a^+_jdn F_j a_kup F_k ... F_l a_ldn
-                                    println("run to 0.1");
+                                IQTensor cpair; 
+                                if(i<j) {
+                                    // i<j
+                                    //   c^+_jdn c^+_iup =-c^+_iup c^+_jdn
+                                    // =-a^+_iup F_i ... F_{j-1} a^+_jdn F_j
                                     psi.position(i);
-                                    println("run to 0.2");
-                                    auto cpair = noprime(psi.A(i)*sites.op("Adagup",i), Site);
-                                    println("run to 0.3");
+                                    cpair = noprime(psi.A(i)*sites.op("Adagup",i), Site);
                                     cpair *= sites.op("F",i);
-                                    println("run to 0.4");
                                     auto ir = commonIndex(psi.A(i),psi.A(i+1),Link);
-                                    println("run to 0.5");
                                     cpair = cpair*dag(prime(psi.A(i),Site,ir));
-                                    println("run to 0.6");
                                     for( int i1 = i+1; i1<j; ++i1 ) {
                                         cpair *= psi.A(i1);
-                                        println("run to 0.7");
                                         cpair *= sites.op("F",i1);
-                                        println("run to 0.8");
                                         cpair *= dag(prime(psi.A(i1),Site,Link));
-                                        println("run to 0.9");
                                     }
                                     cpair *= psi.A(j);
                                     cpair = noprime(cpair*sites.op("Adagdn",j), Site);
-                                    println("run to 1.0");
                                     cpair *= sites.op("F",j);
-                                    println("run to 1.1");
                                     cpair *= dag(prime(psi.A(j),Site,Link));
-                                    println("run to 1.2");
-                                    for (int j1 = j+1; j1<k; ++j1) {
+                                } else if(i>j) {
+                                    // j<i
+                                    //   c^+_jdn c^+_iup
+                                    // = a^+_jdn F_{j+1} ... F_{i-1} a^+_iup
+                                    psi.position(j);
+                                    cpair = psi.A(j)*sites.op("Adagdn",j);
+                                    auto ir = commonIndex(psi.A(j),psi.A(j+1),Link);
+                                    cpair *= dag(prime(psi.A(j),Site,ir));
+                                    for( int j1 = j+1; j1<i; ++j1 ) {
                                         cpair *= psi.A(j1);
-                                        println("run to 1.3");
-                                        cpair *= dag(prime(psi.A(j1),Link));
-                                        println("run to 1.4");
+                                        cpair *= sites.op("F",j1);
+                                        cpair *= dag(prime(psi.A(j1),Site,Link));
                                     }
+                                    cpair *= psi.A(i);
+                                    cpair *= sites.op("Adagup",i);
+                                    cpair *= dag(prime(psi.A(i),Site,Link));
+                                } else { Error("i should not equal to j !"); }
+                                if(k<l) {
+                                    for (int j1 = std::max(i,j)+1; j1<k; ++j1) {
+                                        cpair *= psi.A(j1);
+                                        cpair *= dag(prime(psi.A(j1),Link));
+                                    }
+                                    // k<l
+                                    //   c_kup c_ldn
+                                    // = a_kup F_k ... F_l a_ldn
                                     cpair *= psi.A(k);
-                                    println("run to 1.5");
                                     cpair = noprime(cpair*sites.op("Aup",k), Site);
-                                    println("run to 1.6");
                                     cpair *= sites.op("F",k);
-                                    println("run to 1.7");
                                     cpair *= dag(prime(psi.A(k),Site,Link));
-                                    println("run to 1.8");
                                     for (int k1 = k+1; k1<l; ++k1) {
                                         cpair *= psi.A(k1);
-                                        println("run to 1.9");
                                         cpair *= sites.op("F",k1);
-                                        println("run to 2.0");
                                         cpair *= dag(prime(psi.A(k1),Site,Link));
-                                        println("run to 2.1");
                                     }
                                     cpair *= psi.A(l);
                                     cpair = noprime(cpair*sites.op("F",l),Site);
-                                    println("run to 2.2");
                                     cpair *= sites.op("Adn",l);
-                                    println("run to 2.3");
-                                    ir = commonIndex(psi.A(l),psi.A(l-1),Link);
-                                    println("run to 2.4");
+                                    auto ir = commonIndex(psi.A(l),psi.A(l-1),Link);
                                     cpair *= dag(prime(psi.A(l),Site,ir));
-                                    println("run to 2.5");
+                                } else if (k>l ) {
+                                    for (int j1 = std::max(i,j)+1; j1<l; ++j1) {
+                                        cpair *= psi.A(j1);
+                                        cpair *= dag(prime(psi.A(j1),Link));
+                                    }
+                                    // l<k
+                                    //   c_kup c_ldn = - c_ldn c_kup
+                                    // =-a_ldn F_{l+1} ... F_{k-1} a_kup
+                                    cpair *= psi.A(l);
+                                    cpair *= sites.op("Adn",l);
+                                    cpair *= dag(prime(psi.A(l),Site,Link));
+                                    for (int l1 = l+1; l1<k; ++l1) {
+                                        cpair *= psi.A(l1);
+                                        cpair *= sites.op("F",l1);
+                                        cpair *= dag(prime(psi.A(l1),Site,Link));
+                                    }
+                                    cpair *= psi.A(k);
+                                    cpair *= sites.op("Aup",k);
+                                    auto ir = commonIndex(psi.A(k),psi.A(k-1),Link);
+                                    cpair *= dag(prime(psi.A(k),Site,ir));
+                                } else { Error("k should not equal to l !"); }
+                                if( (i>j && k<l) || ( i<j && k>l ) ) { // have a sign in this case
                                     paircorr.emplace_back(-cpair.cplx()); // store it
                                     printfln(" %d, %d, %d, %d, paircorr = %.8f, %8.f\n", j, i, k, l, -cpair.cplx());
-                                } else if ( i>j && k<l ) {
-                                    // j<i<k<l
-                                    //   c^+_jdn c^+_iup c_kup c_ldn
-                                    // = a^+_jdn F_{j+1} ... F_{i-1} a^+_iup a_kup F_k ... F_l a_ldn
+                                } else {
+                                    paircorr.emplace_back(cpair.cplx()); // store it
+                                    printfln(" %d, %d, %d, %d, paircorr = %.8f, %8.f\n", j, i, k, l, cpair.cplx());
                                 }
                             }
-                        //}
-                    //}
-                //} // for (int id1 = 0; id1<6; id1++) {
-            //} // for(int n1 = 1; n1 <= N ; ++n1) {
+                        }
+                    }
+                } // for (int id1 = 0; id1<6; id1++) {
+            } // for(int n1 = 1; n1 <= N ; ++n1) {
         }
     }
 
