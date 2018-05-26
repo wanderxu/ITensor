@@ -1265,8 +1265,8 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                                     cpairuddu *= psi.A(k);
                                     cpairdudu = noprime(cpairdudu*sites.op("F",k), Site);
                                     cpairuddu = noprime(cpairuddu*sites.op("F",k), Site);
-                                    cpairdudu *= sites.op("Aup",k);
-                                    cpairuddu *= sites.op("Aup",k);
+                                    cpairdudu *= sites.op("Adn",k);
+                                    cpairuddu *= sites.op("Adn",k);
                                     ir = commonIndex(psi.A(k),psi.A(k-1),Link);
                                     cpairdudu *= dag(prime(psi.A(k),Site,ir));
                                     cpairuddu *= dag(prime(psi.A(k),Site,ir));
