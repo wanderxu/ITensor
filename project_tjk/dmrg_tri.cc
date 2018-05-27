@@ -1002,7 +1002,7 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                         auto jl = commonIndex(psi.A(j),psi.A(j-1),Link);
                         cpair = cpair*sites.op("Adn",j)*dag(prime(psi.A(j),Site,jl));
                         pairodp.emplace_back(cpair.cplx()); // store it
-                        printfln(" %d, %d, pair = %.12f, %.12f\n", i,j, cpair.cplx());
+                        printfln(" %d, %d, pair = %.12f", i,j, cpair.cplx());
 
                         // c_idn c_jup = - c_jup c_idn = - a_jup F_{j-1} ... F_{i+1} a_idn
                         psi.position(j);
@@ -1016,7 +1016,7 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                         jl = commonIndex(psi.A(i+1),psi.A(i),Link);
                         cpair = cpair*sites.op("Adn",i)*dag(prime(psi.A(i),Site,jl));
                         pairodp.emplace_back(-cpair.cplx()); // store it
-                        printfln(" %d, %d, pair = %.12f, %.12f\n", i,j, -cpair.cplx());
+                        printfln(" %d, %d, pair = %.12f", i,j, -cpair.cplx());
                     // i > j case:
                     } else if ( i > j ) {
                         //println( " i>j case ");
@@ -1032,7 +1032,7 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                         auto jl = commonIndex(psi.A(j+1),psi.A(j),Link);
                         cpair = cpair*sites.op("Adn",j)*dag(prime(psi.A(j),Site,jl));
                         pairodp.emplace_back(cpair.cplx()); // store it
-                        printfln(" %d, %d, pair = %.12f, %.12f\n", i,j, cpair.cplx());
+                        printfln(" %d, %d, pair = %.12f", i,j, cpair.cplx());
 
                         // c_idn c_jup > = - c_jup c_idn = - a_jup F_j ... F_i a_idn
                         ir = commonIndex(psi.A(j),psi.A(j+1),Link);
@@ -1047,7 +1047,7 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                         jl = commonIndex(psi.A(i),psi.A(i-1),Link);
                         cpair = cpair*sites.op("Adn",i)*dag(prime(psi.A(i),Site,jl));
                         pairodp.emplace_back(-cpair.cplx()); // store it
-                        printfln(" %d, %d, pair = %.12f, %.12f\n", i,j, -cpair.cplx());
+                        printfln(" %d, %d, pair = %.12f", i,j, -cpair.cplx());
 
                     } else {
                         Error("Error: i and j should be different!");
@@ -1284,8 +1284,8 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                                 }
                                 paircorr.emplace_back( pair1a4  );
                                 paircorr.emplace_back( pair2a3  );
-                                printfln(" %d, %d, %d, %d, paircorr1a4 = %.12f, %.12f\n", j, i, k, l, pair1a4);
-                                printfln(" %d, %d, %d, %d, paircorr2a3 = %.12f, %.12f\n", j, i, k, l, pair2a3);
+                                printfln(" %d, %d, %d, %d, paircorr1a4 = %.12f", j, i, k, l, pair1a4);
+                                printfln(" %d, %d, %d, %d, paircorr2a3 = %.12f", j, i, k, l, pair2a3);
                             } // if( i<k && i<l && j<k && j<l) {
                             else {
                                 // use mfourbodyf
@@ -1296,8 +1296,8 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                                                mfourbodyf(psi,sites,sites_tmp,"Adagdn","Adagup","Adn","Aup");
                                 paircorr.emplace_back( pair1a4  );
                                 paircorr.emplace_back( pair2a3  );
-                                printfln(" %d, %d, %d, %d, paircorr1a4 = %.12f, %.12f\n", j, i, k, l, pair1a4);
-                                printfln(" %d, %d, %d, %d, paircorr2a3 = %.12f, %.12f\n", j, i, k, l, pair2a3);
+                                printfln(" %d, %d, %d, %d, paircorr1a4 = %.12f", j, i, k, l, pair1a4);
+                                printfln(" %d, %d, %d, %d, paircorr2a3 = %.12f", j, i, k, l, pair2a3);
                             }
                         }
                     }
@@ -1311,54 +1311,6 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
         } // if(meas_paircorr) {
     }
 
-    //// test fourbody
-    //srand (time(NULL));
-    //std::vector<int> sites_tmp={rand()%N+1,rand()%N+1,rand()%N+1,rand()%N+1};
-    //sites_tmp = {1,7,8,14};
-    //for (auto n : sites_tmp ) { std::cout << n <<" "; }
-    //std::cout << '\n';
-    //println( " <sijkl> = ", mfourbody(psi,sites,sites_tmp,"S+","S-","S+","S-") );
-
-    //std::vector< std::pair<int,int> > op34pair_vec ={};
-    //std::vector<int> corr_ind = {};
-    //std::vector<double> dxdx_meas( 1 );
-    //dxdx_meas[0]=0.0;
-    //op34pair_vec.emplace_back( std::make_pair( sites_tmp[2], sites_tmp[3] ) );
-    //corr_ind.emplace_back(0);
-    //mfourbody_str(psi, sites, {sites_tmp[0],sites_tmp[1]}, "S+", "S-", op34pair_vec, "S+", "S-", corr_ind, dxdx_meas,1.0);
-    //println( " mfourbody_str <sijkl> = ");
-    //for (auto rr : dxdx_meas ) { std::cout << rr <<" "; }
-    //std::cout << '\n';
-
-    ////// test sixbody
-    ////std::vector<int> sites_tmp = {1,2,3,4,5,6};
-    ////for (auto n : sites_tmp ) { std::cout << n <<" "; }
-    ////std::cout << '\n';
-    ////println( "with msixbody <sijklmn> = ", msixbody(psi,sites,sites_tmp,"S+","S-","S+","S-","Sz","Sz") );
-
-    ////auto tmp_mpo = AutoMPO(sites);
-    ////tmp_mpo += 1.0,"S+",sites_tmp[0], "S-", sites_tmp[1],"S+",sites_tmp[2], "S-", sites_tmp[3],"Sz",sites_tmp[4], "Sz", sites_tmp[5];
-    ////auto tmp_corr = IQMPO(tmp_mpo);
-    ////println( "with overlap <sijklmn> =", overlap(psi,tmp_corr,psi));
-
-    ////////sites_tmp = {3,3,3,3};
-    ////////for (auto n : sites_tmp ) { std::cout << n <<" "; }
-    ////////std::cout << '\n';
-    ////////println( "with mfourbody <sijkl> = ", mfourbody(psi,sites,sites_tmp,"S+","S-","S+","S-") );
-
-    ////////tmp_mpo = AutoMPO(sites);
-    ////////tmp_mpo += 1.0,"S+",sites_tmp[0], "S-", sites_tmp[1],"S+",sites_tmp[2], "S-", sites_tmp[3];
-    ////////tmp_corr = IQMPO(tmp_mpo);
-    ////////println( "with overlap <sijkl> =", overlap(psi,tmp_corr,psi));
-
-    ////std::vector<double> tmp_meas(1);
-    ////std::vector<int> corr_ind = {};
-    ////tmp_meas[0]=0.0;
-    ////corr_ind.emplace_back(0);
-    ////msixbody_str(psi, sites, {sites_tmp[0],sites_tmp[1],sites_tmp[2]}, "S+", "S-", "S+",
-    ////                           { {sites_tmp[3],sites_tmp[4],sites_tmp[5]} }, "S-", "Sz", "Sz", corr_ind, tmp_meas,1.0);
-    ////println( "with msixbody_str <sijklmn> =", tmp_meas[0]);
-
     println( "\nRUNNING FINISHED ^_^ !!! " );
     return 0;
-    }
+}
