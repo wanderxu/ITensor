@@ -222,78 +222,78 @@ mfourbody(MPSt<Tensor>& psi,
     auto opk = sites.op(opstr[2].first,opstr[2].second);
     auto opl = sites.op(opstr[3].first,opstr[3].second);
 
-    psi.position(opstr[0].second);
-    IQTensor SStmp=psi.A(opstr[0].second);
-    SStmp *= opi;
-    if( opstr[1].second != opstr[0].second ) {
-        //println("i!=j");
-        auto ir1 = commonIndex(psi.A(opstr[0].second), psi.A(opstr[0].second+1),Link);
-        SStmp *= dag(prime(prime(psi.A(opstr[0].second),Site),ir1));
+    psi.position(opstr[3].second);
+    IQTensor SStmp=psi.A(opstr[3].second);
+    SStmp *= opl;
+    if( opstr[2].second != opstr[3].second ) {
+        //println("k!=l");
+        auto ir1 = commonIndex(psi.A(opstr[3].second), psi.A(opstr[3].second-1),Link);
+        SStmp *= dag(prime(prime(psi.A(opstr[3].second),Site),ir1));
         // propogate until opj
-        for ( int i1 = opstr[0].second+1; i1<opstr[1].second; ++i1) { 
+        for ( int i1 = opstr[3].second-1; i1>opstr[2].second; --i1) { 
             SStmp *= psi.A(i1);
             SStmp *= dag(prime(psi.A(i1),Link));
-        }
-        SStmp *= psi.A(opstr[1].second);
-        SStmp *= opj;
-    }
-    else {
-        //println("i=j");
-        SStmp = noprime(SStmp,Site)*opj;
-    }
-
-    if ( opstr[2].second != opstr[1].second ){
-        //println("j!=k");
-        if ( opstr[1].second == opstr[0].second ) {
-            auto ir2 = commonIndex(psi.A(opstr[1].second), psi.A(opstr[1].second+1),Link);
-            SStmp *= dag(prime(prime(psi.A(opstr[1].second),Site),ir2));
-        }
-        else {
-            SStmp *= dag(prime(prime(psi.A(opstr[1].second),Site),Link));
-        }
-        // propogate until opk
-        for ( int i2 = opstr[1].second+1; i2<opstr[2].second; ++i2) { 
-            SStmp *= psi.A(i2);
-            SStmp *= dag(prime(psi.A(i2),Link));
         }
         SStmp *= psi.A(opstr[2].second);
         SStmp *= opk;
     }
-    else{
-        //println("j=k");
+    else {
+        //println("k=l");
         SStmp = noprime(SStmp,Site)*opk;
     }
 
-    if ( opstr[3].second != opstr[2].second ){
-        //println("k!=l");
-        if ( (opstr[1].second == opstr[0].second) && (opstr[2].second == opstr[1].second) ) {
-            auto ir3 = commonIndex(psi.A(opstr[2].second), psi.A(opstr[2].second+1),Link);
-            SStmp *= dag(prime(prime(psi.A(opstr[2].second),Site),ir3));
+    if ( opstr[1].second != opstr[2].second ){
+        //println("j!=k");
+        if ( opstr[2].second == opstr[3].second ) {
+            auto ir2 = commonIndex(psi.A(opstr[2].second), psi.A(opstr[2].second-1),Link);
+            SStmp *= dag(prime(prime(psi.A(opstr[2].second),Site),ir2));
         }
-        else{
+        else {
             SStmp *= dag(prime(prime(psi.A(opstr[2].second),Site),Link));
         }
+        // propogate until opj
+        for ( int i2 = opstr[2].second-1; i2>opstr[1].second; --i2) { 
+            SStmp *= psi.A(i2);
+            SStmp *= dag(prime(psi.A(i2),Link));
+        }
+        SStmp *= psi.A(opstr[1].second);
+        SStmp *= opj;
+    }
+    else{
+        //println("j=k");
+        SStmp = noprime(SStmp,Site)*opj;
+    }
+
+    if ( opstr[0].second != opstr[1].second ){
+        //println("i!=j");
+        if ( (opstr[2].second == opstr[3].second) && (opstr[1].second == opstr[2].second) ) {
+            auto ir3 = commonIndex(psi.A(opstr[1].second), psi.A(opstr[1].second-1),Link);
+            SStmp *= dag(prime(prime(psi.A(opstr[1].second),Site),ir3));
+        }
+        else{
+            SStmp *= dag(prime(prime(psi.A(opstr[1].second),Site),Link));
+        }
         // propogate until opk
-        for ( int i3 = opstr[2].second+1; i3<opstr[3].second; ++i3) { 
+        for ( int i3 = opstr[1].second-1; i3>opstr[0].second; --i3) { 
             SStmp *= psi.A(i3);
             SStmp *= dag(prime(psi.A(i3),Link));
         }
-        SStmp *= psi.A(opstr[3].second);
-        SStmp *= opl;
+        SStmp *= psi.A(opstr[0].second);
+        SStmp *= opi;
     }
     else{
-        //println("k=l");
-        SStmp = noprime(SStmp,Site)*opl;
+        //println("i=j");
+        SStmp = noprime(SStmp,Site)*opi;
     }
 
     if ( (opstr[1].second == opstr[0].second) && 
          (opstr[2].second == opstr[1].second) &&
          (opstr[3].second == opstr[2].second) ) {
-        SStmp *= dag(prime(psi.A(opstr[3].second),Site)); // return
+        SStmp *= dag(prime(psi.A(opstr[0].second),Site)); // return
     }
     else {
-        auto ir3 = commonIndex(psi.A(opstr[3].second), psi.A(opstr[3].second-1),Link);
-        SStmp *= dag(prime(prime(psi.A(opstr[3].second),Site),ir3)); // return
+        auto ir3 = commonIndex(psi.A(opstr[0].second), psi.A(opstr[0].second+1),Link);
+        SStmp *= dag(prime(prime(psi.A(opstr[0].second),Site),ir3)); // return
     }
     return (SStmp.cplx()).real();
   }
@@ -710,6 +710,9 @@ template <class Tensor> Cplx mfourbodyf(
     // sort by site index
     // std::sort(opstr.begin(), opstr.end(), cmp_by_value);
     // sort manually, we need to count the number of permutation
+    ////printfln("before sorting, opstr = %s, %d, %s, %d, %s, %d, %s, %d ",
+    ////          opstr[0].first, opstr[0].second, opstr[1].first, opstr[1].second,
+    ////          opstr[2].first, opstr[2].second, opstr[3].first, opstr[3].second);
     opair optmp;
     int icount = 0;
     for (int j=4; j>1; j--){
@@ -722,6 +725,10 @@ template <class Tensor> Cplx mfourbodyf(
             } 
         }
     }
+    ////printfln("after sorting, opstr = %s, %d, %s, %d, %s, %d, %s, %d ",
+    ////          opstr[0].first, opstr[0].second, opstr[1].first, opstr[1].second,
+    ////          opstr[2].first, opstr[2].second, opstr[3].first, opstr[3].second);
+    ////println("icount =", icount);
     int signf = 1 - ((icount % 2) * 2);
     // count another part of sign
     if( opstr[0].first == "Adn" ) {
@@ -736,100 +743,102 @@ template <class Tensor> Cplx mfourbodyf(
     if( opstr[3].first == "Adagdn" ) {
         signf = -signf;
     }
+    ////println("signf =", signf);
 
     auto opi = sites.op(opstr[0].first,opstr[0].second);
     auto opj = sites.op(opstr[1].first,opstr[1].second);
     auto opk = sites.op(opstr[2].first,opstr[2].second);
     auto opl = sites.op(opstr[3].first,opstr[3].second);
 
-    psi.position(opstr[0].second);
-    IQTensor SStmp=psi.A(opstr[0].second);
-    SStmp *= opi;
-    if( opstr[1].second != opstr[0].second ) {
-        if(opstr[0].first == "Aup" || opstr[0].first == "Adagup") {
-            SStmp = noprime(SStmp,Site)*sites.op("F", opstr[0].second );
+    // <psi| O_1 O_2 .... O_N |psi>, apply right side operators first
+    psi.position(opstr[3].second);
+    IQTensor SStmp=psi.A(opstr[3].second);
+    SStmp *= opl;
+    if( opstr[2].second != opstr[3].second ) {
+        //println("k!=l");
+        if(opstr[3].first == "Adn" || opstr[3].first == "Adagdn") {
+            SStmp = noprime(SStmp,Site)*sites.op("F", opstr[3].second );
         }
-        //println("i!=j");
-        auto ir1 = commonIndex(psi.A(opstr[0].second), psi.A(opstr[0].second+1),Link);
-        SStmp *= dag(prime(prime(psi.A(opstr[0].second),Site),ir1));
-        // propogate until opj
-        for ( int i1 = opstr[0].second+1; i1<opstr[1].second; ++i1) { 
+        auto ir1 = commonIndex(psi.A(opstr[3].second), psi.A(opstr[3].second-1),Link);
+        SStmp *= dag(prime(prime(psi.A(opstr[3].second),Site),ir1));
+        // propogate until opk
+        for ( int i1 = opstr[3].second-1; i1>opstr[2].second; --i1) { 
             SStmp *= psi.A(i1);
             SStmp *= sites.op("F", i1);
             SStmp *= dag(prime(psi.A(i1),Site,Link));
         }
-        SStmp *= psi.A(opstr[1].second);
-        if(opstr[1].first == "Adn" || opstr[1].first == "Adagdn") {
-            SStmp = noprime(SStmp*sites.op("F",opstr[1].second ), Site);
-        }
-        SStmp *= opj;
-    }
-    else { if( (opstr[0].first == "Aup" || opstr[0].first == "Adagup") &&
-            (opstr[1].first == "Adn" || opstr[1].first == "Adagdn")) {
-            SStmp = noprime(SStmp,Site)*sites.op("F", opstr[0].second );
-        }
-        //println("i=j");
-        SStmp = noprime(SStmp,Site)*opj;
-    }
-
-    if ( opstr[2].second != opstr[1].second ){
-        //println("j!=k");
-        if ( opstr[1].second == opstr[0].second ) {
-            auto ir2 = commonIndex(psi.A(opstr[1].second), psi.A(opstr[1].second+1),Link);
-            SStmp *= dag(prime(prime(psi.A(opstr[1].second),Site),ir2));
-        } else {
-            SStmp *= dag(prime(prime(psi.A(opstr[1].second),Site),Link));
-        }
-        // propogate until opk
-        for ( int i2 = opstr[1].second+1; i2<opstr[2].second; ++i2) { 
-            SStmp *= psi.A(i2);
-            SStmp *= dag(prime(psi.A(i2),Link));
-        }
         SStmp *= psi.A(opstr[2].second);
+        if(opstr[2].first == "Aup" || opstr[2].first == "Adagup") {
+            SStmp = noprime(SStmp*sites.op("F",opstr[2].second ), Site);
+        }
         SStmp *= opk;
     } else {
-        //println("j=k");
+        //println("k=l");
+        if( (opstr[2].first == "Aup" || opstr[2].first == "Adagup") &&
+            (opstr[3].first == "Adn" || opstr[3].first == "Adagdn")) {
+            SStmp = noprime(SStmp,Site)*sites.op("F", opstr[3].second );
+        }
         SStmp = noprime(SStmp,Site)*opk;
     }
 
-    if ( opstr[3].second != opstr[2].second ){
-        if(opstr[2].first == "Aup" || opstr[2].first == "Adagup") {
-            SStmp = noprime(SStmp,Site)*sites.op("F", opstr[2].second );
-        }
-        //println("k!=l");
-        if ( (opstr[1].second == opstr[0].second) && (opstr[2].second == opstr[1].second) ) {
-            auto ir3 = commonIndex(psi.A(opstr[2].second), psi.A(opstr[2].second+1),Link);
-            SStmp *= dag(prime(prime(psi.A(opstr[2].second),Site),ir3));
+    if ( opstr[1].second != opstr[2].second ){
+        //println("j!=k");
+        if ( opstr[2].second == opstr[3].second ) {
+            auto ir2 = commonIndex(psi.A(opstr[2].second), psi.A(opstr[2].second-1),Link);
+            SStmp *= dag(prime(prime(psi.A(opstr[2].second),Site),ir2));
         } else {
             SStmp *= dag(prime(prime(psi.A(opstr[2].second),Site),Link));
         }
-        // propogate until opl
-        for ( int i3 = opstr[2].second+1; i3<opstr[3].second; ++i3) { 
+        // propogate until opk
+        for ( int i2 = opstr[2].second-1; i2>opstr[1].second; --i2) { 
+            SStmp *= psi.A(i2);
+            SStmp *= dag(prime(psi.A(i2),Link));
+        }
+        SStmp *= psi.A(opstr[1].second);
+        SStmp *= opj;
+    } else {
+        //println("j=k");
+        SStmp = noprime(SStmp,Site)*opj;
+    }
+
+    if ( opstr[0].second != opstr[1].second ){
+        //println("i!=j");
+        if(opstr[1].first == "Adn" || opstr[1].first == "Adagdn") {
+            SStmp = noprime(SStmp,Site)*sites.op("F", opstr[1].second );
+        }
+        if ( (opstr[2].second == opstr[3].second) && (opstr[1].second == opstr[2].second) ) {
+            auto ir3 = commonIndex(psi.A(opstr[1].second), psi.A(opstr[1].second-1),Link);
+            SStmp *= dag(prime(prime(psi.A(opstr[1].second),Site),ir3));
+        } else {
+            SStmp *= dag(prime(prime(psi.A(opstr[1].second),Site),Link));
+        }
+        // propogate until opi
+        for ( int i3 = opstr[1].second-1; i3>opstr[0].second; --i3) { 
             SStmp *= psi.A(i3);
             SStmp *= sites.op("F",i3);
             SStmp *= dag(prime(psi.A(i3),Site,Link));
         }
-        SStmp *= psi.A(opstr[3].second);
-        if(opstr[3].first == "Adn" || opstr[3].first == "Adagdn") {
-            SStmp = noprime(SStmp*sites.op("F",opstr[3].second ), Site);
+        SStmp *= psi.A(opstr[0].second);
+        if(opstr[0].first == "Aup" || opstr[0].first == "Adagup") {
+            SStmp = noprime(SStmp*sites.op("F",opstr[0].second ), Site);
         }
-        SStmp *= opl;
-    } else{
-        if( (opstr[2].first == "Aup" || opstr[2].first == "Adagup") &&
-            (opstr[3].first == "Adn" || opstr[3].first == "Adagdn")) {
-            SStmp = noprime(SStmp,Site)*sites.op("F", opstr[2].second );
+        SStmp *= opi;
+    } else {
+        if( (opstr[0].first == "Aup" || opstr[0].first == "Adagup") &&
+            (opstr[1].first == "Adn" || opstr[1].first == "Adagdn")) {
+            SStmp = noprime(SStmp,Site)*sites.op("F", opstr[1].second );
         }
-        //println("k=l");
-        SStmp = noprime(SStmp,Site)*opl;
+        //println("i=j");
+        SStmp = noprime(SStmp,Site)*opi;
     }
 
     if ( (opstr[1].second == opstr[0].second) && 
          (opstr[2].second == opstr[1].second) &&
          (opstr[3].second == opstr[2].second) ) {
-        SStmp *= dag(prime(psi.A(opstr[3].second),Site)); // return
+        SStmp *= dag(prime(psi.A(opstr[0].second),Site)); // return
     } else {
-        auto ir3 = commonIndex(psi.A(opstr[3].second), psi.A(opstr[3].second-1),Link);
-        SStmp *= dag(prime(prime(psi.A(opstr[3].second),Site),ir3)); // return
+        auto ir3 = commonIndex(psi.A(opstr[0].second), psi.A(opstr[0].second+1),Link);
+        SStmp *= dag(prime(prime(psi.A(opstr[0].second),Site),ir3)); // return
     }
     // return (SStmp.cplx()).real();
     return signf*SStmp.cplx();
