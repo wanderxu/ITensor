@@ -1064,8 +1064,17 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
 
         // measure pairing correlation
         if(meas_paircorr) {
+            int i_start = 1;
+            int i_end = N;
+            if( Npart > 1 ) {
+                i_start = ( N/Npart )*(ithpart-1) + 1;
+                i_end =  ( N/Npart )*ithpart;
+                if( ithpart==Npart ) { i_end =  N; }
+            }
+            println("tot_numer = ", N, " is divided into ", Npart, " part");
+            println("i_start = ", i_start, "  i_end = ", i_end);
             std::vector<Cplx> paircorr={};
-            for(int n1 = 1; n1 <= N ; ++n1) {
+            for(int n1 = i_start; n1 <= i_end ; ++n1) {
                 //int n1 = 1;
                 int i = nnlist[n1-1].s0;
                 for (int id1 = 0; id1<6; id1++) {
