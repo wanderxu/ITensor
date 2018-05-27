@@ -291,6 +291,9 @@ int main(int argc, char* argv[])
         std::vector<double> SiSjzz_meas={};
         std::vector<double> SiSjpm_meas={};
         std::vector<double> Sz_meas={};
+        std::vector<double> Nup_meas={};
+        std::vector<double> Ndn_meas={};
+        std::vector<double> Ntot_meas={};
         std::vector<Cplx> Sp_meas={};
         std::vector<Cplx> Sm_meas={};
         for ( int i = 1; i <= N; ++i ) {
@@ -307,6 +310,10 @@ int main(int argc, char* argv[])
             auto sz_tmp = ((bra*sites.op("Sz",i)*ket).cplx()).real();
             Sz_meas.emplace_back(sz_tmp);
             totalM +=  sz_tmp;
+
+            Nup_meas.emplace_back( ((bra*sites.op("Nup",i)*ket).cplx()).real() );
+            Ndn_meas.emplace_back( ((bra*sites.op("Ndn",i)*ket).cplx()).real() );
+            Ntot_meas.emplace_back( ((bra*sites.op("Ntot",i)*ket).cplx()).real() );
 
             auto sp_tmp = (bra*sites.op("S+",i)*ket).cplx();
             Sp_meas.emplace_back(sp_tmp);
@@ -373,26 +380,47 @@ int main(int argc, char* argv[])
         printfln("Mzsquare = %.10e", Mzsquare );
 
         std::ofstream fSzout("Siz.out",std::ios::out);
+        fSzout.precision(12);
         for (std::vector<double>::const_iterator i = Sz_meas.begin(); i != Sz_meas.end(); ++i)
                 fSzout << *i << ' ';
 
+        std::ofstream fNupout("Nup.out",std::ios::out);
+        fNupout.precision(12);
+        for (std::vector<double>::const_iterator i = Nup_meas.begin(); i != Nup_meas.end(); ++i)
+                fNupout << *i << ' ';
+
+        std::ofstream fNdnout("Ndn.out",std::ios::out);
+        fNdnout.precision(12);
+        for (std::vector<double>::const_iterator i = Ndn_meas.begin(); i != Ndn_meas.end(); ++i)
+                fNdnout << *i << ' ';
+
+        std::ofstream fNtotout("Ntot.out",std::ios::out);
+        fNtotout.precision(12);
+        for (std::vector<double>::const_iterator i = Ntot_meas.begin(); i != Ntot_meas.end(); ++i)
+                fNtotout << *i << ' ';
+
         std::ofstream fSpout("Sip.out",std::ios::out);
+        fSpout.precision(12);
         for (std::vector<Cplx>::const_iterator i = Sp_meas.begin(); i != Sp_meas.end(); ++i)
                 fSpout << *i << ' ';
 
         std::ofstream fSmout("Sim.out",std::ios::out);
+        fSmout.precision(12);
         for (std::vector<Cplx>::const_iterator i = Sm_meas.begin(); i != Sm_meas.end(); ++i)
                 fSmout << *i << ' ';
 
         std::ofstream fSiSjout("SiSj.out",std::ios::out);
+        fSiSjout.precision(12);
         for (std::vector<double>::const_iterator i = SiSj_meas.begin(); i != SiSj_meas.end(); ++i)
                 fSiSjout << *i << ' ';
 
         std::ofstream fSiSjzzout("SiSjzz.out",std::ios::out);
+        fSiSjzzout.precision(12);
         for (std::vector<double>::const_iterator i = SiSjzz_meas.begin(); i != SiSjzz_meas.end(); ++i)
                 fSiSjzzout << *i << ' ';
 
         std::ofstream fSiSjpmout("SiSjpm.out",std::ios::out);
+        fSiSjpmout.precision(12);
         for (std::vector<double>::const_iterator i = SiSjpm_meas.begin(); i != SiSjpm_meas.end(); ++i)
                 fSiSjpmout << *i << ' ';
     }
