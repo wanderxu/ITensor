@@ -10,19 +10,19 @@ input
     gamma1 = 1.1
     gamma2 = 1.1
     readmps = yes
-    eneropt = yes
+    eneropt = no
     twist_ybc = yes
     ytheta = 0.5
     domeas  = yes // if domeas=no, then following meas* tag will not work
     Npart = 0
     ithpart = 0
-    meas_spincorr = no
-    meas_dimercorr = no
+    meas_spincorr = yes
+    meas_dimer = yes
     meas_dxcorr = no
     meas_dycorr = no
     meas_dxycorr = no
     meas_chiralcorr = no
-    meas_pair = yes
+    meas_pair = no
     meas_pairodp = yes
     meas_paircorr = yes
 
