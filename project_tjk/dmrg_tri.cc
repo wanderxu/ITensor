@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
     Cplx expitheta = std::exp( Cplx(0.0,std::acos(-1))* ytheta );
     auto domeas = input.getYesNo("domeas",false);
     auto meas_spincorr = input.getYesNo("meas_spincorr",false);
-    auto meas_dimercorr = input.getYesNo("meas_dimercorr",false);
+    auto meas_dimer = input.getYesNo("meas_dimer",false);
     auto meas_dxcorr = input.getYesNo("meas_dxcorr",false);
     auto meas_dycorr = input.getYesNo("meas_dycorr",false);
     auto meas_dxycorr = input.getYesNo("meas_dxycorr",false);
@@ -425,7 +425,7 @@ int main(int argc, char* argv[])
                 fSiSjpmout << *i << ' ';
     }
 
-    if(domeas && meas_dimercorr) {
+    if(domeas && meas_dimer) {
         println("\n////////////////////////////");
         println("Start to perform measurement of dimer correlation");
         // 
@@ -469,8 +469,23 @@ int main(int argc, char* argv[])
         println( "y_dimer: \n", y_dimer );
         println( "xy_dimer: \n", xy_dimer );
 
-        // measure x_dimer correlation
+        println("measure x_dimer order parameter");
+        std::vector<double> dx_meas={}; // store <Di>
+        for(int i = 0; i < int(x_dimer.size()); ++i) {
+            auto dimer_meas = 0.0;
+            // note conjugation codition is used, assume s1!=s2, and it is really the case here
+            dimer_meas += mtwobody(psi,sites,{x_dimer[i].s1, x_dimer[i].s2}, "S+", "S-");
+            dimer_meas += mtwobody(psi,sites,{x_dimer[i].s1, x_dimer[i].s2}, "Sz", "Sz");
+            dx_meas.emplace_back(dimer_meas);
+        }
+        // output to file
+        std::ofstream fdxout("Dxi.out",std::ios::out);
+        fdxout.precision(12);
+        for (std::vector<double>::const_iterator i = dx_meas.begin(); i != dx_meas.end(); ++i)
+                fdxout << *i << ' ';
+
     if( meas_dxcorr) {
+        // measure x_dimer correlation
         println("measure x_dimer correlation");
         int i_start = 0;
         int i_end = int(x_dimer.size());
@@ -483,7 +498,6 @@ int main(int argc, char* argv[])
         println("i_start = ", i_start, "  i_end = ", i_end);
 
         std::vector<double> dxdx_meas( (i_end-i_start)*(x_dimer.size()-i_start+x_dimer.size()-i_end+1)/2 ); // store <DiDj>
-        std::vector<double> dx_meas={}; // store <Di>
         //for(int i = 0; i < int(x_dimer.size()); ++i) {
         for(int i = i_start; i < i_end; ++i) {
             std::vector< std::pair<int,int> > op34pair_vec ={}; // store (opk,opl) pair
@@ -511,13 +525,6 @@ int main(int argc, char* argv[])
                 else {
                     // use ordinary method
                     // calculate correlation, Si*Sj*Sk*Sl
-                    if(i == j){
-                        auto dimer_meas = 0.0;
-                        // note conjugation codition is used, assume s1!=s2, and it is really the case here
-                        dimer_meas += mtwobody(psi,sites,{x_dimer[i].s1, x_dimer[i].s2}, "S+", "S-");
-                        dimer_meas += mtwobody(psi,sites,{x_dimer[i].s1, x_dimer[i].s2}, "Sz", "Sz");
-                        dx_meas.emplace_back(dimer_meas);
-                    }
                     auto ddcorr_meas = 0.0;
                     if( (sites_tmp[0] == sites_tmp[1]) ||
                         (sites_tmp[0] == sites_tmp[2]) ||
@@ -562,13 +569,25 @@ int main(int argc, char* argv[])
         }
         // output to file
         std::ofstream fdxdxout("DxiDxj.out",std::ios::out);
+        fdxdxout.precision(12);
         for (std::vector<double>::const_iterator i = dxdx_meas.begin(); i != dxdx_meas.end(); ++i)
                 fdxdxout << *i << ' ';
-
-        std::ofstream fdxout("Dxi.out",std::ios::out);
-        for (std::vector<double>::const_iterator i = dx_meas.begin(); i != dx_meas.end(); ++i)
-                fdxout << *i << ' ';
     } // end if( meas_dxcorr) {
+
+        println("measure y_dimer order parameter");
+        std::vector<double> dy_meas={}; // store <Di>
+        for(int i = 0; i < int(y_dimer.size()); ++i) {
+            auto dimer_meas = 0.0;
+            // note conjugation codition is used, assume s1!=s2, and it is really the case here
+            dimer_meas += mtwobody(psi,sites,{y_dimer[i].s1, y_dimer[i].s2}, "S+", "S-");
+            dimer_meas += mtwobody(psi,sites,{y_dimer[i].s1, y_dimer[i].s2}, "Sz", "Sz");
+            dy_meas.emplace_back(dimer_meas);
+        }
+        // output to file
+        std::ofstream fdyout("Dyi.out",std::ios::out);
+        fdyout.precision(12);
+        for (std::vector<double>::const_iterator i = dy_meas.begin(); i != dy_meas.end(); ++i)
+                fdyout << *i << ' ';
 
     if( meas_dycorr) {
         // measure y_dimer correlation
@@ -584,7 +603,6 @@ int main(int argc, char* argv[])
         println("i_start = ", i_start, "  i_end = ", i_end);
 
         std::vector<double> dydy_meas( (i_end-i_start)*(y_dimer.size()-i_start+y_dimer.size()-i_end+1)/2 ); // store <DiDj>
-        std::vector<double> dy_meas={}; // store <Di>
         for(int i = i_start; i < i_end; ++i) {
             std::vector< std::pair<int,int> > op34pair_vec ={}; // store (opk,opl) pair
             std::vector<int> corr_ind = {};  // index in dydy_meas
@@ -611,13 +629,6 @@ int main(int argc, char* argv[])
                 else {
                     // use ordinary method
                     // calculate correlation, Si*Sj*Sk*Sl
-                    if(i == j){
-                        auto dimer_meas = 0.0;
-                        // note conjugation codition is used, assume s1!=s2, and it is really the case here
-                        dimer_meas += mtwobody(psi,sites,{y_dimer[i].s1, y_dimer[i].s2}, "S+", "S-");
-                        dimer_meas += mtwobody(psi,sites,{y_dimer[i].s1, y_dimer[i].s2}, "Sz", "Sz");
-                        dy_meas.emplace_back(dimer_meas);
-                    }
                     auto ddcorr_meas = 0.0;
                     if( (sites_tmp[0] == sites_tmp[1]) ||
                         (sites_tmp[0] == sites_tmp[2]) ||
@@ -662,13 +673,25 @@ int main(int argc, char* argv[])
         }
         // output to file
         std::ofstream fdydyout("DyiDyj.out",std::ios::out);
+        fdydyout.precision(12);
         for (std::vector<double>::const_iterator i = dydy_meas.begin(); i != dydy_meas.end(); ++i)
                 fdydyout << *i << ' ';
-
-        std::ofstream fdyout("Dyi.out",std::ios::out);
-        for (std::vector<double>::const_iterator i = dy_meas.begin(); i != dy_meas.end(); ++i)
-                fdyout << *i << ' ';
     } // if( meas_dycorr) {
+
+        println("measure xy_dimer order parameter");
+        std::vector<double> dxy_meas={}; // store <Di>
+        for(int i = 0; i < int(xy_dimer.size()); ++i) {
+            auto dimer_meas = 0.0;
+            // note conjugation codition is used, assume s1!=s2, and it is really the case here
+            dimer_meas += mtwobody(psi,sites,{xy_dimer[i].s1, xy_dimer[i].s2}, "S+", "S-");
+            dimer_meas += mtwobody(psi,sites,{xy_dimer[i].s1, xy_dimer[i].s2}, "Sz", "Sz");
+            dxy_meas.emplace_back(dimer_meas);
+        }
+        // output to file
+        std::ofstream fdxyout("Dxyi.out",std::ios::out);
+        fdxyout.precision(12);
+        for (std::vector<double>::const_iterator i = dxy_meas.begin(); i != dxy_meas.end(); ++i)
+                fdxyout << *i << ' ';
 
     if( meas_dxycorr) {
         // measure xy_dimer correlation
@@ -684,7 +707,6 @@ int main(int argc, char* argv[])
         println("i_start = ", i_start, "  i_end = ", i_end);
 
         std::vector<double> dxydxy_meas( (i_end-i_start)*(xy_dimer.size()-i_start+xy_dimer.size()-i_end+1)/2 ); // store <DiDj>
-        std::vector<double> dxy_meas={}; // store <Di>
         for(int i = i_start; i < i_end; ++i) {
             std::vector< std::pair<int,int> > op34pair_vec ={}; // store (opk,opl) pair
             std::vector<int> corr_ind = {};  // index in dxydxy_meas
@@ -711,13 +733,6 @@ int main(int argc, char* argv[])
                 else {
                     // use ordinary method
                     // calculate correlation, Si*Sj*Sk*Sl
-                    if(i == j){
-                        auto dimer_meas = 0.0;
-                        // note conjugation codition is used, assume s1!=s2, and it is really the case here
-                        dimer_meas += mtwobody(psi,sites,{xy_dimer[i].s1, xy_dimer[i].s2}, "S+", "S-");
-                        dimer_meas += mtwobody(psi,sites,{xy_dimer[i].s1, xy_dimer[i].s2}, "Sz", "Sz");
-                        dxy_meas.emplace_back(dimer_meas);
-                    }
                     auto ddcorr_meas = 0.0;
                     if( (sites_tmp[0] == sites_tmp[1]) ||
                         (sites_tmp[0] == sites_tmp[2]) ||
@@ -762,12 +777,9 @@ int main(int argc, char* argv[])
         }
         // output to file
         std::ofstream fdxydxyout("DxyiDxyj.out",std::ios::out);
+        fdxydxyout.precision(12);
         for (std::vector<double>::const_iterator i = dxydxy_meas.begin(); i != dxydxy_meas.end(); ++i)
                 fdxydxyout << *i << ' ';
-
-        std::ofstream fdxyout("Dxyi.out",std::ios::out);
-        for (std::vector<double>::const_iterator i = dxy_meas.begin(); i != dxy_meas.end(); ++i)
-                fdxyout << *i << ' ';
     }  // if( meas_dxycorr) {
     }
 
@@ -973,10 +985,12 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
             }
         } // end for(int i = 0; i < int(tri_plaq.size()); ++i) {
         std::ofstream fXiXjout("XiXj.out",std::ios::out);
+        fXiXjout.precision(12);
         for (std::vector<double>::const_iterator i = XiXj_meas.begin(); i != XiXj_meas.end(); ++i)
                 fXiXjout << *i << ' ';
 
         std::ofstream fXiout("Xi.out",std::ios::out);
+        fXiout.precision(12);
         for (std::vector<double>::const_iterator i = Xi_meas.begin(); i != Xi_meas.end(); ++i)
                 fXiout << *i << ' ';
     }
