@@ -715,7 +715,7 @@ template <class Tensor> Cplx mfourbodyf(
     ////          opstr[2].first, opstr[2].second, opstr[3].first, opstr[3].second);
     opair optmp;
     int icount = 0;
-    for (int j=4; j>1; j--){
+    for (int j=3; j>0; j--){
         for (int i=0; i<j; i++){
             if(opstr[i].second > opstr[i+1].second) {
                 optmp = opstr[i];
