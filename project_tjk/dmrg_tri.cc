@@ -1335,8 +1335,8 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                                 }
                                 paircorr.emplace_back( pair1a4  );
                                 paircorr.emplace_back( pair2a3  );
-                                printfln(" %d, %d, %d, %d, paircorr1a4 = %.12f", j, i, k, l, pair1a4);
-                                printfln(" %d, %d, %d, %d, paircorr2a3 = %.12f", j, i, k, l, pair2a3);
+                                ////printfln(" %d, %d, %d, %d, paircorr1a4 = %.12f", j, i, k, l, pair1a4);
+                                ////printfln(" %d, %d, %d, %d, paircorr2a3 = %.12f", j, i, k, l, pair2a3);
                             } // if( i<k && i<l && j<k && j<l) {
                             else {
                                 // use mfourbodyf
@@ -1347,11 +1347,12 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                                                mfourbodyf(psi,sites,sites_tmp,"Adagdn","Adagup","Adn","Aup");
                                 paircorr.emplace_back( pair1a4  );
                                 paircorr.emplace_back( pair2a3  );
-                                printfln(" %d, %d, %d, %d, paircorr1a4 = %.12f", j, i, k, l, pair1a4);
-                                printfln(" %d, %d, %d, %d, paircorr2a3 = %.12f", j, i, k, l, pair2a3);
+                                ////printfln(" %d, %d, %d, %d, paircorr1a4 = %.12f", j, i, k, l, pair1a4);
+                                ////printfln(" %d, %d, %d, %d, paircorr2a3 = %.12f", j, i, k, l, pair2a3);
                             }
                         }
                     }
+                    printfln(" paircorr of j,i = %d, %d, k,l=?,? done ", j, i);
                 } // for (int id1 = 0; id1<6; id1++) {
             } // for(int n1 = 1; n1 <= N ; ++n1) {
             // output
