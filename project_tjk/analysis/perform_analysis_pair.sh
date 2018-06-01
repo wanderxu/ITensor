@@ -20,6 +20,7 @@ for Ny in ${Nyarray}; do
       for ((istep=$firststep;istep<=$maxstep;istep++)); do
         cd $WORKDIR
         datafile=$pretag/project_tjk/run/${maindir}/step${istep}/paircorr.out
+        datafile2=$pretag/project_tjk/run/${maindir}/step${istep}/pair_bubble.out
 
         if [ -f $datafile ];  then
             echo " processing $maindir's step${istep} ..."
@@ -46,12 +47,14 @@ endin
             cp -f $pretag/project_tjk/analysis/$exe .
             # transform the data to one column 
             sed -E -e 's/[[:blank:]]+/\n/g' $datafile >tmp.dat
-            python $exe tmp.dat pair >> ${maindir}.logs
+            sed -E -e 's/[[:blank:]]+/\n/g' $datafile2 >tmp2.dat
+            python $exe tmp.dat tmp2.dat pair >> ${maindir}.logs
 
             for pairtag in ${taglist}; do
               # plot
               maxv=$( sort -nrk3 pair${pairtag}k.dat |head -1|awk '{print $3}' )
-              echo "maxv in $pairtag = $maxv"
+              minv=$( sort -nrk3 pair${pairtag}k.dat |tail -1|awk '{print $3}' )
+              echo "maxv in $pairtag = $maxv, minv in $pairtag = $minv"
 cat>plot${pairtag}k.gnu<<endin
 set terminal postscript eps enhanced color
 set output "pair${pairtag}k.eps"
@@ -67,8 +70,9 @@ set pm3d map
 set pm3d interpolate 7,7
 set xrange[-0.5:0.5]
 set yrange[-0.5:0.5]
-set cbrange[0:1]
-splot "pair${pairtag}k.dat" u 1:2:(\$3/$maxv) notitle
+#set cbrange[0:1]
+#splot "pair${pairtag}k.dat" u 1:2:(\$3/$maxv) notitle
+splot "pair${pairtag}k.dat" u 1:2:(\$3) notitle
 endin
               gnuplot plot${pairtag}k.gnu
             done

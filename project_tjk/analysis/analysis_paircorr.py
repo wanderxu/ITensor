@@ -13,14 +13,22 @@ import scipy.optimize as opt
 from model_para import *
 
 # data.out is correlation data
-assert len(sys.argv) == 3, "Usage: python file.py data.out tag"
+assert (len(sys.argv) == 3 or len(sys.argv) == 4), "Usage: python file.py data.out [data2.out] tag"
+ldeductbg=(len(sys.argv) == 4)
 tag=sys.argv[2]
+if ldeductbg:
+    tag=sys.argv[3]
 
 # read data.out
 print "reading file "+sys.argv[1]+" ......"
 indat=np.loadtxt(sys.argv[1], converters={0: lambda s: eval(s)}).view(complex).reshape(-1)
 numsij = len(indat)
 print "len(indat) = ", numsij
+
+# read data2.out
+print "reading file "+sys.argv[1]+" ......"
+indat2=np.loadtxt(sys.argv[2], converters={0: lambda s: eval(s)}).view(complex).reshape(-1)
+print "len(indat2) = ", len(indat2)
 
 kfac = 1
 ## redefine N and Ny
@@ -71,11 +79,11 @@ for i in range(N):
         for j in range(i,N):
             for id2 in range(6):
                 if icount < numsij:
-                    sisj14[i,j,id1,id2] = indat[icount]
-                    sisj14[j,i,id2,id1] = indat[icount]
+                    sisj14[i,j,id1,id2] = indat[icount] + (-indat2[icount] if ldeductbg else 0.j)
+                    sisj14[j,i,id2,id1] = indat[icount] + (-indat2[icount] if ldeductbg else 0.j)
                     icount += 1
-                    sisj23[i,j,id1,id2] = indat[icount]
-                    sisj23[j,i,id2,id1] = indat[icount]
+                    sisj23[i,j,id1,id2] = indat[icount] + ( indat2[icount] if ldeductbg else 0.j) #sign canceled
+                    sisj23[j,i,id2,id1] = indat[icount] + ( indat2[icount] if ldeductbg else 0.j) #sign canceled
                     icount += 1
             #np.set_printoptions(precision=2,linewidth=400)
             #print( sisj14[i,j,id1,:] )
