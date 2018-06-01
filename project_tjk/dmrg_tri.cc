@@ -1040,29 +1040,24 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                     gup *= sites.op("F",i);
                     gup *= dag(prime(psi.A(i),Site,ir));
                     gdn *= dag(prime(psi.A(i),Site,ir));
-                    println("run to 0.0");
                     for(int j = i+1; j <= N; ++j) {
                         gup *= psi.A(j);
                         gdn *= psi.A(j);
                         gdn *= sites.op("F",j);
-                        println("run to 0.1");
 
                         auto gup_tmp = gup*sites.op("Aup",j);
                         auto jr = commonIndex(psi.A(j),psi.A(j-1),Link);
                         gup_tmp *= dag( prime(psi.A(j),Site,jr) );
                         grup.emplace_back( -gup_tmp.cplx() ); // minus as we apply Adag first
-                        println("run to 0.2");
 
                         auto gdn_tmp = noprime(gdn,Site)*sites.op("Adn",j);
                         gdn_tmp *= dag( prime(psi.A(j),Site,jr) );
                         grdn.emplace_back( -gdn_tmp.cplx() ); // minus as we apply Adag first
-                        println("run to 0.3");
 
                         if( j < N ) {
                             gup *= sites.op("F",j);
                             gup *= dag( prime(psi.A(j), Site, Link) );
                             gdn *= dag( prime(psi.A(j), Site, Link) );
-                            println("run to 0.4");
                         }
 
                     }
