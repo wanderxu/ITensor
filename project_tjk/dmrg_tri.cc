@@ -37,6 +37,7 @@ int main(int argc, char* argv[])
     auto meas_dxycorr = input.getYesNo("meas_dxycorr",false);
     auto meas_chiralcorr = input.getYesNo("meas_chiralcorr",false);
     auto meas_pair = input.getYesNo("meas_pair",false);
+    auto meas_pairbubble = input.getYesNo("meas_pairbubble",false);
     auto meas_pairodp = input.getYesNo("meas_pairodp",false);
     auto meas_paircorr = input.getYesNo("meas_paircorr",false);
     auto quiet = input.getYesNo("quiet",true);
@@ -1018,6 +1019,135 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
             nnlist.emplace_back( id0, nntmp );
         }
         println( "\nnnlist: \n", nnlist );
+
+        // measure single-particle Green's function, and get pairbubble from it
+        if( meas_pairbubble ) {
+            std::vector<Cplx> grup={};
+            std::vector<Cplx> grdn={};
+            for(int i = 1; i<=N; ++i) {
+                psi.position(i);
+                auto ket = psi.A(i);
+                auto bra = dag(prime(ket,Site));
+                grup.emplace_back( ((bra*sites.op("Nup",i)*ket).cplx()) );
+                grdn.emplace_back( ((bra*sites.op("Ndn",i)*ket).cplx()) );
+                if ( i < N ) {
+                    // i < j case
+                    // c^+_iup c_jup = a^+_iup F_i ... F_{j-1} a_jup
+                    // c^+_idn c_jdn = a^+_idn F_{i+1} ... F_j a_jdn
+                    auto ir = commonIndex(psi.A(i),psi.A(i+1),Link);
+                    auto gup = noprime( psi.A(i)*sites.op("Adagup",i), Site );
+                    auto gdn = psi.A(i)*sites.op("Adagdn",i);
+                    gup *= sites.op("F",i);
+                    gup *= dag(prime(psi.A(i),Site,ir));
+                    gdn *= dag(prime(psi.A(i),Site,ir));
+                    println("run to 0.0");
+                    for(int j = i+1; j <= N; ++j) {
+                        gup *= psi.A(j);
+                        gdn *= psi.A(j);
+                        gdn *= sites.op("F",j);
+                        println("run to 0.1");
+
+                        auto gup_tmp = gup*sites.op("Aup",j);
+                        auto jr = commonIndex(psi.A(j),psi.A(j-1),Link);
+                        gup_tmp *= dag( prime(psi.A(j),Site,jr) );
+                        grup.emplace_back( -gup_tmp.cplx() ); // minus as we apply Adag first
+                        println("run to 0.2");
+
+                        auto gdn_tmp = noprime(gdn,Site)*sites.op("Adn",j);
+                        gdn_tmp *= dag( prime(psi.A(j),Site,jr) );
+                        grdn.emplace_back( -gdn_tmp.cplx() ); // minus as we apply Adag first
+                        println("run to 0.3");
+
+                        if( j < N ) {
+                            gup *= sites.op("F",j);
+                            gup *= dag( prime(psi.A(j), Site, Link) );
+                            gdn *= dag( prime(psi.A(j), Site, Link) );
+                            println("run to 0.4");
+                        }
+
+                    }
+                } // if ( i < N ) {
+            }  // for(int i = 1; i<=N; ++i) {
+            std::ofstream fgrupout("grup.out",std::ios::out);
+            fgrupout.precision(12);
+            for (std::vector<Cplx>::const_iterator i = grup.begin(); i != grup.end(); ++i)
+                    fgrupout << *i << ' ';
+            std::ofstream fgrdnout("grdn.out",std::ios::out);
+            fgrdnout.precision(12);
+            for (std::vector<Cplx>::const_iterator i = grdn.begin(); i != grdn.end(); ++i)
+                    fgrdnout << *i << ' ';
+
+            // cal. pair_bubble term
+            std::vector<Cplx> pair_bubble={};
+            for(int n1 = 1; n1 <= N; ++n1) {
+                //int n1 = 1;
+                int i = nnlist[n1-1].s0;
+                for (int id1 = 0; id1<6; id1++) {
+                    //int id1=0;
+                    int j = nnlist[n1-1].snn[id1];
+                    for(int n2 = n1; n2 <= N ; ++n2) {
+                        //int n2 = 8;
+                        int k = nnlist[n2-1].s0;
+                        for (int id2 = 0; id2<6; id2++) {
+                            //int id2=0;
+                            int l = nnlist[n2-1].snn[id2];
+
+                            // pair1a4_bubble = < c^+_jdn c_ldn> <c^+_iup c_kup> + <c^+_jup c_lup> <c^+_idn c_kdn>
+                            Cplx gjlup;
+                            Cplx gjldn;
+                            if( j <= l ) {
+                                gjlup = grup[(2*N-j+2)*(j-1)/2+l-j];
+                                gjldn = grdn[(2*N-j+2)*(j-1)/2+l-j];
+                            } else {
+                                gjlup = grup[(2*N-l+2)*(l-1)/2+j-l];
+                                gjldn = grdn[(2*N-l+2)*(l-1)/2+j-l];
+                            }
+                            Cplx gikup;
+                            Cplx gikdn;
+                            if ( i <= k ){
+                                gikup = grup[(2*N-i+2)*(i-1)/2+k-i];
+                                gikdn = grdn[(2*N-i+2)*(i-1)/2+k-i];
+                            } else {
+                                gikup = grup[(2*N-k+2)*(k-1)/2+i-k];
+                                gikdn = grdn[(2*N-k+2)*(k-1)/2+i-k];
+                            }
+                            Cplx pair1a4_bubble = gjldn*gikup + gjlup*gikdn;
+
+                            // pair2a3_bubble = < c^+_jup c_kup> <c^+_idn c_ldn> + <c^+_jdn c_kdn> <c^+_iup c_lup>
+                            Cplx gilup;
+                            Cplx gildn;
+                            if( i <= l ) {
+                                gilup = grup[(2*N-i+2)*(i-1)/2+l-i];
+                                gildn = grdn[(2*N-i+2)*(i-1)/2+l-i];
+                            } else {
+                                gilup = grup[(2*N-l+2)*(l-1)/2+i-l];
+                                gildn = grdn[(2*N-l+2)*(l-1)/2+i-l];
+                            }
+                            Cplx gjkup;
+                            Cplx gjkdn;
+                            if ( j <= k ){
+                                gjkup = grup[(2*N-j+2)*(j-1)/2+k-j];
+                                gjkdn = grdn[(2*N-j+2)*(j-1)/2+k-j];
+                            } else {
+                                gjkup = grup[(2*N-k+2)*(k-1)/2+j-k];
+                                gjkdn = grdn[(2*N-k+2)*(k-1)/2+j-k];
+                            }
+                            Cplx pair2a3_bubble = gjkup*gildn + gjkdn*gilup;
+
+                            pair_bubble.emplace_back( pair1a4_bubble );
+                            pair_bubble.emplace_back( pair2a3_bubble );
+                            ////printfln(" %d, %d, %d, %d, paircorr1a4 = %.12f", j, i, k, l, pair1a4);
+                            ////printfln(" %d, %d, %d, %d, paircorr2a3 = %.12f", j, i, k, l, pair2a3);
+                        } // for (int id2 = 0; id2<6; id2++) {
+                    }
+                    printfln(" pair_bubble of j,i = %d, %d, k,l=?,? done ", j, i);
+                } // for (int id1 = 0; id1<6; id1++) {
+            } // for(int n1 = 1; n1 <= N ; ++n1) {
+            std::ofstream fpair_bubbleout("pair_bubble.out",std::ios::out);
+            fpair_bubbleout.precision(12);
+            for (std::vector<Cplx>::const_iterator i = pair_bubble.begin(); i != pair_bubble.end(); ++i)
+                    fpair_bubbleout << *i << ' ';
+        }
 
         // measure pairing order parameter
         if( meas_pairodp) {
