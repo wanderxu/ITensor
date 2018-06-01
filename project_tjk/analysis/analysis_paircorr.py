@@ -26,9 +26,11 @@ numsij = len(indat)
 print "len(indat) = ", numsij
 
 # read data2.out
-print "reading file "+sys.argv[1]+" ......"
-indat2=np.loadtxt(sys.argv[2], converters={0: lambda s: eval(s)}).view(complex).reshape(-1)
-print "len(indat2) = ", len(indat2)
+indat2=0
+if ldeductbg:
+    print "reading file "+sys.argv[2]+" ......"
+    indat2=np.loadtxt(sys.argv[2], converters={0: lambda s: eval(s)}).view(complex).reshape(-1)
+    print "len(indat2) = ", len(indat2)
 
 kfac = 1
 ## redefine N and Ny
@@ -113,9 +115,9 @@ for id1 in range(6):
         for i in range(N):
             for j in range(N):
                 # singlet pairing
-                for ipair in range(6):
+                for ipair in range(5):
                     didj[ipair,i,j] += np.conj(phase[ipair,id1])*phase[ipair,id2]*(sisj14[i,j,id1,id2] - sisj23[i,j,id1,id2])
-                for ipair in range(6,10):
+                for ipair in range(5,10):
                 # triplet pairing
                     didj[ipair,i,j] += np.conj(phase[ipair,id1])*phase[ipair,id2]*(sisj14[i,j,id1,id2] + sisj23[i,j,id1,id2])
 

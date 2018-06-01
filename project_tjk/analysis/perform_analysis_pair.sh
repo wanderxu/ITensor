@@ -1,8 +1,8 @@
 #!/bin/bash
 
 source cal_para.sh
-firststep=1
-maxstep=8
+firststep=4
+maxstep=4
 taglist=$( echo "s d+id d-id dxy dx2-y2 f p+ip p-ip px py")
 
 WORKDIR="$PWD"
@@ -49,6 +49,7 @@ endin
             sed -E -e 's/[[:blank:]]+/\n/g' $datafile >tmp.dat
             sed -E -e 's/[[:blank:]]+/\n/g' $datafile2 >tmp2.dat
             python $exe tmp.dat tmp2.dat pair >> ${maindir}.logs
+            #python $exe tmp.dat pair >> ${maindir}.logs
 
             for pairtag in ${taglist}; do
               # plot
