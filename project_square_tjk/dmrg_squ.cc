@@ -1,5 +1,5 @@
 #include "itensor/all.h"
-#include "triangular_more.h"
+#include "square_more.h"
 #include "measure.h"
 
 using namespace itensor;
@@ -117,8 +117,8 @@ int main(int argc, char* argv[])
         //
 
         auto ampo = AutoMPO(sites);
-        auto lattice = triangularLatticev2(Nx,Ny,{"YPeriodic=",yperiodic});
-        auto lattice4plaque = triangularLattice4Plaque(Nx,Ny,{"YPeriodic=",yperiodic});
+        auto lattice = squareLatticev2(Nx,Ny,{"YPeriodic=",yperiodic});
+        auto lattice4plaque = squareLattice4Plaque(Nx,Ny,{"YPeriodic=",yperiodic});
 
         println("H is made up of ");
         println("\nBound:\n", lattice);
