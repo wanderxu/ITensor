@@ -1099,8 +1099,8 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                                 gjlup = grup[(2*N-j+2)*(j-1)/2+l-j];
                                 gjldn = grdn[(2*N-j+2)*(j-1)/2+l-j];
                             } else {
-                                gjlup = grup[(2*N-l+2)*(l-1)/2+j-l];
-                                gjldn = grdn[(2*N-l+2)*(l-1)/2+j-l];
+                                gjlup = std::conj(grup[(2*N-l+2)*(l-1)/2+j-l]);
+                                gjldn = std::conj(grdn[(2*N-l+2)*(l-1)/2+j-l]);
                             }
                             Cplx gikup;
                             Cplx gikdn;
@@ -1108,8 +1108,8 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                                 gikup = grup[(2*N-i+2)*(i-1)/2+k-i];
                                 gikdn = grdn[(2*N-i+2)*(i-1)/2+k-i];
                             } else {
-                                gikup = grup[(2*N-k+2)*(k-1)/2+i-k];
-                                gikdn = grdn[(2*N-k+2)*(k-1)/2+i-k];
+                                gikup = std::conj(grup[(2*N-k+2)*(k-1)/2+i-k]);
+                                gikdn = std::conj(grdn[(2*N-k+2)*(k-1)/2+i-k]);
                             }
                             Cplx pair1a4_bubble = gjldn*gikup + gjlup*gikdn;
 
@@ -1120,8 +1120,8 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                                 gilup = grup[(2*N-i+2)*(i-1)/2+l-i];
                                 gildn = grdn[(2*N-i+2)*(i-1)/2+l-i];
                             } else {
-                                gilup = grup[(2*N-l+2)*(l-1)/2+i-l];
-                                gildn = grdn[(2*N-l+2)*(l-1)/2+i-l];
+                                gilup = std::conj(grup[(2*N-l+2)*(l-1)/2+i-l]);
+                                gildn = std::conj(grdn[(2*N-l+2)*(l-1)/2+i-l]);
                             }
                             Cplx gjkup;
                             Cplx gjkdn;
@@ -1129,15 +1129,15 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                                 gjkup = grup[(2*N-j+2)*(j-1)/2+k-j];
                                 gjkdn = grdn[(2*N-j+2)*(j-1)/2+k-j];
                             } else {
-                                gjkup = grup[(2*N-k+2)*(k-1)/2+j-k];
-                                gjkdn = grdn[(2*N-k+2)*(k-1)/2+j-k];
+                                gjkup = std::conj(grup[(2*N-k+2)*(k-1)/2+j-k]);
+                                gjkdn = std::conj(grdn[(2*N-k+2)*(k-1)/2+j-k]);
                             }
                             Cplx pair2a3_bubble = gjkup*gildn + gjkdn*gilup;
 
                             pair_bubble.emplace_back( pair1a4_bubble );
                             pair_bubble.emplace_back( pair2a3_bubble );
-                            ////printfln(" %d, %d, %d, %d, paircorr1a4 = %.12f", j, i, k, l, pair1a4);
-                            ////printfln(" %d, %d, %d, %d, paircorr2a3 = %.12f", j, i, k, l, pair2a3);
+                            ////printfln(" %d, %d, %d, %d, pair1a4_bubble = %.12f", j, i, k, l, pair1a4);
+                            ////printfln(" %d, %d, %d, %d, pair2a3_bubble = %.12f", j, i, k, l, pair2a3);
                         } // for (int id2 = 0; id2<6; id2++) {
                     }
                     printfln(" pair_bubble of j,i = %d, %d, k,l=?,? done ", j, i);
