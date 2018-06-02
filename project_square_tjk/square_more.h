@@ -1,8 +1,8 @@
 //
 // Writen by Xiao Yan Xu (wanderxu@gmail.com)
 //
-#ifndef __LATTICE_TRIANGULAR_MORE_H_
-#define __LATTICE_TRIANGULAR_MORE_H_
+#ifndef __LATTICE_SQUARE_MORE_H_
+#define __LATTICE_SQUARE_MORE_H_
 
 #include "latticeplaque.h"
 
@@ -30,29 +30,32 @@ struct LatticeBondv2
         isbd{isbd_}
         { }
 
-    LatticeBondv2(int s1_, int s2_,
+    LatticeBondv2(int s1_, int s2_, bool isbd_,
                 Real x1_,  Real y1_,
                 Real x2_,  Real y2_)
       : s1{s1_}, 
         s2{s2_},
+        isbd{isbd_},
         x1{x1_},
         y1{y1_},
         x2{x2_},
         y2{y2_}
         { }
 
-    LatticeBondv2(int s1_, int s2_, std::string type_)
+    LatticeBondv2(int s1_, int s2_, bool isbd_, std::string type_)
       : s1{s1_}, 
         s2{s2_}, 
+        isbd{isbd_},
         type{type_} 
         { }
 
-    LatticeBondv2(int s1_, int s2_, 
+    LatticeBondv2(int s1_, int s2_, bool isbd_,
                 Real x1_,  Real y1_,
                 Real x2_,  Real y2_,
                 std::string type_)
       : s1{s1_}, 
         s2{s2_}, 
+        isbd{isbd_},
         type{type_},
         x1{x1_},
         y1{y1_},
@@ -128,6 +131,45 @@ squareLatticev2(int Nx,
 
     return latt;
   }
+
+LatticeGraphv2 inline
+squareLatticeNNeighbor(int Nx, 
+        int Ny,
+        Args const& args = Args::global()) {
+    auto yperiodic = args.getBool("YPeriodic",true);
+    // Periodicity on y is meaningless for one dimensional chain or a ladder
+    yperiodic = yperiodic && (Ny > 2);
+    auto N = Nx*Ny;
+    auto Nbond = 2*N-2*Ny + (yperiodic ? 0 : -2*Nx+2);
+    LatticeGraphv2 latt; 
+    latt.reserve(Nbond);
+
+    for(int n = 1; n <= N; ++n) {
+        int x = (n-1)/Ny+1; 
+        int y = (n-1)%Ny+1;
+
+        //Second-neighbor bonds
+        if(x < Nx && Ny > 1) {
+            //Next-Neighbor X +Y
+            if(y < Ny) latt.emplace_back(n,n+Ny+1,false,x,y,x+1,y+1,"2");
+            //Next-Neighbor X -Y
+            if(y > 1) latt.emplace_back(n,n+Ny-1,false,x,y,x+1,y-1,"2");
+            //Periodic Next-Neighbor bonds
+            if(yperiodic && y == Ny) {
+                //Periodic Next-Neighbor X +Y
+                latt.emplace_back(n,n+1,true,x,Ny,x+1,1,"2");
+            }
+            if(yperiodic && y == 1) {
+                //Periodic Next-Neighbor X -Y
+                latt.emplace_back(n,n+2*Ny-1,true,x,1,x+1,Ny,"2");
+            }
+        }
+    }
+
+    if(int(latt.size()) != Nbond) Error("Wrong number of bonds");
+
+    return latt;
+}
 
 // lattice 4-plaque graph
 Lattice4PlaqueGraph inline

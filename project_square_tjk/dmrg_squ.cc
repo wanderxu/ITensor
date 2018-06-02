@@ -19,6 +19,7 @@ int main(int argc, char* argv[])
     auto N = Nx*Ny;
     auto yperiodic = input.getYesNo("yperiodic",true);
     double t1 = input.getReal("t1");
+    double t2 = input.getReal("t2");
     auto idop = input.getInt("idop");
     double J1 = input.getReal("J1");
     double J2 = input.getReal("J2");
@@ -118,6 +119,7 @@ int main(int argc, char* argv[])
 
         auto ampo = AutoMPO(sites);
         auto lattice = squareLatticev2(Nx,Ny,{"YPeriodic=",yperiodic});
+        auto latticeNN = squareLatticeNNeighbor(Nx,Ny,{"YPeriodic=",yperiodic});
         auto lattice4plaque = squareLattice4Plaque(Nx,Ny,{"YPeriodic=",yperiodic});
 
         println("H is made up of ");
@@ -149,6 +151,39 @@ int main(int argc, char* argv[])
                 ampo += -t1/expitheta,"Cdagup",bnd.s2,"Cup",bnd.s1; // CupL^+ Cup1 e^{-i\theta}
                 ampo += -t1*expitheta,"Cdagdn",bnd.s1,"Cdn",bnd.s2; // Cdn1^+ CdnL e^{i\theta}
                 ampo += -t1/expitheta,"Cdagdn",bnd.s2,"Cdn",bnd.s1; // CdnL^+ Cdn1 e^{-i\theta}
+            }
+        }
+        // second neighbor hopping
+        for(auto bnd : latticeNN)
+        {
+            if( (not bnd.isbd) or (not twist_ybc) ) {
+                ampo += -t2,"Cdagup",bnd.s1,"Cup",bnd.s2;
+                ampo += -t2,"Cdagup",bnd.s2,"Cup",bnd.s1;
+                ampo += -t2,"Cdagdn",bnd.s1,"Cdn",bnd.s2;
+                ampo += -t2,"Cdagdn",bnd.s2,"Cdn",bnd.s1;
+            }
+            else if ( ytheta == 1.0 ) {
+                println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
+                ampo += t2,"Cdagup",bnd.s1,"Cup",bnd.s2; // Cup1^+ CupL e^{i\theta}
+                ampo += t2,"Cdagup",bnd.s2,"Cup",bnd.s1; // CupL^+ Cup1 e^{-i\theta}
+                ampo += t2,"Cdagdn",bnd.s1,"Cdn",bnd.s2; // Cdn1^+ CdnL e^{i\theta}
+                ampo += t2,"Cdagdn",bnd.s2,"Cdn",bnd.s1; // CdnL^+ Cdn1 e^{-i\theta}
+            }
+            else if ( bnd.y2 == 1 ) // X+Y direc. boundary bond
+            {
+                println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
+                ampo += -t2*expitheta,"Cdagup",bnd.s1,"Cup",bnd.s2; // Cup1^+ CupL e^{i\theta}
+                ampo += -t2/expitheta,"Cdagup",bnd.s2,"Cup",bnd.s1; // CupL^+ Cup1 e^{-i\theta}
+                ampo += -t2*expitheta,"Cdagdn",bnd.s1,"Cdn",bnd.s2; // Cdn1^+ CdnL e^{i\theta}
+                ampo += -t2/expitheta,"Cdagdn",bnd.s2,"Cdn",bnd.s1; // CdnL^+ Cdn1 e^{-i\theta}
+            }
+            else if ( bnd.y2 == Ny ) // X-Y direc. boundary bond
+            {
+                println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
+                ampo += -t2/expitheta,"Cdagup",bnd.s1,"Cup",bnd.s2; // Cup1^+ CupL e^{-i\theta}
+                ampo += -t2*expitheta,"Cdagup",bnd.s2,"Cup",bnd.s1; // CupL^+ Cup1 e^{i\theta}
+                ampo += -t2/expitheta,"Cdagdn",bnd.s1,"Cdn",bnd.s2; // Cdn1^+ CdnL e^{-i\theta}
+                ampo += -t2*expitheta,"Cdagdn",bnd.s2,"Cdn",bnd.s1; // CdnL^+ Cdn1 e^{i\theta}
             }
         }
 

@@ -4,6 +4,7 @@ input
     Ny = 4
     yperiodic = yes
     t1 = 1.0
+    t2 =-0.3
     idop = 8
     J1 = 1.0
     J2 = 0.0
