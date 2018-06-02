@@ -129,6 +129,10 @@ int main(int argc, char* argv[])
         println("\nPlaque:\n", lattice4plaque);
         println("Total number of plaques: ", lattice4plaque.size());
 
+        println("\n nnnBound:\n", latticeNN);
+        println("Total number of nnn bound: ", latticeNN.size());
+        println("\n");
+
         // hopping term
         for(auto bnd : lattice)
         {
