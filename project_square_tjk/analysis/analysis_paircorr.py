@@ -92,16 +92,16 @@ for i in range(N):
 
 ##calculate pairing
 phase = np.zeros((10,6),dtype=complex)
-phase[0,:] = 6*[1.0+0.j]/np.sqrt(6.0)
-phase[1,:] = [1.0+0.j, np.exp(2.0*np.pi/3.0*1.j), np.exp(-2.0*np.pi/3.0*1.j), 1.0+0.j, np.exp(2.0*np.pi/3.0*1.j), np.exp(-2.0*np.pi/3.0*1.j)]/np.sqrt(6.0)
-phase[2,:] = [1.0+0.j, np.exp(-2.0*np.pi/3.0*1.j), np.exp(2.0*np.pi/3.0*1.j), 1.0+0.j, np.exp(-2.0*np.pi/3.0*1.j), np.exp(2.0*np.pi/3.0*1.j)]/np.sqrt(6.0)
-phase[3,:] = [0.0+0.j, -1.0+0.j, 1.0+0.j, 0.0+0.j, -1.0+0.j, 1.0+0.j]/np.sqrt(4.0)
-phase[4,:] = [2.0+0.j, -1.0+0.j, -1.0+0.j, 2.0+0.j, -1.0+0.j, -1.0+0.j]/np.sqrt(12.0)
+phase[0,:] = [1.0+0.j, 1.0+0.j, 0.0+0.j, 1.0+0.j, 1.0+0.j, 0.0+0.j]/np.sqrt(4.0)
+phase[1,:] = [1.0+0.j, np.exp(2.0*np.pi/2.0*1.j), 0.0+0.j, 1.0+0.j, np.exp(2.0*np.pi/2.0*1.j), 0.0+0.j]/np.sqrt(4.0)
+phase[2,:] = [1.0+0.j, np.exp(-2.0*np.pi/2.0*1.j), 0.0+0.j, 1.0+0.j, np.exp(-2.0*np.pi/2.0*1.j), 0.0+0.j]/np.sqrt(4.0)
+phase[3,:] = [0.0+0.j,  0.0+0.j, 1.0+0.j, 0.0+0.j,  0.0+0.j, 1.0+0.j]/np.sqrt(2.0)
+phase[4,:] = [1.0+0.j, -1.0+0.j,  0.0+0.j, 1.0+0.j, -1.0+0.j,  0.0+0.j]/np.sqrt(4.0)
 phase[5,:] = [1.0+0.j, -1.0+0.j, 1.0+0.j, -1.0+0.j, 1.0+0.j, -1.0+0.j]/np.sqrt(6.0)
-phase[6,:] = [1.0+0.j, np.exp(np.pi/3.0*1.j), np.exp(2.0*np.pi/3.0*1.j), -1.0+0.j, -np.exp(np.pi/3.0*1.j), -np.exp(2.0*np.pi/3.0*1.j)]/np.sqrt(6.0)
-phase[7,:] = [1.0+0.j, np.exp(-np.pi/3.0*1.j), np.exp(-2.0*np.pi/3.0*1.j), -1.0+0.j, -np.exp(-np.pi/3.0*1.j), -np.exp(-2.0*np.pi/3.0*1.j)]/np.sqrt(6.0)
-phase[8,:] = [2.0+0.j, 1.0+0.j, -1.0+0.j, -2.0+0.j, -1.0+0.j, 1.0+0.j]/np.sqrt(12.0)
-phase[9,:] = [0.0+0.j, -1.0+0.j, -1.0+0.j, 0.0+0.j, 1.0+0.j, 1.0+0.j]/np.sqrt(4.0)
+phase[6,:] = [1.0+0.j, np.exp(np.pi/2.0*1.j), 0.0+0.j, -1.0+0.j, -np.exp(np.pi/2.0*1.j), 0.0+0.j]/np.sqrt(4.0)
+phase[7,:] = [1.0+0.j, np.exp(-np.pi/2.0*1.j), 0.0+0.j, -1.0+0.j, -np.exp(-np.pi/2.0*1.j), 0.0+0.j]/np.sqrt(4.0)
+phase[8,:] = [1.0+0.j, 0.0+0.j,  0.0+0.j, -1.0+0.j,  0.0+0.j, 0.0+0.j]/np.sqrt(2.0)
+phase[9,:] = [0.0+0.j, -1.0+0.j,  0.0+0.j, 0.0+0.j, 1.0+0.j, 0.0+0.j]/np.sqrt(2.0)
 np.set_printoptions(precision=4,linewidth=400)
 pairlist=['s', 'd+id', 'd-id', 'dxy', 'dx2-y2', 'f', 'p+ip', 'p-ip', 'px', 'py']
 print "phi(", pairlist, ") = "
