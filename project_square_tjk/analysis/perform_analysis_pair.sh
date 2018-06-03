@@ -1,8 +1,8 @@
 #!/bin/bash
 
 source cal_para.sh
-firststep=7
-maxstep=7
+firststep=4
+maxstep=4
 taglist=$( echo "s d+id d-id dxy dx2-y2 f p+ip p-ip px py")
 
 WORKDIR="$PWD"
@@ -16,6 +16,7 @@ for Ny in ${Nyarray}; do
       maindir=Nx${Nx}_Ny${Ny}_Jone${J1}_Jtwo${J2}_gone${gamma1}_gtwo${gamma2}_t${t1}_${t2}_idop${idop}
       pretag=$HOME/mycode/itensor/
       exe=analysis_paircorr.py
+      exe2=analysis_paircorr_xy.py
 
       for ((istep=$firststep;istep<=$maxstep;istep++)); do
         cd $WORKDIR
@@ -45,11 +46,13 @@ gamma1 = $gamma1
 gamma2 = $gamma2
 endin
             cp -f $pretag/project_square_tjk/analysis/$exe .
+            cp -f $pretag/project_square_tjk/analysis/$exe2 .
             # transform the data to one column 
             sed -E -e 's/[[:blank:]]+/\n/g' $datafile >tmp.dat
             sed -E -e 's/[[:blank:]]+/\n/g' $datafile2 >tmp2.dat
             python $exe tmp.dat tmp2.dat pair >> ${maindir}.logs
             #python $exe tmp.dat pair >> ${maindir}.logs
+            python $exe2 tmp.dat pair >> ${maindir}.logs
 
             for pairtag in ${taglist}; do
               # plot
