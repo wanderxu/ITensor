@@ -118,6 +118,7 @@ endin
         # Dy
         tagarray=$( echo "Dy")
         for tag in $tagarray; do
+            datafile=$pretag/project_square_tjk/run/${maindir}/step${istep}/${tag}i.out
             cat $datafile |sed -E -e 's/[[:blank:]]+/\n/g'> ${tag}i_column.dat
             for ((i=0; i<$nn; i++)); do
                 startp=$( echo "$i $Ny $Nx" |awk '{print int($1/$2)*1.0-($1%$2)*0.0-0.0*0.3, ($1%$2)*1.0+1.0*0.3}' )
@@ -143,8 +144,9 @@ endin
 
         tagarray=$( echo "Dx")
         for tag in $tagarray; do
+            datafile=$pretag/project_square_tjk/run/${maindir}/step${istep}/${tag}i.out
             cat $datafile |sed -E -e 's/[[:blank:]]+/\n/g'> ${tag}i_column.dat
-            for ((i=0; i<$nn; i++)); do
+            for ((i=0; i<($nn-$Ny); i++)); do
                 startp=$( echo "$i $Ny $Nx" |awk '{print int($1/$2)*1.0-($1%$2)*0.0+1.0*0.3, ($1%$2)*1.0}' )
                 endp=$( echo "$i $Ny $Nx" |awk   '{print int($1/$2)*1.0-($1%$2)*0.0+1.0*0.7, ($1%$2)*1.0}' )
                 dvalue=$( awk -v iv=$i '{if(NR==(iv+1)) print ($1>0)?20*$1:-20*$1}' ${tag}i_column.dat )

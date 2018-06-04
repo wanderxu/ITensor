@@ -12,7 +12,7 @@ for Ny in ${Nyarray}; do
   for Nx  in ${Nxarray}; do
     for J2 in ${J2array}; do
       # prepare work
-      maindir=Nx${Nx}_Ny${Ny}_Jone${J1}_Jtwo${J2}_gone${gamma1}_gtwo${gamma2}_t${t1}_${t2}_idop${idop}
+      maindir=Nx${Nx}_Ny${Ny}_Jone${J1}_Jtwo${J2}_gone${gamma1}_gtwo${gamma2}_t${t1}_idop${idop}
       pretag=$HOME/mycode/itensor/
       kfac=1
       let nn=$Nx*$Ny
@@ -24,7 +24,7 @@ for Ny in ${Nyarray}; do
       for ((istep=$firststep;istep<=$maxstep;istep++)); do
       for tag in $tagarray; do
         cd $WORKDIR
-        datafile=$pretag/project_square_tjk/run/${maindir}/step${istep}/${tag}.out
+        datafile=$pretag/project_tjk/run/${maindir}/step${istep}/${tag}.out
 
         if [ -f $datafile ];  then
             echo " processing $maindir's ${tag} ..."
@@ -60,48 +60,46 @@ endin
             # plot some a2 direction lines 
             for ((ix=0; ix<$Nx; ix++)); do
                 startp=$( echo "$ix $Ny $Nx" |awk '{print $1, 0}' )
-                endp=$( echo "$ix $Ny $Nx" |awk '{print $1, ($2-1)}' )
+                endp=$( echo "$ix $Ny $Nx" |awk '{print -($2-1)*0.5+$1, ($2-1)*sqrt(3.0)/2.0}' )
                 echo " \"<echo '$startp \n $endp'\" with l lc rgb 'grey' lw 0.1 not, \\" >> plot_${tag}_real_space.gnu
             done
 
-            #### plot some a1+a2 direction lines (1.0, 1.0)
-            ###for ((ix=0; ix<($Nx-$Ny+1); ix++)); do
-            ###    startp=$( echo "$ix $Ny $Nx" |awk '{print $1, 0}' )
-            ###    endp=$( echo "$ix $Ny $Nx" |awk '{print  ($2-1)*1.0+$1, ($2-1)*1.0}' )
-            ###    echo " \"<echo '$startp \n $endp'\" with l lc rgb 'grey' lw 0.1 not, \\" >> plot_${tag}_real_space.gnu
-            ###done
-            ###for ((ix=($Nx-$Ny+1); ix<$Nx; ix++)); do
-            ###    startp=$( echo "$ix $Ny $Nx" |awk '{print $1, 0}' )
-            ###    endp=$( echo "$ix $Ny $Nx" |awk '{print  ($2-$1+$3-$2-1)*1.0+$1, ($2-$1+$3-$2-1)*1.0}' )
-            ###    echo " \"<echo '$startp \n $endp'\" with l lc rgb 'grey' lw 0.1 not, \\" >> plot_${tag}_real_space.gnu
-            ###done
-            ###for ((ix=-1; ix>-($Nx-$Ny-1); ix--)); do
-            ###    startp=$( echo "$ix $Ny $Nx" |awk '{print $1*1.0, -$1*1.0}' )
-            ###    endp=$( echo "$ix $Ny $Nx" |awk '{print  ($2-1)*1.0+$1, ($2-1)*1.0}' )
-            ###    echo " \"<echo '$startp \n $endp'\" with l lc rgb 'grey' lw 0.1 not, \\" >> plot_${tag}_real_space.gnu
-            ###done
+            # plot some a1+a2 direction lines (0.5, sqrt(3.0)/2.0
+            for ((ix=0; ix<($Nx-$Ny+1); ix++)); do
+                startp=$( echo "$ix $Ny $Nx" |awk '{print $1, 0}' )
+                endp=$( echo "$ix $Ny $Nx" |awk '{print  ($2-1)*0.5+$1, ($2-1)*sqrt(3.0)/2.0}' )
+                echo " \"<echo '$startp \n $endp'\" with l lc rgb 'grey' lw 0.1 not, \\" >> plot_${tag}_real_space.gnu
+            done
+            for ((ix=($Nx-$Ny+1); ix<$Nx; ix++)); do
+                startp=$( echo "$ix $Ny $Nx" |awk '{print $1, 0}' )
+                endp=$( echo "$ix $Ny $Nx" |awk '{print  ($2-$1+$3-$2-1)*0.5+$1, ($2-$1+$3-$2-1)*sqrt(3.0)/2.0}' )
+                echo " \"<echo '$startp \n $endp'\" with l lc rgb 'grey' lw 0.1 not, \\" >> plot_${tag}_real_space.gnu
+            done
+            #for ((ix=-1; ix>-($Nx-$Ny-1); ix--)); do
+            for ((ix=-1; ix>-($Ny-1); ix--)); do
+                startp=$( echo "$ix $Ny $Nx" |awk '{print $1*0.5, -$1*sqrt(3.0)/2.0}' )
+                endp=$( echo "$ix $Ny $Nx" |awk '{print  ($2-1)*0.5+$1, ($2-1)*sqrt(3.0)/2.0}' )
+                echo " \"<echo '$startp \n $endp'\" with l lc rgb 'grey' lw 0.1 not, \\" >> plot_${tag}_real_space.gnu
+            done
 
             # plot some horizontal lines 
             for ((ix=0; ix<$Ny; ix++)); do
-                startp=$( echo "$ix $Ny $Nx" |awk '{print -$1*0.0, $1*1.0}' )
-                endp=$( echo "$ix $Ny $Nx" |awk '{print -$1*0.0+$3-1,$1*1.0}' )
+                startp=$( echo "$ix $Ny $Nx" |awk '{print -$1*0.5, $1*sqrt(3.0)/2.0}' )
+                endp=$( echo "$ix $Ny $Nx" |awk '{print -$1*0.5+$3-1,$1*sqrt(3.0)/2.0}' )
                 echo " \"<echo '$startp \n $endp'\" with l lc rgb 'grey' lw 0.1 not, \\" >> plot_${tag}_real_space.gnu
             done
 
             # split
-            datafile=$pretag/project_square_tjk/run/${maindir}/step${istep}/${tag}.out
-            # split
+            datafile=$pretag/project_tjk/run/${maindir}/step${istep}/${tag}.out
             cat $datafile |sed -E -e 's/[[:blank:]]+/\n/g'> ${tag}_column.dat
             for ((i=0; i<$nn; i++)); do
-                startp=$( echo "$i $Ny $Nx" |awk '{print int($1/$2)*1.0-($1%$2)*0.0, ($1%$2)*1.0}' )
-                endp=$( echo "$i $Ny $Nx" |awk '{print int($1/$2)*1.0-($1%$2)*0.0-0.0, ($1%$2)*1.0+1.0}' )
+                startp=$( echo "$i $Ny $Nx" |awk '{print int($1/$2)*1.0-($1%$2)*0.5, ($1%$2)*sqrt(3.0)/2.0}' )
+                endp=$( echo "$i $Ny $Nx" |awk '{print int($1/$2)*1.0-($1%$2)*0.5-0.5, ($1%$2)*sqrt(3.0)/2.0+sqrt(3.0)/2.0}' )
                 #dvalue=$( awk -v iv=$i '{if(NR==(iv+1)) print ($1>0)?$1:-$1}' ${tag}_column.dat )
-                dvalue=$( awk -v iv=$i '{if(NR==(iv+1)) print 6*16*$1*$1*$1*$1}' ${tag}_column.dat ) # make it sharper
+                dvalue=$( awk -v iv=$i '{if(NR==(iv+1)) print 4*$1}' ${tag}_column.dat ) # make it sharper
                 echo " \"<echo '$startp'\" with p ps $dvalue lc 1 pt 6 lw 1.5 not, \\" >> plot_${tag}_real_space.gnu
             done
-
             gnuplot plot_${tag}_real_space.gnu
-
         fi
       done
       done

@@ -71,7 +71,8 @@ endin
             endp=$( echo "$ix $Ny $Nx" |awk '{print  ($2-$1+$3-$2-1)*0.5+$1, ($2-$1+$3-$2-1)*sqrt(3.0)/2.0}' )
             echo " \"<echo '$startp \n $endp'\" with l lc rgb 'grey' lw 0.1 not, \\" >> plot_all_real_space.gnu
         done
-        for ((ix=-1; ix>-($Nx-$Ny-1); ix--)); do
+        #for ((ix=-1; ix>-($Nx-$Ny-1); ix--)); do
+        for ((ix=-1; ix>-($Ny-1); ix--)); do
             startp=$( echo "$ix $Ny $Nx" |awk '{print $1*0.5, -$1*sqrt(3.0)/2.0}' )
             endp=$( echo "$ix $Ny $Nx" |awk '{print  ($2-1)*0.5+$1, ($2-1)*sqrt(3.0)/2.0}' )
             echo " \"<echo '$startp \n $endp'\" with l lc rgb 'grey' lw 0.1 not, \\" >> plot_all_real_space.gnu
@@ -118,6 +119,7 @@ endin
         # Dy
         tagarray=$( echo "Dy")
         for tag in $tagarray; do
+            datafile=$pretag/project_tjk/run/${maindir}/step${istep}/${tag}i.out
             cat $datafile |sed -E -e 's/[[:blank:]]+/\n/g'> ${tag}i_column.dat
             for ((i=0; i<$nn; i++)); do
                 startp=$( echo "$i $Ny $Nx" |awk '{print int($1/$2)*1.0-($1%$2)*0.5-0.5*0.3, ($1%$2)*sqrt(3.0)/2.0+sqrt(3.0)/2.0*0.3}' )
@@ -131,8 +133,9 @@ endin
         # Dxy
         tagarray=$( echo "Dxy")
         for tag in $tagarray; do
+            datafile=$pretag/project_tjk/run/${maindir}/step${istep}/${tag}i.out
             cat $datafile |sed -E -e 's/[[:blank:]]+/\n/g'> ${tag}i_column.dat
-            for ((i=0; i<$nn; i++)); do
+            for ((i=0; i<($nn-$Ny); i++)); do
                 startp=$( echo "$i $Ny $Nx" |awk '{print int($1/$2)*1.0-($1%$2)*0.5+0.5*0.3, ($1%$2)*sqrt(3.0)/2.0+sqrt(3.0)/2.0*0.3}' )
                 endp=$( echo "$i $Ny $Nx" |awk '{print int($1/$2)*1.0-($1%$2)*0.5+0.5*0.7, ($1%$2)*sqrt(3.0)/2.0+sqrt(3.0)/2.0*0.7}' )
                 dvalue=$( awk -v iv=$i '{if(NR==(iv+1)) print ($1>0)?20*$1:-20*$1}' ${tag}i_column.dat )
@@ -143,8 +146,9 @@ endin
 
         tagarray=$( echo "Dx")
         for tag in $tagarray; do
+            datafile=$pretag/project_tjk/run/${maindir}/step${istep}/${tag}i.out
             cat $datafile |sed -E -e 's/[[:blank:]]+/\n/g'> ${tag}i_column.dat
-            for ((i=0; i<$nn; i++)); do
+            for ((i=0; i<($nn-$Ny); i++)); do
                 startp=$( echo "$i $Ny $Nx" |awk '{print int($1/$2)*1.0-($1%$2)*0.5+1.0*0.3, ($1%$2)*sqrt(3.0)/2.0}' )
                 endp=$( echo "$i $Ny $Nx" |awk   '{print int($1/$2)*1.0-($1%$2)*0.5+1.0*0.7, ($1%$2)*sqrt(3.0)/2.0}' )
                 dvalue=$( awk -v iv=$i '{if(NR==(iv+1)) print ($1>0)?20*$1:-20*$1}' ${tag}i_column.dat )
