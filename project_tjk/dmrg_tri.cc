@@ -1243,9 +1243,8 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
 
             std::vector<Cplx> pair1a4( ((i_end*6-i_start*6)*(nnlist.size()*6-i_start*6+nnlist.size()*6-i_end*6+6)/2) );
             std::vector<Cplx> pair2a3( ((i_end*6-i_start*6)*(nnlist.size()*6-i_start*6+nnlist.size()*6-i_end*6+6)/2) );
-            println("run to 0.0");
-            println("pair1a4.size = ", pair1a4.size());
-            println("pair2a3.size = ", pair2a3.size());
+            //println("pair1a4.size = ", pair1a4.size());
+            //println("pair2a3.size = ", pair2a3.size());
             //for(int i = 0; i < nnlist.size(); ++i) {
             for(int n1 = i_start; n1 < i_end; ++n1) {
                 int i = nnlist[n1].s0;
@@ -1260,9 +1259,8 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
 
                             std::vector<int> sites_tmp = { j, i, k, l };
                             // i,j,k,l, only select i!=j < k!=l
-                            printfln("n1, id1, n2, id2 = %d, %d, %d, %d", n1, id1, n2, id2 );
-                            printfln("j, i, k, l = %d, %d, %d, %d", j, i, k, l );
-                            //println("run to 0.1");
+                            // printfln("n1, id1, n2, id2 = %d, %d, %d, %d", n1, id1, n2, id2 );
+                            // printfln("j, i, k, l = %d, %d, %d, %d", j, i, k, l );
                             if( (sites_tmp[0] != sites_tmp[1]) &&
                                 (sites_tmp[0] <  sites_tmp[2]) &&
                                 (sites_tmp[0] <  sites_tmp[3]) &&
@@ -1271,35 +1269,31 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                                 (sites_tmp[2] != sites_tmp[3]) ) {
                                 op34pair_vec.emplace_back( std::make_pair( sites_tmp[2], sites_tmp[3] ) );
                                 int ind_meas = ( nnlist.size()-i_start + nnlist.size()-n1+1)*(n1-i_start)/2*36 + (nnlist.size()-n1)*6*id1 + (n2-n1)*6 + id2;
-                                std::cout << " ind_meas = " << ind_meas <<std::endl;
+                                //std::cout << " ind_meas = " << ind_meas <<std::endl;
                                 pair1a4[ind_meas] = 0.0; // initial the obserator
                                 pair2a3[ind_meas] = 0.0; // initial the obserator
                                 corr_ind.emplace_back( ind_meas );
-                                println("j,i<k,l case");
+                                // println("j,i<k,l case");
                                 //std::cout << " k, l = " << k << " " << l <<std::endl;
                                 //std::cout << " ind_meas = " << ind_meas <<std::endl;
                             } else {
                                 // use mfourbodyf
-                                println("run to 0.2");
                                 auto pair1a4_tmp = mfourbodyf(psi,sites,sites_tmp,"Adagdn","Adagup","Aup","Adn") + 
                                                    mfourbodyf(psi,sites,sites_tmp,"Adagup","Adagdn","Adn","Aup");
-                                println("run to 0.3");
                                 auto pair2a3_tmp = mfourbodyf(psi,sites,sites_tmp,"Adagup","Adagdn","Aup","Adn") + 
                                                    mfourbodyf(psi,sites,sites_tmp,"Adagdn","Adagup","Adn","Aup");
-                                println("run to 0.4");
                                 int ind_meas = ( nnlist.size()-i_start + nnlist.size()-n1+1)*(n1-i_start)/2*36 + (nnlist.size()-n1)*6*id1 + (n2-n1)*6 + id2;
-                                std::cout << " ind_meas = " << ind_meas <<std::endl;
+                                // std::cout << " ind_meas = " << ind_meas <<std::endl;
                                 pair1a4[ind_meas] = pair1a4_tmp ;
                                 pair2a3[ind_meas] = pair2a3_tmp ;
-                                printfln(" %d, %d, %d, %d, paircorr1a4 = %.12f", j, i, k, l, pair1a4_tmp);
-                                printfln(" %d, %d, %d, %d, paircorr2a3 = %.12f", j, i, k, l, pair2a3_tmp);
+                                // printfln(" %d, %d, %d, %d, paircorr1a4 = %.12f", j, i, k, l, pair1a4_tmp);
+                                // printfln(" %d, %d, %d, %d, paircorr2a3 = %.12f", j, i, k, l, pair2a3_tmp);
                             }
                         }
                     } // for(int n2 = n1; n2 < int(nnlist.size()); ++n2) {
                     if( op34pair_vec.size() > 0 ) {
                         //std::cout << " op34pair_vec = " <<std::endl;
                         //for (auto rr : op34pair_vec ) { std::cout << rr.first <<" "<< rr.second << '\n'; }
-                        println("run to 1.0");
                         mfourbodyf_str(psi, sites, {j, i}, "Adagdn", "Adagup", op34pair_vec, "Aup", "Adn", corr_ind, pair1a4, Cplx(1.0,0.0) );
                         mfourbodyf_str(psi, sites, {j, i}, "Adagup", "Adagdn", op34pair_vec, "Adn", "Aup", corr_ind, pair1a4, Cplx(1.0,0.0) );
                         mfourbodyf_str(psi, sites, {j, i}, "Adagup", "Adagdn", op34pair_vec, "Aup", "Adn", corr_ind, pair2a3, Cplx(1.0,0.0) );

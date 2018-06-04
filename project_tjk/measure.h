@@ -305,7 +305,7 @@ struct opairstruct {
 
 //bool cmp_by_value_of_1st_element_of_struct(const std::vector<opair>& lhs, const std::vector<opair>& rhs) {  
 bool cmp_by_value_of_1st_element_of_struct(const opairstruct& lhs, const opairstruct& rhs) {  
-      return lhs.op_pair[0].second <= rhs.op_pair[0].second;  
+      return lhs.op_pair[0].second < rhs.op_pair[0].second;  
 }
 
 // a serials of fourbody correlation, (op1,op2) is fixed, (op3,op4) in range op34array
@@ -872,8 +872,12 @@ mfourbodyf_str(MPSt<Tensor>& psi,
 
     ////println("signf =", signf);
 
+    ////printfln("before sorting, opstr_12 = %s, %d, %s, %d ",
+    ////          opstr_12[0].first, opstr_12[0].second, opstr_12[1].first, opstr_12[1].second);
     // sort by site index
     std::sort(opstr_12.begin(), opstr_12.end(), cmp_by_value);
+    ////printfln("after sorting, opstr_12 = %s, %d, %s, %d ",
+    ////          opstr_12[0].first, opstr_12[0].second, opstr_12[1].first, opstr_12[1].second);
     // count the sign comes from c_dn and c^+_dn
     if( opstr_12[0].first == "Adn" ) {
         signf = -signf;
@@ -892,7 +896,11 @@ mfourbodyf_str(MPSt<Tensor>& psi,
         std::vector<opair> opstr_34_tmp = { std::make_pair(op3_label, sites_34_array[kli].first),
                                             std::make_pair(op4_label, sites_34_array[kli].second) };
         // sort by site index
+        ////printfln("before sorting, opstr_34_tmp = %s, %d, %s, %d ",
+        ////          opstr_34_tmp[0].first, opstr_34_tmp[0].second, opstr_34_tmp[1].first, opstr_34_tmp[1].second);
         std::sort(opstr_34_tmp.begin(), opstr_34_tmp.end(), cmp_by_value);
+        ////printfln("after sorting, opstr_34_tmp = %s, %d, %s, %d ",
+        ////          opstr_34_tmp[0].first, opstr_34_tmp[0].second, opstr_34_tmp[1].first, opstr_34_tmp[1].second);
         opairstruct opairstruct_tmp;
         opairstruct_tmp.op_pair = opstr_34_tmp;
         opairstruct_tmp.ind = corr_ind[kli];
@@ -912,15 +920,27 @@ mfourbodyf_str(MPSt<Tensor>& psi,
         opstr_34_array.emplace_back( opairstruct_tmp );
     }
 
+    // for test
+    ////println( "before sorting");
+    ////println( "(i,j)=", opstr_12[0].second, opstr_12[1].second );
+    ////for ( int kli = 0; kli < sites_34_array.size(); ++kli ){
+    ////    println( "(k,l), ind, sign =", opstr_34_array[kli].op_pair[0].second," ",
+    ////                             opstr_34_array[kli].op_pair[1].second," ", 
+    ////                             opstr_34_array[kli].ind, " ",
+    ////                             opstr_34_array[kli].sign );
+    ////}
+
     // sort by site index of first operator
     std::sort( opstr_34_array.begin(), opstr_34_array.end(), cmp_by_value_of_1st_element_of_struct);
 
-    ////// for test
+    // for test
+    ////println( "after sorting");
     ////println( "(i,j)=", opstr_12[0].second, opstr_12[1].second );
     ////for ( int kli = 0; kli < sites_34_array.size(); ++kli ){
-    ////    println( "(k,l), ind =", opstr_34_array[kli].op_pair[0].second," ",
+    ////    println( "(k,l), ind, sign =", opstr_34_array[kli].op_pair[0].second," ",
     ////                             opstr_34_array[kli].op_pair[1].second," ", 
-    ////                             opstr_34_array[kli].ind );
+    ////                             opstr_34_array[kli].ind, " ",
+    ////                             opstr_34_array[kli].sign );
     ////}
 
     psi.position(opstr_12[0].second);
@@ -935,7 +955,8 @@ mfourbodyf_str(MPSt<Tensor>& psi,
     // propogate until opj
     for ( int i1 = opstr_12[0].second+1; i1<opstr_12[1].second; ++i1) { 
         SStmp *= psi.A(i1);
-        SStmp *= dag(prime(psi.A(i1),Link));
+        SStmp *= sites.op("F", i1);
+        SStmp *= dag(prime(psi.A(i1),Site,Link));
     }
     SStmp *= psi.A( opstr_12[1].second );
     if(opstr_12[1].first == "Adn" || opstr_12[1].first == "Adagdn") {
@@ -959,18 +980,19 @@ mfourbodyf_str(MPSt<Tensor>& psi,
         auto opk = sites.op(opk_label,k);
         SStmp2 *= opk;
         if(opstr_34_array[kli].op_pair[0].first == "Aup" || opstr_34_array[kli].op_pair[0].first == "Adagup") {
-            SStmp = noprime(SStmp,Site)*sites.op("F", opstr_34_array[kli].op_pair[0].second );
+            SStmp2 = noprime(SStmp2,Site)*sites.op("F", opstr_34_array[kli].op_pair[0].second );
         }
         SStmp2 *= dag(prime(prime(psi.A(k),Site),Link));
         // propogate until opl (pair with opk)
         for ( int i2 = k+1; i2<l; ++i2 ){
             SStmp2 *= psi.A(i2);
-            SStmp2 *= dag(prime(psi.A(i2),Link));
+            SStmp2 *= sites.op("F",i2);
+            SStmp2 *= dag(prime(psi.A(i2),Site,Link));
         }
 
         SStmp2 *= psi.A( l );
         if(opstr_34_array[kli].op_pair[1].first == "Adn" || opstr_34_array[kli].op_pair[1].first == "Adagdn") {
-            SStmp = noprime(SStmp,Site)*sites.op("F", opstr_34_array[kli].op_pair[1].second );
+            SStmp2 = noprime(SStmp2*sites.op("F", opstr_34_array[kli].op_pair[1].second ), Site);
         }
         auto opl = sites.op(opl_label,l);
         SStmp2 *= opl;
