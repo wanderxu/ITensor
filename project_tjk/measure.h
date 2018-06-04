@@ -300,11 +300,12 @@ mfourbody(MPSt<Tensor>& psi,
 
 struct opairstruct {
     std::vector<opair> op_pair;
-    int ind; };
+    int ind;
+    int sign; };
 
 //bool cmp_by_value_of_1st_element_of_struct(const std::vector<opair>& lhs, const std::vector<opair>& rhs) {  
 bool cmp_by_value_of_1st_element_of_struct(const opairstruct& lhs, const opairstruct& rhs) {  
-      return lhs.op_pair[0].second < rhs.op_pair[0].second;  
+      return lhs.op_pair[0].second <= rhs.op_pair[0].second;  
 }
 
 // a serials of fourbody correlation, (op1,op2) is fixed, (op3,op4) in range op34array
@@ -842,6 +843,147 @@ template <class Tensor> Cplx mfourbodyf(
     }
     // return (SStmp.cplx()).real();
     return signf*SStmp.cplx();
+  }
+
+// a serials of fourbody correlation, (op1,op2) is fixed, (op3,op4) in range op34array
+// note the requirement of the input is: op1!=op2!=op3!=op4, and op3,op4 > op1,op2
+template <class Tensor>
+void
+mfourbodyf_str(MPSt<Tensor>& psi,
+     tJ const& sites,
+     std::vector<int> const& sites_12,
+     std::string const& op1_label,
+     std::string const& op2_label,
+     std::vector< std::pair<int,int> > const& sites_34_array,
+     std::string const& op3_label,
+     std::string const& op4_label,
+     std::vector<int>& corr_ind,
+     std::vector<Cplx>& corr_meas,
+     Cplx const& cfac )  // cfac is a constant factor
+    {
+    // op1, op2 is fixed
+    std::vector<opair> opstr_12 = { std::make_pair(op1_label,sites_12[0]),
+                                    std::make_pair(op2_label,sites_12[1])};
+    int signf = 1;
+    // count the sign for sites_12
+    if( sites_12[0] > sites_12[1] ) {
+        signf = -signf;
+    }
+
+    ////println("signf =", signf);
+
+    // sort by site index
+    std::sort(opstr_12.begin(), opstr_12.end(), cmp_by_value);
+    // count the sign comes from c_dn and c^+_dn
+    if( opstr_12[0].first == "Adn" ) {
+        signf = -signf;
+    }
+    if( opstr_12[1].first == "Adagdn" ) {
+        signf = -signf;
+    }
+
+    auto opi = sites.op(opstr_12[0].first,opstr_12[0].second);
+    auto opj = sites.op(opstr_12[1].first,opstr_12[1].second);
+    //auto opk = sites.op(opstr[2].first,opstr[2].second);
+    //auto opl = sites.op(opstr[3].first,opstr[3].second);
+
+    std::vector< opairstruct > opstr_34_array;
+    for ( int kli = 0; kli < sites_34_array.size(); ++kli ){
+        std::vector<opair> opstr_34_tmp = { std::make_pair(op3_label, sites_34_array[kli].first),
+                                            std::make_pair(op4_label, sites_34_array[kli].second) };
+        // sort by site index
+        std::sort(opstr_34_tmp.begin(), opstr_34_tmp.end(), cmp_by_value);
+        opairstruct opairstruct_tmp;
+        opairstruct_tmp.op_pair = opstr_34_tmp;
+        opairstruct_tmp.ind = corr_ind[kli];
+        // count the sign for sites_34
+        if( sites_34_array[kli].first > sites_34_array[kli].second ) {
+            opairstruct_tmp.sign = -signf;
+        } else {
+            opairstruct_tmp.sign = signf;
+        }
+        // count the sign from c_dn and c^+_dn
+        if( opstr_34_tmp[0].first == "Adn" ){
+            opairstruct_tmp.sign = -opairstruct_tmp.sign;
+        }
+        if( opstr_34_tmp[1].first == "Adagdn" ){
+            opairstruct_tmp.sign = -opairstruct_tmp.sign;
+        }
+        opstr_34_array.emplace_back( opairstruct_tmp );
+    }
+
+    // sort by site index of first operator
+    std::sort( opstr_34_array.begin(), opstr_34_array.end(), cmp_by_value_of_1st_element_of_struct);
+
+    ////// for test
+    ////println( "(i,j)=", opstr_12[0].second, opstr_12[1].second );
+    ////for ( int kli = 0; kli < sites_34_array.size(); ++kli ){
+    ////    println( "(k,l), ind =", opstr_34_array[kli].op_pair[0].second," ",
+    ////                             opstr_34_array[kli].op_pair[1].second," ", 
+    ////                             opstr_34_array[kli].ind );
+    ////}
+
+    psi.position(opstr_12[0].second);
+    IQTensor SStmp=psi.A(opstr_12[0].second);
+    IQTensor SStmp2=psi.A(opstr_12[0].second);
+    SStmp *= opi;
+    if(opstr_12[0].first == "Aup" || opstr_12[0].first == "Adagup") {
+        SStmp = noprime(SStmp,Site)*sites.op("F", opstr_12[0].second );
+    }
+    auto ir1 = commonIndex(psi.A(opstr_12[0].second), psi.A(opstr_12[0].second+1),Link);
+    SStmp *= dag(prime(prime(psi.A(opstr_12[0].second),Site),ir1));
+    // propogate until opj
+    for ( int i1 = opstr_12[0].second+1; i1<opstr_12[1].second; ++i1) { 
+        SStmp *= psi.A(i1);
+        SStmp *= dag(prime(psi.A(i1),Link));
+    }
+    SStmp *= psi.A( opstr_12[1].second );
+    if(opstr_12[1].first == "Adn" || opstr_12[1].first == "Adagdn") {
+        SStmp = noprime(SStmp*sites.op("F",opstr_12[1].second ), Site);
+    }
+    SStmp *= opj;
+    SStmp *= dag(prime(prime(psi.A(opstr_12[1].second),Site),Link));
+
+    // propogate until first opk
+    for ( int i1 = opstr_12[1].second+1; i1<opstr_34_array[0].op_pair[0].second; ++i1){
+        SStmp *= psi.A(i1);
+        SStmp *= dag(prime(psi.A(i1),Link));
+    }
+
+    for( int kli = 0; kli < sites_34_array.size(); ++kli ) {
+        auto opk_label = opstr_34_array[kli].op_pair[0].first;
+        auto k = opstr_34_array[kli].op_pair[0].second;
+        auto opl_label = opstr_34_array[kli].op_pair[1].first;
+        auto l = opstr_34_array[kli].op_pair[1].second;
+        SStmp2 = SStmp * psi.A(k);
+        auto opk = sites.op(opk_label,k);
+        SStmp2 *= opk;
+        if(opstr_34_array[kli].op_pair[0].first == "Aup" || opstr_34_array[kli].op_pair[0].first == "Adagup") {
+            SStmp = noprime(SStmp,Site)*sites.op("F", opstr_34_array[kli].op_pair[0].second );
+        }
+        SStmp2 *= dag(prime(prime(psi.A(k),Site),Link));
+        // propogate until opl (pair with opk)
+        for ( int i2 = k+1; i2<l; ++i2 ){
+            SStmp2 *= psi.A(i2);
+            SStmp2 *= dag(prime(psi.A(i2),Link));
+        }
+
+        SStmp2 *= psi.A( l );
+        if(opstr_34_array[kli].op_pair[1].first == "Adn" || opstr_34_array[kli].op_pair[1].first == "Adagdn") {
+            SStmp = noprime(SStmp,Site)*sites.op("F", opstr_34_array[kli].op_pair[1].second );
+        }
+        auto opl = sites.op(opl_label,l);
+        SStmp2 *= opl;
+        auto ir3 = commonIndex(psi.A(l), psi.A(l-1),Link);
+        SStmp2 *= dag(prime(prime(psi.A(l),Site),ir3)); // i!=j!=k!=l
+        corr_meas[ opstr_34_array[kli].ind ] += opstr_34_array[kli].sign * cfac*SStmp2.cplx(); // add measurement to corr_meas
+        if( kli+1 < sites_34_array.size() ) {
+            for ( int i3 = k; i3<opstr_34_array[kli+1].op_pair[0].second; ++i3 ){
+                SStmp *= psi.A(i3);
+                SStmp *= dag(prime(psi.A(i3),Link));
+            }
+        }
+    }
   }
 
 } //namespace itensor
