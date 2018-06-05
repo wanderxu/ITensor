@@ -1,8 +1,8 @@
 #!/bin/bash
 
 source cal_para.sh
-firststep=5
-maxstep=6
+firststep=1
+maxstep=8
 taglist=$( echo "s d+id d-id dxy dx2-y2 f p+ip p-ip px py")
 
 WORKDIR="$PWD"

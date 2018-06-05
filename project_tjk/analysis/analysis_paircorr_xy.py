@@ -91,23 +91,24 @@ for i in range(N):
             #print( sisj14[i,j,id1,:] )
 
 # calculate ddxx, ddxy, ddyx, ddyy vs x
-# pick a reference point i0 to be ix=Nx/4
+# pick a reference point x0 to be x0=Nx/4-1
 # id = 0 : +x direc
 #      1 : -y direc, fourth quardrant (south-east)
 #      2 : -y direc, third quardrant (south-west)
 #      3 : -x direc
 #      4 : +y direc, second quardrant (north-west)
 #      5 : +y direc, second quardrant (north-east)
-i0=N/4
+x0=Nx/4-1
 ddxx = np.zeros((Nx),dtype=complex)
 ddxy = np.zeros((Nx),dtype=complex)
 ddyx = np.zeros((Nx),dtype=complex)
 ddyy = np.zeros((Nx),dtype=complex)
 for j in range(N):
-    ddxx[j%Nx] += ( sisj14[i0,j,0,0] - sisj23[i0,j,0,0] )*4.0
-    ddxy[j%Nx] += ( sisj14[i0,j,0,4] - sisj23[i0,j,0,4] )*2.0 + ( sisj14[i0,j,0,5] - sisj23[i0,j,0,5] )*2.0
-    ddyx[j%Nx] += ( sisj14[i0,j,4,0] - sisj23[i0,j,4,0] )*2.0 + ( sisj14[i0,j,5,0] - sisj23[i0,j,5,0] )*2.0
-    ddyy[j%Nx] += ( sisj14[i0,j,4,4] - sisj23[i0,j,4,4] ) + ( sisj14[i0,j,4,5] - sisj23[i0,j,4,5] ) +  \
+    i0 = x0*Ny + j%Ny
+    ddxx[j/Ny] += ( sisj14[i0,j,0,0] - sisj23[i0,j,0,0] )*4.0
+    ddxy[j/Ny] += ( sisj14[i0,j,0,4] - sisj23[i0,j,0,4] )*2.0 + ( sisj14[i0,j,0,5] - sisj23[i0,j,0,5] )*2.0
+    ddyx[j/Ny] += ( sisj14[i0,j,4,0] - sisj23[i0,j,4,0] )*2.0 + ( sisj14[i0,j,5,0] - sisj23[i0,j,5,0] )*2.0
+    ddyy[j/Ny] += ( sisj14[i0,j,4,4] - sisj23[i0,j,4,4] ) + ( sisj14[i0,j,4,5] - sisj23[i0,j,4,5] ) +  \
                   ( sisj14[i0,j,5,4] - sisj23[i0,j,5,4] ) + ( sisj14[i0,j,5,5] - sisj23[i0,j,5,5] )
 
 with open("ddxxvsx.dat","w") as f:

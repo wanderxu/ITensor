@@ -109,11 +109,12 @@ print "phi(", pairlist, ") = "
 print phase
 
 # calculate didj
+# drop out boundaries
 didj = np.zeros((10,N,N),dtype=complex)
 for id1 in range(6):
     for id2 in range(6):
-        for i in range(N):
-            for j in range(N):
+        for i in range(N/4,N/4*3):
+            for j in range(N/4,N/4*3):
                 # singlet pairing
                 for ipair in range(5):
                     didj[ipair,i,j] += np.conj(phase[ipair,id1])*phase[ipair,id2]*(sisj14[i,j,id1,id2] - sisj23[i,j,id1,id2])

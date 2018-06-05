@@ -91,21 +91,22 @@ for i in range(N):
             #print( sisj14[i,j,id1,:] )
 
 # calculate ddxx, ddxy, ddyx, ddyy vs x
-# pick a reference point i0 to be ix=Nx/4
+# pick a reference point x0 to be x0=Nx/4-1
 # id = 0 : +x direc
 #      1 : -y direc
 #      3 : -x direc
 #      4 : +y direc
-i0=N/4
+x0=Nx/4-1
 ddxx = np.zeros((Nx),dtype=complex)
 ddxy = np.zeros((Nx),dtype=complex)
 ddyx = np.zeros((Nx),dtype=complex)
 ddyy = np.zeros((Nx),dtype=complex)
 for j in range(N):
-    ddxx[j%Nx] += ( sisj14[i0,j,0,0] - sisj23[i0,j,0,0] )
-    ddxy[j%Nx] += ( sisj14[i0,j,0,4] - sisj23[i0,j,0,4] )
-    ddyx[j%Nx] += ( sisj14[i0,j,4,0] - sisj23[i0,j,4,0] )
-    ddyy[j%Nx] += ( sisj14[i0,j,4,4] - sisj23[i0,j,4,4] )
+    i0 = x0*Ny + j%Ny
+    ddxx[j/Ny] += ( sisj14[i0,j,0,0] - sisj23[i0,j,0,0] )
+    ddxy[j/Ny] += ( sisj14[i0,j,0,4] - sisj23[i0,j,0,4] )
+    ddyx[j/Ny] += ( sisj14[i0,j,4,0] - sisj23[i0,j,4,0] )
+    ddyy[j/Ny] += ( sisj14[i0,j,4,4] - sisj23[i0,j,4,4] )
 
 with open("ddxxvsx.dat","w") as f:
     for ix in range(Nx):
