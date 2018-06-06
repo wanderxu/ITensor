@@ -41,6 +41,8 @@ int main(int argc, char* argv[])
     auto meas_pairbubble = input.getYesNo("meas_pairbubble",false);
     auto meas_pairodp = input.getYesNo("meas_pairodp",false);
     auto meas_paircorr = input.getYesNo("meas_paircorr",false);
+    auto lfixi0 = input.getYesNo("lfixi0",false);
+    auto x0 = input.getInt("x0",0);
     auto quiet = input.getYesNo("quiet",true);
     // as the measurement usually very slow, we divide it into Npart, submit Npart jobs, each one deals with its ithpart
     auto ithpart = input.getInt("ithpart",1);
@@ -1281,7 +1283,10 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
             println("i_start = ", i_start, "  i_end = ", i_end);
 
             std::vector<Cplx> pair1a4( ((i_end*6-i_start*6)*(nnlist.size()*6-i_start*6+nnlist.size()*6-i_end*6+6)/2) );
+            std::fill(pair1a4.begin(), pair1a4.end(), Cplx(0.0,0.0));
             std::vector<Cplx> pair2a3( ((i_end*6-i_start*6)*(nnlist.size()*6-i_start*6+nnlist.size()*6-i_end*6+6)/2) );
+            std::fill(pair2a3.begin(), pair2a3.end(), Cplx(0.0,0.0));
+            int numofcalcorr = 0;
             //println("pair1a4.size = ", pair1a4.size());
             //println("pair2a3.size = ", pair2a3.size());
             //for(int i = 0; i < nnlist.size(); ++i) {
@@ -1306,6 +1311,10 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                                 (sites_tmp[1] <  sites_tmp[2]) &&
                                 (sites_tmp[1] <  sites_tmp[3]) &&
                                 (sites_tmp[2] != sites_tmp[3]) ) {
+                                if( !lfixi0 || ( ((n1 == x0*Ny + n2%Ny) || (n2 == x0*Ny + n1%Ny) ) && 
+                                                                   (id1==0 || id1 == 4) &&
+                                                                   (id2==0 || id2 == 4)) ) { // fix n1
+                                numofcalcorr += 1;
                                 op34pair_vec.emplace_back( std::make_pair( sites_tmp[2], sites_tmp[3] ) );
                                 int ind_meas = ( nnlist.size()-i_start + nnlist.size()-n1+1)*(n1-i_start)/2*36 + (nnlist.size()-n1)*6*id1 + (n2-n1)*6 + id2;
                                 //std::cout << " ind_meas = " << ind_meas <<std::endl;
@@ -1315,7 +1324,12 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                                 // println("j,i<k,l case");
                                 //std::cout << " k, l = " << k << " " << l <<std::endl;
                                 //std::cout << " ind_meas = " << ind_meas <<std::endl;
+                                }
                             } else {
+                                if( !lfixi0 || ( ((n1 == x0*Ny + n2%Ny) || (n2 == x0*Ny + n1%Ny) ) && 
+                                                                   (id1==0 || id1 == 4) &&
+                                                                   (id2==0 || id2 == 4)) ) { // fix n1
+                                numofcalcorr += 1;
                                 // use mfourbodyf
                                 auto pair1a4_tmp = mfourbodyf(psi,sites,sites_tmp,"Adagdn","Adagup","Aup","Adn") + 
                                                    mfourbodyf(psi,sites,sites_tmp,"Adagup","Adagdn","Adn","Aup");
@@ -1327,6 +1341,7 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                                 pair2a3[ind_meas] = pair2a3_tmp ;
                                 // printfln(" %d, %d, %d, %d, paircorr1a4 = %.12f", j, i, k, l, pair1a4_tmp);
                                 // printfln(" %d, %d, %d, %d, paircorr2a3 = %.12f", j, i, k, l, pair2a3_tmp);
+                                }
                             }
                         }
                     } // for(int n2 = n1; n2 < int(nnlist.size()); ++n2) {
@@ -1341,13 +1356,19 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                     printfln(" paircorr of j,i = %d, %d, k,l=?,? done ", j, i);
                 } // for (int id1 = 0; id1<6; id1++) {
             } // for(int n1 = i_start; n1 < i_end; ++n1) {
+            println("numofcalcorr = ", numofcalcorr);
             std::vector<Cplx> paircorr;
             for ( int i = 0; i < pair1a4.size(); ++i) {
                 paircorr.emplace_back( pair1a4[i] );
                 paircorr.emplace_back( pair2a3[i] );
             }
             // output
-            std::ofstream paircorrout("paircorr.out",std::ios::out);
+            std::ofstream paircorrout;
+            if( lfixi0 ) {
+            paircorrout.open("paircorrfixi0.out",std::ios::out);
+            } else {
+            paircorrout.open("paircorr.out",std::ios::out);
+            }
             paircorrout.precision(12);
             for (std::vector<Cplx>::const_iterator i = paircorr.begin(); i != paircorr.end(); ++i)
                     paircorrout << *i << ' ';

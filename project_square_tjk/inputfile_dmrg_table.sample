@@ -27,6 +27,8 @@ input
     meas_pairbubble = yes
     meas_pairodp = yes
     meas_paircorr = yes
+    lfixi0 = yes
+    x0 = 3
 
     nsweeps = 1
     sweeps
