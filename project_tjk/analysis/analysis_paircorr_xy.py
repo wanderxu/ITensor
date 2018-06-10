@@ -90,36 +90,60 @@ for i in range(N):
             #np.set_printoptions(precision=2,linewidth=400)
             #print( sisj14[i,j,id1,:] )
 
-# calculate ddxx, ddxy, ddyx, ddyy vs x
+# calculate ddab (a,b = 1, 2, 3) vs x. Here 1 denotes x, 2 denotes y, 3 denotes xy
 # pick a reference point x0 to be x0=Nx/4-1
 # id = 0 : +x direc
-#      1 : -y direc, fourth quardrant (south-east)
+#      1 : -y direc, fourth quardrant (south-east), -a2 direc.
 #      2 : -y direc, third quardrant (south-west)
 #      3 : -x direc
 #      4 : +y direc, second quardrant (north-west)
 #      5 : +y direc, second quardrant (north-east)
 x0=Nx/4-1
-ddxx = np.zeros((Nx),dtype=complex)
-ddxy = np.zeros((Nx),dtype=complex)
-ddyx = np.zeros((Nx),dtype=complex)
-ddyy = np.zeros((Nx),dtype=complex)
+dd11 = np.zeros((Nx),dtype=complex)
+dd12 = np.zeros((Nx),dtype=complex)
+dd13 = np.zeros((Nx),dtype=complex)
+dd21 = np.zeros((Nx),dtype=complex)
+dd22 = np.zeros((Nx),dtype=complex)
+dd23 = np.zeros((Nx),dtype=complex)
+dd31 = np.zeros((Nx),dtype=complex)
+dd32 = np.zeros((Nx),dtype=complex)
+dd33 = np.zeros((Nx),dtype=complex)
 for j in range(N):
     i0 = x0*Ny + j%Ny
-    ddxx[j/Ny] += ( sisj14[i0,j,0,0] - sisj23[i0,j,0,0] )*4.0
-    ddxy[j/Ny] += ( sisj14[i0,j,0,4] - sisj23[i0,j,0,4] )*2.0 + ( sisj14[i0,j,0,5] - sisj23[i0,j,0,5] )*2.0
-    ddyx[j/Ny] += ( sisj14[i0,j,4,0] - sisj23[i0,j,4,0] )*2.0 + ( sisj14[i0,j,5,0] - sisj23[i0,j,5,0] )*2.0
-    ddyy[j/Ny] += ( sisj14[i0,j,4,4] - sisj23[i0,j,4,4] ) + ( sisj14[i0,j,4,5] - sisj23[i0,j,4,5] ) +  \
-                  ( sisj14[i0,j,5,4] - sisj23[i0,j,5,4] ) + ( sisj14[i0,j,5,5] - sisj23[i0,j,5,5] )
+    dd11[j/Ny] += ( sisj14[i0,j,0,0] - sisj23[i0,j,0,0] )
+    dd12[j/Ny] += ( sisj14[i0,j,0,4] - sisj23[i0,j,0,4] )
+    dd13[j/Ny] += ( sisj14[i0,j,0,5] - sisj23[i0,j,0,5] )
+    dd21[j/Ny] += ( sisj14[i0,j,4,0] - sisj23[i0,j,4,0] )
+    dd22[j/Ny] += ( sisj14[i0,j,4,4] - sisj23[i0,j,4,4] )
+    dd23[j/Ny] += ( sisj14[i0,j,4,5] - sisj23[i0,j,4,5] )
+    dd31[j/Ny] += ( sisj14[i0,j,5,0] - sisj23[i0,j,5,0] )
+    dd32[j/Ny] += ( sisj14[i0,j,5,4] - sisj23[i0,j,5,4] )
+    dd33[j/Ny] += ( sisj14[i0,j,5,5] - sisj23[i0,j,5,5] )
 
-with open("ddxxvsx.dat","w") as f:
+with open("dd11vsx.dat","w") as f:
     for ix in range(Nx):
-        f.write( "{:4d} {: .8f} {: .8f}\n".format(ix, ddxx[ix].real, ddxx[ix].imag) )
-with open("ddxyvsx.dat","w") as f:
+        f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd11[ix].real, dd11[ix].imag) )
+with open("dd12vsx.dat","w") as f:
     for ix in range(Nx):
-        f.write( "{:4d} {: .8f} {: .8f}\n".format(ix, ddxy[ix].real, ddxy[ix].imag) )
-with open("ddyxvsx.dat","w") as f:
+        f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd12[ix].real, dd12[ix].imag) )
+with open("dd13vsx.dat","w") as f:
     for ix in range(Nx):
-        f.write( "{:4d} {: .8f} {: .8f}\n".format(ix, ddyx[ix].real, ddyx[ix].imag) )
-with open("ddyyvsx.dat","w") as f:
+        f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd13[ix].real, dd13[ix].imag) )
+with open("dd21vsx.dat","w") as f:
     for ix in range(Nx):
-        f.write( "{:4d} {: .8f} {: .8f}\n".format(ix, ddyy[ix].real, ddyy[ix].imag) )
+        f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd21[ix].real, dd21[ix].imag) )
+with open("dd22vsx.dat","w") as f:
+    for ix in range(Nx):
+        f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd22[ix].real, dd22[ix].imag) )
+with open("dd23vsx.dat","w") as f:
+    for ix in range(Nx):
+        f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd23[ix].real, dd23[ix].imag) )
+with open("dd31vsx.dat","w") as f:
+    for ix in range(Nx):
+        f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd31[ix].real, dd31[ix].imag) )
+with open("dd32vsx.dat","w") as f:
+    for ix in range(Nx):
+        f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd32[ix].real, dd32[ix].imag) )
+with open("dd33vsx.dat","w") as f:
+    for ix in range(Nx):
+        f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd33[ix].real, dd33[ix].imag) )

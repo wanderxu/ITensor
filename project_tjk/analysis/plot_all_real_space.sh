@@ -2,7 +2,7 @@
 
 source cal_para.sh
 firststep=1
-maxstep=8
+maxstep=9
 
 WORKDIR="$PWD"
 echo $WORKDIR
