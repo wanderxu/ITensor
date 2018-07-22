@@ -1049,12 +1049,22 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
             int x = (n-1)/Ny+1;
             int y = (n-1)%Ny+1;
             int id0 = n;
-            int id1 = (x<Nx ? n+Ny: n+Ny-N); // (1,0) dir
-            int id2 = (y>1 ? n-1: n-1+Ny); // (0,-1) dir
-            int id3 = (x>1 ? (y>1 ? n-Ny-1 : n-Ny-1+Ny) : ( y>1 ? n-Ny-1+N : n-Ny-1+Ny+N ) ); // (-1,-1) dir
-            int id4 = (x>1 ? n-Ny : n-Ny+N); // (-1,0) dir
-            int id5 = (y<Ny ? n+1: n+1-Ny); // (0,1) dir
-            int id6 = (x<Nx ? (y<Ny ? n+Ny+1 : n+Ny+1-Ny) : ( y<Ny ? n+Ny+1-N : n+Ny+1-N-Ny) ); // (1,1) dir
+            int id1 = 0, id2 = 0, id3 = 0, id4 = 0, id5 = 0, id6 = 0;
+            if(x%2==1) {
+                id1 = (y>1 ? n+Ny-1: n+2*Ny-1); // (1,0) dir
+                id2 = (y>1 ? n-1: n+Ny-1);      // (0,-1) dir
+                id3 = (x>1 ? (y>1 ? n-Ny-1 : n-Ny-1+Ny) : ( y>1 ? n-Ny-1+N : n-Ny-1+Ny+N ) ); // (-1,-1) dir
+                id4 = (x>1 ? n-Ny : n-Ny+N); // (-1,0) dir
+                id5 = (y<Ny ? n+1: n+1-Ny);  // (0,1) dir
+                id6 = (x<Nx ? n+Ny : n+Ny+1-N ); // (1,1) dir
+            } else {
+                id1 = (x<Nx ? n+Ny: n+Ny-N); // (1,0) dir
+                id2 = (y>1 ? n-1: n+Ny-1);   // (0,-1) dir
+                id3 = n-Ny;  // (-1,-1) dir
+                id4 = (y<Ny ? n-Ny+1: n-2*Ny+1); // (-1,0) dir
+                id5 = (y<Ny ? n+1: n+1-Ny);      // (0,1) dir
+                id6 = (x<Nx ? (y<Ny ? n+Ny+1 : n+Ny+1-Ny) : ( y<Ny ? n+Ny+1-N : n+Ny+1-N-Ny) ); // (1,1) dir
+            }
             std::vector<int> nntmp = {id1, id2, id3, id4, id5, id6};
             nnlist.emplace_back( id0, nntmp );
         }
