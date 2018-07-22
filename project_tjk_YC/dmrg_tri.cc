@@ -119,8 +119,10 @@ int main(int argc, char* argv[])
         //
 
         auto ampo = AutoMPO(sites);
-        auto lattice = triangularLatticev2(Nx,Ny,{"YPeriodic=",yperiodic});
-        auto lattice4plaque = triangularLattice4Plaque(Nx,Ny,{"YPeriodic=",yperiodic});
+        //auto lattice = triangularLatticev2(Nx,Ny,{"YPeriodic=",yperiodic});
+        //auto lattice4plaque = triangularLattice4Plaque(Nx,Ny,{"YPeriodic=",yperiodic});
+        auto lattice = triangularLatticeYC(Nx,Ny,{"YPeriodic=",yperiodic});
+        auto lattice4plaque = triangularLatticeYC4Plaque(Nx,Ny,{"YPeriodic=",yperiodic});
 
         println("H is made up of ");
         println("\nBound:\n", lattice);
@@ -447,34 +449,58 @@ int main(int argc, char* argv[])
         
         // make the dimer table
         // x-direction
-        auto num_x_dimer = (Nx-1)*Ny;
+        //auto num_x_dimer = (Nx-1)*Ny;
+        auto num_x_dimer = (Nx-1)*Ny - (yperiodic ? 0 : Nx/2);
         auto num_y_dimer = Nx*(yperiodic ? Ny : Ny-1);
-        auto num_xy_dimer = (Nx-1)*(yperiodic ? Ny : Ny-1);
+        //auto num_xy_dimer = (Nx-1)*(yperiodic ? Ny : Ny-1);
+        auto num_xy_dimer = (Nx-1)*Ny - (yperiodic ? 0 : (Nx-1)/2);
         LatticeGraph x_dimer;
         LatticeGraph y_dimer;
         LatticeGraph xy_dimer;
         x_dimer.reserve(num_x_dimer);
         y_dimer.reserve(num_y_dimer);
         xy_dimer.reserve(num_xy_dimer);
-        for(int n = 1; n <= N; ++n)
-            {
-            int x = (n-1)/Ny+1;
+        for(int n = 1; n <= N; ++n) {
+            int x = (n-1)/Ny+1; 
             int y = (n-1)%Ny+1;
 
             //X-direction bonds
-            if(x < Nx) x_dimer.emplace_back(n,n+Ny);
+            if(x<Nx && x%2==1) {
+                xy_dimer.emplace_back(n,n+Ny);
+            } else if(x<Nx && x%2==0) {
+                x_dimer.emplace_back(n,n+Ny);
+            }
 
-            if(Ny > 1) //2d bonds
-                {
-                //vertical bond
-                if(y < Ny) y_dimer.emplace_back(n,n+1);
-                if((y == Ny) && yperiodic) y_dimer.emplace_back(n,n-Ny+1);
+            if(Ny > 1){ //2d bonds
+                // vertical bond 
+                if((n+1 <= N) && ((y < Ny))) {
+                    y_dimer.emplace_back(n,n+1);
+                }
+                // Y-periodic diagonal bond
+                if((n+2*Ny-1 <= N) && y==1 && x%2==1 && yperiodic ) {
+                    x_dimer.emplace_back(n,n+2*Ny-1);
+                }
+                if((n+1 <= N) && y==Ny && x%2==0 && yperiodic ) {
+                    xy_dimer.emplace_back(n,n+1);
+                }
+
+                //Periodic vertical bond
+                if(yperiodic && y == 1) y_dimer.emplace_back(n,n+Ny-1);
 
                 //Diagonal bonds
-                if((x < Nx) && (y < Ny)) xy_dimer.emplace_back(n,n+Ny+1);
-                if((x < Nx) && (y == Ny) && yperiodic) xy_dimer.emplace_back(n,n+1);
+                if(x < Nx && y > 1 && x%2==1) {
+                    x_dimer.emplace_back(n,n+Ny-1);
+                } else if (x < Nx && y < Ny && x%2==0) {
+                    xy_dimer.emplace_back(n,n+Ny+1);
                 }
             }
+        }
+        println( "x_dimer.size() = ", x_dimer.size());
+        println( "num_x_dimer = ", num_x_dimer);
+        println( "y_dimer.size() = ", y_dimer.size());
+        println( "num_y_dimer = ", num_y_dimer);
+        println( "xy_dimer.size() = ", xy_dimer.size());
+        println( "num_xy_dimer = ", num_xy_dimer);
         if(int(x_dimer.size()) != num_x_dimer) Error("Wrong number of x_dimer");
         if(int(y_dimer.size()) != num_y_dimer) Error("Wrong number of y_dimer");
         if(int(xy_dimer.size()) != num_xy_dimer) Error("Wrong number of xy_dimer");
@@ -811,15 +837,17 @@ int main(int argc, char* argv[])
             int x = (n-1)/Ny+1;
             int y = (n-1)%Ny+1;
 
-            if((x < Nx) && (y < Ny)) {
-                tri_plaq.emplace_back(n, n+Ny+1, n+Ny); // x-direction plaq
-                tri_plaq.emplace_back(n, n+1, n+Ny+1); // y-direction plaq
+            if( x%2 == 1 ) {
+                if((x < Nx) && (y > 1))  tri_plaq.emplace_back(n, n+Ny-1, n+Ny); // x-direction plaq
+                if((x < Nx) && (y < Ny)) tri_plaq.emplace_back(n, n+Ny, n+1); // y-direction plaq
+                if((x < Nx) && (y == 1) && yperiodic)  tri_plaq.emplace_back(n, n+2*Ny-1, n+Ny);
+                if((x < Nx) && (y == Ny) && yperiodic) tri_plaq.emplace_back(n, n+Ny, n-Ny+1);
+            } else {
+                if((x < Nx) && (y < Ny)) tri_plaq.emplace_back(n, n+Ny, n+Ny+1); // x-direction plaq
+                if((x < Nx) && (y < Ny)) tri_plaq.emplace_back(n, n+Ny+1, n+1); // y-direction plaq
+                if((x < Nx) && (y == Ny) && yperiodic) tri_plaq.emplace_back(n, n+Ny, n+1);
+                if((x < Nx) && (y == Ny) && yperiodic) tri_plaq.emplace_back(n, n+1, n-Ny+1);
             }
-            if((x < Nx) && (y == Ny) && yperiodic) {
-                tri_plaq.emplace_back(n, n+1, n+Ny);
-                tri_plaq.emplace_back(n, n-Ny+1, n+1);
-            }
-
         }
         if(int(tri_plaq.size()) != num_tri_plaq) Error("Wrong number of tri_plaq");
         println( "tri_plaq: \n", tri_plaq );
