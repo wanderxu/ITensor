@@ -1,0 +1,46 @@
+input
+    {
+    Nx = 6
+    Ny = 4
+    yperiodic = yes
+    t1 = 1.0
+    idop = 8
+    J1 = 1.0
+    J2 = 0.0
+    gamma1 = 1.0
+    gamma2 = 1.0
+    readmps = yes
+    eneropt = yes
+    twist_ybc = no
+    ytheta = 0.0
+    domeas  = yes // if domeas=no, then following meas* tag will not work
+    Npart = 0
+    ithpart = 0
+    meas_spincorr = no
+    meas_dimer = yes
+    meas_dxcorr = no
+    meas_dycorr = no
+    meas_dxycorr = no
+    meas_chiralcorr = yes
+    meas_pair = yes
+    meas_pairbubble = no
+    meas_pairodp = no
+    meas_paircorr = no
+    lfixi0 = yes
+    x0 = 3
+
+    nsweeps = 1
+    sweeps
+        {
+        maxm  minm  cutoff  niter  noise
+        10    10    1E-6    4      1E-7
+        20    20    1E-8    3      1E-8
+        20    20    1E-10   2      1E-10
+        20    20    1E-12   2      0
+        40    20    1E-12   2      0
+        80    20    1E-12   2      0
+        160   20    1E-12   2      0
+        320   20    1E-12   2      0
+        }
+    quiet = yes
+    }
