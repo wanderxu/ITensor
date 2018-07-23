@@ -121,8 +121,8 @@ int main(int argc, char* argv[])
         auto ampo = AutoMPO(sites);
         //auto lattice = triangularLatticev2(Nx,Ny,{"YPeriodic=",yperiodic});
         //auto lattice4plaque = triangularLattice4Plaque(Nx,Ny,{"YPeriodic=",yperiodic});
-        auto lattice = triangularLatticeYC(Nx,Ny,{"YPeriodic=",yperiodic});
-        auto lattice4plaque = triangularLatticeYC4Plaque(Nx,Ny,{"YPeriodic=",yperiodic});
+        auto lattice = triangularLatticeXC(Nx,Ny,{"YPeriodic=",yperiodic});
+        auto lattice4plaque = triangularLatticeXC4Plaque(Nx,Ny,{"YPeriodic=",yperiodic});
 
         println("H is made up of ");
         println("\nBound:\n", lattice);
@@ -449,11 +449,9 @@ int main(int argc, char* argv[])
         
         // make the dimer table
         // x-direction
-        //auto num_x_dimer = (Nx-1)*Ny;
-        auto num_x_dimer = (Nx-1)*Ny - (yperiodic ? 0 : Nx/2);
-        auto num_y_dimer = Nx*(yperiodic ? Ny : Ny-1);
-        //auto num_xy_dimer = (Nx-1)*(yperiodic ? Ny : Ny-1);
-        auto num_xy_dimer = (Nx-1)*Ny - (yperiodic ? 0 : (Nx-1)/2);
+        auto num_x_dimer = (Nx-1)*Ny;
+        auto num_y_dimer = N-Ny/2-(yperiodic ? 0 : Nx-1);
+        auto num_xy_dimer = N-(Ny+1)/2 - (yperiodic ? 0 : Nx);
         LatticeGraph x_dimer;
         LatticeGraph y_dimer;
         LatticeGraph xy_dimer;
@@ -465,34 +463,32 @@ int main(int argc, char* argv[])
             int y = (n-1)%Ny+1;
 
             //X-direction bonds
-            if(x<Nx && x%2==1) {
-                xy_dimer.emplace_back(n,n+Ny);
-            } else if(x<Nx && x%2==0) {
-                x_dimer.emplace_back(n,n+Ny);
-            }
+            if(x < Nx) x_dimer.emplace_back(n,n+Ny);
 
-            if(Ny > 1){ //2d bonds
+            if(Ny > 1) { //2d bonds
                 // vertical bond 
-                if((n+1 <= N) && ((y < Ny))) {
+                if((n+1 <= N) && y%2==1 && (y < Ny)) {
                     y_dimer.emplace_back(n,n+1);
                 }
-                // Y-periodic diagonal bond
-                if((n+2*Ny-1 <= N) && y==1 && x%2==1 && yperiodic ) {
-                    x_dimer.emplace_back(n,n+2*Ny-1);
+                if((n-Ny+1 <= N) && y%2==0 && (y < Ny) && x>1) {
+                    y_dimer.emplace_back(n,n-Ny+1);
                 }
-                if((n+1 <= N) && y==Ny && x%2==0 && yperiodic ) {
+
+                // Y-periodic diagonal bond
+                if((n+1 <= N) && y%2==1 && y==Ny && yperiodic ) {
                     xy_dimer.emplace_back(n,n+1);
+                }
+                if((n-Ny+1 <= N) && y%2==0 && y==Ny && yperiodic ) {
+                    xy_dimer.emplace_back(n,n-Ny+1);
                 }
 
                 //Periodic vertical bond
-                if(yperiodic && y == 1) y_dimer.emplace_back(n,n+Ny-1);
+                if(yperiodic && y==Ny && x>1 && y%2==0) y_dimer.emplace_back(n,n-2*Ny+1);
+                if(yperiodic && y==Ny && y%2==1) y_dimer.emplace_back(n,n-Ny+1);
 
                 //Diagonal bonds
-                if(x < Nx && y > 1 && x%2==1) {
-                    x_dimer.emplace_back(n,n+Ny-1);
-                } else if (x < Nx && y < Ny && x%2==0) {
-                    xy_dimer.emplace_back(n,n+Ny+1);
-                }
+                if( n+1<=N && y%2==0 && y<Ny) xy_dimer.emplace_back(n,n+1);
+                if( n+Ny+1<=N && y%2==1 && y<Ny) xy_dimer.emplace_back(n,n+Ny+1);
             }
         }
         println( "x_dimer.size() = ", x_dimer.size());
@@ -837,18 +833,20 @@ int main(int argc, char* argv[])
             int x = (n-1)/Ny+1;
             int y = (n-1)%Ny+1;
 
-            if( x%2 == 1 ) {
-                if((x < Nx) && (y > 1))  tri_plaq.emplace_back(n, n+Ny-1, n+Ny); // x-direction plaq
-                if((x < Nx) && (y < Ny)) tri_plaq.emplace_back(n, n+Ny, n+1); // y-direction plaq
+            if( y%2 == 1 ) {
+                if((x < Nx) && (y > 1))  tri_plaq.emplace_back(n, n+Ny-1, n+Ny); // down tri plaq
+                if((x < Nx) && (y < Ny)) tri_plaq.emplace_back(n, n+Ny, n+Ny+1); // up tri plaq
                 if((x < Nx) && (y == 1) && yperiodic)  tri_plaq.emplace_back(n, n+2*Ny-1, n+Ny);
-                if((x < Nx) && (y == Ny) && yperiodic) tri_plaq.emplace_back(n, n+Ny, n-Ny+1);
-            } else {
-                if((x < Nx) && (y < Ny)) tri_plaq.emplace_back(n, n+Ny, n+Ny+1); // x-direction plaq
-                if((x < Nx) && (y < Ny)) tri_plaq.emplace_back(n, n+Ny+1, n+1); // y-direction plaq
                 if((x < Nx) && (y == Ny) && yperiodic) tri_plaq.emplace_back(n, n+Ny, n+1);
-                if((x < Nx) && (y == Ny) && yperiodic) tri_plaq.emplace_back(n, n+1, n-Ny+1);
+            } else {
+                if((x < Nx) && (y < Ny)) tri_plaq.emplace_back(n, n-1, n+Ny); // down tri plaq
+                if((x < Nx) && (y < Ny)) tri_plaq.emplace_back(n, n+Ny, n+1); //  up tri plaq
+                if((x < Nx) && (y == Ny)) tri_plaq.emplace_back(n, n-1, n+Ny); // down tri plaq
+                if((x < Nx) && (y == Ny) && yperiodic) tri_plaq.emplace_back(n, n+Ny, n-Ny+1); // up tri plaq
             }
         }
+        println( "tri_plaq.size() = ", tri_plaq.size() );
+        println( "num_tri_plaq = ", num_tri_plaq );
         if(int(tri_plaq.size()) != num_tri_plaq) Error("Wrong number of tri_plaq");
         println( "tri_plaq: \n", tri_plaq );
 
@@ -1050,20 +1048,20 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
             int y = (n-1)%Ny+1;
             int id0 = n;
             int id1 = 0, id2 = 0, id3 = 0, id4 = 0, id5 = 0, id6 = 0;
-            if(x%2==1) {
-                id1 = (y>1 ? n+Ny-1: n+2*Ny-1); // (1,0) dir
-                id2 = (y>1 ? n-1: n+Ny-1);      // (0,-1) dir
-                id3 = (x>1 ? (y>1 ? n-Ny-1 : n-Ny-1+Ny) : ( y>1 ? n-Ny-1+N : n-Ny-1+Ny+N ) ); // (-1,-1) dir
+            if(y%2==1) {
+                id1 = (x<Nx ? n+Ny: n+Ny-N);    // (1,0) dir
+                id2 = (y>1 ? n+Ny-1: n+2*Ny-1); // (0,-1) dir
+                id3 = (y>1 ? n-1 : n+Ny-1); // (-1,-1) dir
                 id4 = (x>1 ? n-Ny : n-Ny+N); // (-1,0) dir
                 id5 = (y<Ny ? n+1: n+1-Ny);  // (0,1) dir
-                id6 = (x<Nx ? n+Ny : n+Ny+1-N ); // (1,1) dir
+                id6 = (x<Nx ? (y<Ny ? n+Ny+1 : n-Ny+1) : ( y<Ny ? n+Ny+1-N : n+Ny+1-N-Ny) ); // (1,1) dir
             } else {
                 id1 = (x<Nx ? n+Ny: n+Ny-N); // (1,0) dir
-                id2 = (y>1 ? n-1: n+Ny-1);   // (0,-1) dir
-                id3 = n-Ny;  // (-1,-1) dir
-                id4 = (y<Ny ? n-Ny+1: n-2*Ny+1); // (-1,0) dir
-                id5 = (y<Ny ? n+1: n+1-Ny);      // (0,1) dir
-                id6 = (x<Nx ? (y<Ny ? n+Ny+1 : n+Ny+1-Ny) : ( y<Ny ? n+Ny+1-N : n+Ny+1-N-Ny) ); // (1,1) dir
+                id2 = n-1;   // (0,-1) dir
+                id3 = (x>1 ? n-Ny-1 : N-Ny+n-1);  // (-1,-1) dir
+                id4 = (x>1 ? n-Ny: n-Ny+N); // (-1,0) dir
+                id5 = (x>1 ? (y<Ny ? n-Ny+1 : n-2*Ny+1) : ( y<Ny ? n-Ny+1+N : n-2*Ny+1+N) ); // (0,1) dir
+                id6 = (y<Ny ? n+1 : n-Ny+1);  // (1,1) dir
             }
             std::vector<int> nntmp = {id1, id2, id3, id4, id5, id6};
             nnlist.emplace_back( id0, nntmp );

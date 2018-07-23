@@ -350,7 +350,7 @@ triangularLatticeXC4Plaque(int Nx,
     // Periodicity on y is meaningless for one dimensional chain or a ladder
     yperiodic = yperiodic && (Ny > 2);
     auto N = Nx*Ny;
-    auto Nplaque = (Ny<2 ? 0 : 3*N-4*Ny-Nx+1 + (yperiodic ? 0 : -3*Nx+4));
+    auto Nplaque = (Ny<2 ? 0 : 3*N-4*Ny + (yperiodic ? 0 : -4*Nx+5));
     Lattice4PlaqueGraph latt; 
     latt.reserve(Nplaque);
 
@@ -381,6 +381,7 @@ triangularLatticeXC4Plaque(int Nx,
                 //Diagonal plaques, P2
                 if(x > 1 && y < Ny-1) latt.emplace_back(n,n+1,n+2,n-Ny+1);
                 if(x > 1 && y == Ny-1 && yperiodic) latt.emplace_back(n,n+1,n+2-Ny,n+1-Ny);
+                if(x > 1 && y == Ny && yperiodic) latt.emplace_back(n,n-Ny+1,n+2-Ny,n+1-2*Ny);
 
                 //Vertical plaques, P3
                 if(x < Nx && y > 1) latt.emplace_back(n,n-1,n+Ny-1,n+Ny);
