@@ -1263,13 +1263,14 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
             //for(int i = 0; i < nnlist.size(); ++i) {
             for(int n1 = i_start; n1 < i_end; ++n1) {
                 int i = nnlist[n1].s0;
-                int ix = i/Ny;
+                int n1y = i%Ny;
                 for (int id1 = 0; id1<6; id1++) {
                     int j = nnlist[n1].snn[id1];
                     std::vector< std::pair<int,int> > op34pair_vec ={}; // store (opk,opl) pair
                     std::vector<int> corr_ind = {};  // index in paircorr
                     for(int n2 = n1; n2 < nnlist.size(); ++n2) {
                         int k = nnlist[n2].s0;
+                        int n2y = k%Ny;
                         for (int id2 = 0; id2<6; id2++) {
                             int l = nnlist[n2].snn[id2];
 
@@ -1283,8 +1284,7 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                                 (sites_tmp[1] <  sites_tmp[2]) &&
                                 (sites_tmp[1] <  sites_tmp[3]) &&
                                 (sites_tmp[2] != sites_tmp[3]) ) {
-                                if( ( (!lfixi0 || ((n1 == x0*Ny + n2%Ny) || (n2 == x0*Ny + n1%Ny)) ) &&
-                                      ( ((n1 == ix*Ny + n2%Ny) || (n2 == ix*Ny + n1%Ny)) )    )
+                                if(  (!lfixi0 || ((n1 == x0*Ny + n2%Ny) || (n2 == x0*Ny + n1%Ny)) ) && n1y==n2y
                                     && (id1==0 || id1 == 4 || id1 ==5)
                                     && (id2==0 || id2 == 4 || id2 ==5) ) { // fix n1
                                 numofcalcorr += 1;
@@ -1302,8 +1302,7 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                                 ///if( !lfixi0 || ( ((n1 == x0*Ny + n2%Ny) || (n2 == x0*Ny + n1%Ny) ) && 
                                 ///                                   (id1==0 || id1 == 4 || id1 ==5) &&
                                 ///                                   (id2==0 || id2 == 4 || id2 ==5)) ) { // fix n1
-                                if( ( (!lfixi0 || ((n1 == x0*Ny + n2%Ny) || (n2 == x0*Ny + n1%Ny)) ) &&
-                                      ( ((n1 == ix*Ny + n2%Ny) || (n2 == ix*Ny + n1%Ny)) )    )
+                                if(  (!lfixi0 || ((n1 == x0*Ny + n2%Ny) || (n2 == x0*Ny + n1%Ny)) ) && n1y==n2y
                                     && (id1==0 || id1 == 4 || id1 ==5)
                                     && (id2==0 || id2 == 4 || id2 ==5) ) { // fix n1
                                 numofcalcorr += 1;
