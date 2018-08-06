@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source cal_para.sh
-firststep=1
+firststep=6
 maxstep=10
 
 WORKDIR="$PWD"
@@ -21,7 +21,7 @@ for Ny in ${Nyarray}; do
 
       for ((istep=$firststep;istep<=$maxstep;istep++)); do
         cd $WORKDIR
-        datafile=$pretag/project_tjk/run/${maindir}/step${istep}/Ntot.out
+        datafile=$pretag/project_tjk/run-moresweeps/${maindir}/step${istep}/Ntot.out
 
         if [ -f $datafile ];  then
             echo " processing $maindir step$istep ..."
@@ -88,7 +88,7 @@ endin
         # density up
         tagarray=$( echo "Nup")
         for tag in $tagarray; do
-            datafile=$pretag/project_tjk/run/${maindir}/step${istep}/${tag}.out
+            datafile=$pretag/project_tjk/run-moresweeps/${maindir}/step${istep}/${tag}.out
             # split
             cat $datafile |sed -E -e 's/[[:blank:]]+/\n/g'> ${tag}_column.dat
             for ((i=0; i<$nn; i++)); do
@@ -103,7 +103,7 @@ endin
         # density dn
         tagarray=$( echo "Ndn")
         for tag in $tagarray; do
-            datafile=$pretag/project_tjk/run/${maindir}/step${istep}/${tag}.out
+            datafile=$pretag/project_tjk/run-moresweeps/${maindir}/step${istep}/${tag}.out
             # split
             cat $datafile |sed -E -e 's/[[:blank:]]+/\n/g'> ${tag}_column.dat
             for ((i=0; i<$nn; i++)); do
@@ -119,7 +119,7 @@ endin
         # Dy
         tagarray=$( echo "Dy")
         for tag in $tagarray; do
-            datafile=$pretag/project_tjk/run/${maindir}/step${istep}/${tag}i.out
+            datafile=$pretag/project_tjk/run-moresweeps/${maindir}/step${istep}/${tag}i.out
             cat $datafile |sed -E -e 's/[[:blank:]]+/\n/g'> ${tag}i_column.dat
             for ((i=0; i<$nn; i++)); do
                 startp=$( echo "$i $Ny $Nx" |awk '{print int($1/$2)*1.0-($1%$2)*0.5-0.5*0.3, ($1%$2)*sqrt(3.0)/2.0+sqrt(3.0)/2.0*0.3}' )
@@ -133,7 +133,7 @@ endin
         # Dxy
         tagarray=$( echo "Dxy")
         for tag in $tagarray; do
-            datafile=$pretag/project_tjk/run/${maindir}/step${istep}/${tag}i.out
+            datafile=$pretag/project_tjk/run-moresweeps/${maindir}/step${istep}/${tag}i.out
             cat $datafile |sed -E -e 's/[[:blank:]]+/\n/g'> ${tag}i_column.dat
             for ((i=0; i<$(($nn-$Ny)); i++)); do
                 startp=$( echo "$i $Ny $Nx" |awk '{print int($1/$2)*1.0-($1%$2)*0.5+0.5*0.3, ($1%$2)*sqrt(3.0)/2.0+sqrt(3.0)/2.0*0.3}' )
@@ -146,7 +146,7 @@ endin
 
         tagarray=$( echo "Dx")
         for tag in $tagarray; do
-            datafile=$pretag/project_tjk/run/${maindir}/step${istep}/${tag}i.out
+            datafile=$pretag/project_tjk/run-moresweeps/${maindir}/step${istep}/${tag}i.out
             cat $datafile |sed -E -e 's/[[:blank:]]+/\n/g'> ${tag}i_column.dat
             for ((i=0; i<$(($nn-$Ny)); i++)); do
                 startp=$( echo "$i $Ny $Nx" |awk '{print int($1/$2)*1.0-($1%$2)*0.5+1.0*0.3, ($1%$2)*sqrt(3.0)/2.0}' )

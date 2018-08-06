@@ -1,8 +1,8 @@
 #!/bin/bash
 
 source cal_para.sh
-firststep=7
-maxstep=7
+firststep=1
+maxstep=10
 
 WORKDIR="$PWD"
 echo $WORKDIR
@@ -65,12 +65,12 @@ endin
             done
 
             # plot some a1+a2 direction lines (0.5, sqrt(3.0)/2.0
-            for ((ix=0; ix<($Nx-$Ny+1); ix++)); do
+            for ((ix=0; ix<$(($Nx-$Ny+1)); ix++)); do
                 startp=$( echo "$ix $Ny $Nx" |awk '{print $1, 0}' )
                 endp=$( echo "$ix $Ny $Nx" |awk '{print  ($2-1)*0.5+$1, ($2-1)*sqrt(3.0)/2.0}' )
                 echo " \"<echo '$startp \n $endp'\" with l lc rgb 'grey' lw 0.1 not, \\" >> plot_${tag}_real_space.gnu
             done
-            for ((ix=($Nx-$Ny+1); ix<$Nx; ix++)); do
+            for ((ix=$(($Nx-$Ny+1)); ix<$Nx; ix++)); do
                 startp=$( echo "$ix $Ny $Nx" |awk '{print $1, 0}' )
                 endp=$( echo "$ix $Ny $Nx" |awk '{print  ($2-$1+$3-$2-1)*0.5+$1, ($2-$1+$3-$2-1)*sqrt(3.0)/2.0}' )
                 echo " \"<echo '$startp \n $endp'\" with l lc rgb 'grey' lw 0.1 not, \\" >> plot_${tag}_real_space.gnu
