@@ -31,14 +31,19 @@ print "len(indati) = ", numsi
 yfold = 1 # a factor for taking care of chiral correlation
 if yperiodic :
     if numsij == N*(N+1)/2:
-        Neff = N  ## for spin correlation, y_dimer correlation
+        Neff = N  ## for spin correlation
     elif numsij == (N-Ny)*(N-Ny+1)/2:
-        Neff = N-Ny ## for x_dimer, xy_dimer correlation
+        Neff = N-Ny ## for x_dimer
+    elif numsij == (N-Ny/2)*(N-Ny/2+1)/2:
+        Neff = N-Ny ## for y_dimer
+    elif numsij == (N-(Ny+1)/2)*(N-(Ny+1)/2+1)/2:
+        Neff = N-Ny ## for xy_dimer
     elif numsij == (N-Ny)*(2*N-2*Ny+1):
         Neff = 2*(N-Ny) ## for chiral correlation
         yfold = 2 ## two tri_plaq for one unit cell, we count it in y direction
     else:
         print "Wrong number of SiSj, please check your SiSj.out"
+#NOTE: Following case for XC case has not been tested yet. It might have bugs.
 elif Ny > 2: # y-direction open boundary case, and not the ladder
     if numsij == N*(N+1)/2:
         Neff = N  ## for spin correlation
@@ -121,13 +126,19 @@ ss2=0.
 for i in range(Neff):
     for j in range(i,Neff):
         if icount < numsij:
-            sisj[i,j] = indat[icount] - indati[i]*indati[j]
-            sisj[j,i] = indat[icount] - indati[j]*indati[i]
-            if i == j:
-                ss2 += indat[icount]
-            else :
-                ss2 += indat[icount]*2.
-            icount += 1
+            lskip = False
+            if sys.argv[3] == "Dy" and ( (i < Ny and i%2==1) or (j < Ny and j%2==1) ) :
+                lskip = True
+            if sys.argv[3] == "Dxy" and ( (i >= Neff-Ny and i%2==0) or (j >= Neff-Ny and j%2==0) ) :
+                lskip = True
+            if not lskip:
+                sisj[i,j] = indat[icount] - indati[i]*indati[j]
+                sisj[j,i] = indat[icount] - indati[j]*indati[i]
+                if i == j:
+                    ss2 += indat[icount]
+                else :
+                    ss2 += indat[icount]*2.
+                icount += 1
     np.set_printoptions(precision=2,linewidth=400)
     print( sisj[i][0:max(Neff,20)] )
     #print str(sisj[i])
@@ -172,3 +183,23 @@ with open(tag+"ij_xdirec.dat","w") as f:
 with open(tag+"ij_ydirec.dat","w") as f:
     for i in range(ic,ic+Ny/2+1):
         f.write( "{} {: .8f}\n".format(i-ic, sisj[ic][i]) )
+
+# calculate ss vs x
+# pick a reference point x0 to be x0=Nx/4-1
+ssx_collect = np.zeros((Nx/4,Nx/2),dtype=complex)
+for x0 in range(Nx/4-1, Nx/2-1) :
+    ssx = np.zeros((Nx),dtype=complex)
+    for j in range(N):
+        #if j%Ny==1 :
+        i0 = x0*Ny + j%Ny
+        ssx[j/Ny] += sisj[i0,j]
+    ssx_collect[x0-(Nx/4-1)] = ssx[x0:x0+Nx/2]
+    
+    with open(tag+"corr_x0"+str(x0)+".dat","w") as f:
+        for ix in range(x0,Nx):
+            f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, ssx[ix].real, ssx[ix].imag) )
+ssx = np.mean(ssx_collect, axis=0)
+
+with open(tag+"corr_vsx.dat","w") as f:
+    for ix in range(len(ssx)):
+        f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, ssx[ix].real, ssx[ix].imag) )
