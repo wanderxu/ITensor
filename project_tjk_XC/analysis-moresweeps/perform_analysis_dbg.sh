@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source cal_para.sh
-firststep=1
+firststep=5
 maxstep=10
 
 WORKDIR="$PWD"
@@ -15,6 +15,7 @@ for Ny in ${Nyarray}; do
       maindir=Nx${Nx}_Ny${Ny}_Jone${J1}_Jtwo${J2}_gone${gamma1}_gtwo${gamma2}_t${t1}_idop${idop}
       pretag=$HOME/mycode/itensor/
       exe=analysis_SiSj_deduct_bg.py
+      exe2=analysis_SiSj_varyx0.py # no dbg case
 
       for ((istep=$firststep;istep<=$maxstep;istep++)); do
       ##  rename several files for automatically processing
@@ -35,7 +36,8 @@ for Ny in ${Nyarray}; do
       fi
 
       #tagarray=$( echo "S Sz Spom Dx Dy Dxy X")
-      tagarray=$( echo "S Sz Spom")
+      tagarray=$( echo "S Sz Spom Dx Dy Dxy")
+      #tagarray=$( echo "S Sz Spom")
       for tag in $tagarray; do
         cd $WORKDIR
         datafile=$pretag/project_tjk_XC/run-moresweeps/${maindir}/step${istep}/${tag}i${tag}j.out
@@ -65,6 +67,9 @@ gamma2 = $gamma2
 endin
             cp -f $pretag/project_tjk_XC/analysis-moresweeps/$exe .
             python $exe $datafile $datafile2 ${tag} >> ${maindir}.logs
+
+            cp -f $pretag/project_tjk_XC/analysis-moresweeps/$exe2 .
+            python $exe2 $datafile $datafile2 ${tag} >> ${maindir}.logs
 
             # plot
             maxv=$( sort -nrk3 ${tag}dbgk.dat |head -1|awk '{print $3}' )
