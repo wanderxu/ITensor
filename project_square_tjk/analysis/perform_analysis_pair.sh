@@ -1,8 +1,8 @@
 #!/bin/bash
 
 source cal_para.sh
-firststep=1
-maxstep=8
+firststep=7
+maxstep=9
 taglist=$( echo "s d+id d-id dxy dx2-y2 f p+ip p-ip px py")
 
 WORKDIR="$PWD"
@@ -16,11 +16,13 @@ for Ny in ${Nyarray}; do
       maindir=Nx${Nx}_Ny${Ny}_Jone${J1}_Jtwo${J2}_gone${gamma1}_gtwo${gamma2}_t${t1}_${t2}_idop${idop}
       pretag=$HOME/mycode/itensor/
       exe=analysis_paircorr.py
-      exe2=analysis_paircorr_xy.py
+      #exe2=analysis_paircorr_xy.py
+      exe2=analysis_paircorr_varyx0.py
 
       for ((istep=$firststep;istep<=$maxstep;istep++)); do
         cd $WORKDIR
         datafile=$pretag/project_square_tjk/run/${maindir}/step${istep}/paircorr.out
+        #datafile=$pretag/project_square_XC/run/${maindir}/step${istep}/paircorrfixi0.out
         datafile2=$pretag/project_square_tjk/run/${maindir}/step${istep}/pair_bubble.out
 
         if [ -f $datafile ];  then
@@ -50,8 +52,9 @@ endin
             # transform the data to one column 
             sed -E -e 's/[[:blank:]]+/\n/g' $datafile >tmp.dat
             sed -E -e 's/[[:blank:]]+/\n/g' $datafile2 >tmp2.dat
-            python $exe tmp.dat tmp2.dat pair >> ${maindir}.logs
+            #python $exe tmp.dat tmp2.dat pair >> ${maindir}.logs
             #python $exe tmp.dat pair >> ${maindir}.logs
+            python $exe tmp2.dat pair >> ${maindir}.logs
             python $exe2 tmp.dat pair >> ${maindir}.logs
 
             for pairtag in ${taglist}; do

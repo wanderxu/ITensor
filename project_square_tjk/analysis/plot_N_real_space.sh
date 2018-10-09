@@ -2,7 +2,7 @@
 
 source cal_para.sh
 firststep=7
-maxstep=7
+maxstep=9
 
 WORKDIR="$PWD"
 echo $WORKDIR
@@ -27,7 +27,7 @@ for Ny in ${Nyarray}; do
         datafile=$pretag/project_square_tjk/run/${maindir}/step${istep}/${tag}.out
 
         if [ -f $datafile ];  then
-            echo " processing $maindir's ${tag} ..."
+            echo " processing $maindir step${istep}'s ${tag} ..."
 
             if [ ! -d $maindir ]; then
                 mkdir $maindir
@@ -96,12 +96,13 @@ endin
                 startp=$( echo "$i $Ny $Nx" |awk '{print int($1/$2)*1.0-($1%$2)*0.0, ($1%$2)*1.0}' )
                 endp=$( echo "$i $Ny $Nx" |awk '{print int($1/$2)*1.0-($1%$2)*0.0-0.0, ($1%$2)*1.0+1.0}' )
                 #dvalue=$( awk -v iv=$i '{if(NR==(iv+1)) print ($1>0)?$1:-$1}' ${tag}_column.dat )
-                dvalue=$( awk -v iv=$i '{if(NR==(iv+1)) print 6*16*$1*$1*$1*$1}' ${tag}_column.dat ) # make it sharper
+                dvalue=$( awk -v iv=$i '{if(NR==(iv+1)) print 4*$1}' ${tag}_column.dat ) # make it sharper
                 echo " \"<echo '$startp'\" with p ps $dvalue lc 1 pt 6 lw 1.5 not, \\" >> plot_${tag}_real_space.gnu
             done
 
             gnuplot plot_${tag}_real_space.gnu
 
+            awk '{s+=$1}NR%4==0{print s/4;s=0}' ${tag}_column.dat > ${tag}_yave.dat
         fi
       done
       done

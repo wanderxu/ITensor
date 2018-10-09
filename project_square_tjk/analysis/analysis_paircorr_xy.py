@@ -90,33 +90,33 @@ for i in range(N):
             #np.set_printoptions(precision=2,linewidth=400)
             #print( sisj14[i,j,id1,:] )
 
-# calculate ddxx, ddxy, ddyx, ddyy vs x
+# calculate ddab (a,b = 1, 2) vs x. Here 1 denotes x, 2 denotes y
 # pick a reference point x0 to be x0=Nx/4-1
 # id = 0 : +x direc
 #      1 : -y direc
 #      3 : -x direc
 #      4 : +y direc
 x0=Nx/4-1
-ddxx = np.zeros((Nx),dtype=complex)
-ddxy = np.zeros((Nx),dtype=complex)
-ddyx = np.zeros((Nx),dtype=complex)
-ddyy = np.zeros((Nx),dtype=complex)
+dd11 = np.zeros((Nx),dtype=complex)
+dd12 = np.zeros((Nx),dtype=complex)
+dd21 = np.zeros((Nx),dtype=complex)
+dd22 = np.zeros((Nx),dtype=complex)
 for j in range(N):
     i0 = x0*Ny + j%Ny
-    ddxx[j/Ny] += ( sisj14[i0,j,0,0] - sisj23[i0,j,0,0] )
-    ddxy[j/Ny] += ( sisj14[i0,j,0,4] - sisj23[i0,j,0,4] )
-    ddyx[j/Ny] += ( sisj14[i0,j,4,0] - sisj23[i0,j,4,0] )
-    ddyy[j/Ny] += ( sisj14[i0,j,4,4] - sisj23[i0,j,4,4] )
+    dd11[j/Ny] += ( sisj14[i0,j,0,0] - sisj23[i0,j,0,0] )
+    dd12[j/Ny] += ( sisj14[i0,j,0,4] - sisj23[i0,j,0,4] )
+    dd21[j/Ny] += ( sisj14[i0,j,4,0] - sisj23[i0,j,4,0] )
+    dd22[j/Ny] += ( sisj14[i0,j,4,4] - sisj23[i0,j,4,4] )
 
-with open("ddxxvsx.dat","w") as f:
+with open("dd11vsx.dat","w") as f:
     for ix in range(Nx):
-        f.write( "{:4d} {: .8f} {: .8f}\n".format(ix, ddxx[ix].real, ddxx[ix].imag) )
-with open("ddxyvsx.dat","w") as f:
+        f.write( "{:4d} {: .8f} {: .8f}\n".format(ix, dd11[ix].real, dd11[ix].imag) )
+with open("dd12vsx.dat","w") as f:
     for ix in range(Nx):
-        f.write( "{:4d} {: .8f} {: .8f}\n".format(ix, ddxy[ix].real, ddxy[ix].imag) )
-with open("ddyxvsx.dat","w") as f:
+        f.write( "{:4d} {: .8f} {: .8f}\n".format(ix, dd12[ix].real, dd12[ix].imag) )
+with open("dd21vsx.dat","w") as f:
     for ix in range(Nx):
-        f.write( "{:4d} {: .8f} {: .8f}\n".format(ix, ddyx[ix].real, ddyx[ix].imag) )
-with open("ddyyvsx.dat","w") as f:
+        f.write( "{:4d} {: .8f} {: .8f}\n".format(ix, dd21[ix].real, dd21[ix].imag) )
+with open("dd22vsx.dat","w") as f:
     for ix in range(Nx):
-        f.write( "{:4d} {: .8f} {: .8f}\n".format(ix, ddyy[ix].real, ddyy[ix].imag) )
+        f.write( "{:4d} {: .8f} {: .8f}\n".format(ix, dd22[ix].real, dd22[ix].imag) )

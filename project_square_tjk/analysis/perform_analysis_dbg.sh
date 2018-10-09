@@ -6,40 +6,42 @@ maxstep=8
 
 WORKDIR="$PWD"
 echo $WORKDIR
-##EXE=$HOME/mywork/itensor/project_tjk/dmrg_tri
+##EXE=$HOME/mywork/itensor/project_square_tjk/dmrg_tri
 cd $WORKDIR
 for Ny in ${Nyarray}; do
   for Nx  in ${Nxarray}; do
     for J2 in ${J2array}; do
       # prepare work
-      maindir=Nx${Nx}_Ny${Ny}_Jone${J1}_Jtwo${J2}_gone${gamma1}_gtwo${gamma2}_t${t1}_idop${idop}
+      maindir=Nx${Nx}_Ny${Ny}_Jone${J1}_Jtwo${J2}_gone${gamma1}_gtwo${gamma2}_t${t1}_${t2}_idop${idop}
       pretag=$HOME/mycode/itensor/
       exe=analysis_SiSj_deduct_bg.py
+      exe2=analysis_SiSj_varyx0.py # no dbg case
 
       for ((istep=$firststep;istep<=$maxstep;istep++)); do
       ##  rename several files for automatically processing
-      if [ -f $pretag/project_tjk/run/${maindir}/step${istep}/SiSjzz.out ]; then
-          mv $pretag/project_tjk/run/${maindir}/step${istep}/SiSjzz.out $pretag/project_tjk/run/${maindir}/step${istep}/SziSzj.out
+      if [ -f $pretag/project_square_tjk/run/${maindir}/step${istep}/SiSjzz.out ]; then
+          mv $pretag/project_square_tjk/run/${maindir}/step${istep}/SiSjzz.out $pretag/project_square_tjk/run/${maindir}/step${istep}/SziSzj.out
       fi
-      if [ -f $pretag/project_tjk/run/${maindir}/step${istep}/SiSjpm.out ]; then
-          mv -f $pretag/project_tjk/run/${maindir}/step${istep}/SiSjpm.out $pretag/project_tjk/run/${maindir}/step${istep}/SpomiSpomj.out
+      if [ -f $pretag/project_square_tjk/run/${maindir}/step${istep}/SiSjpm.out ]; then
+          mv -f $pretag/project_square_tjk/run/${maindir}/step${istep}/SiSjpm.out $pretag/project_square_tjk/run/${maindir}/step${istep}/SpomiSpomj.out
       fi
-      if [ -f $pretag/project_tjk/run/${maindir}/step${istep}/Siz.out ]; then
+      if [ -f $pretag/project_square_tjk/run/${maindir}/step${istep}/Siz.out ]; then
           ## constuct files with zeros to not deduct background for spin correlation case
-          awk '{for (i = 1; i <= NF; i++) printf("%2d", 0 )}' $pretag/project_tjk/run/${maindir}/step${istep}/Siz.out \
-          > $pretag/project_tjk/run/${maindir}/step${istep}/Si.out
-          awk '{for (i = 1; i <= NF; i++) printf("%2d", 0 )}' $pretag/project_tjk/run/${maindir}/step${istep}/Siz.out \
-          > $pretag/project_tjk/run/${maindir}/step${istep}/Szi.out
-          awk '{for (i = 1; i <= NF; i++) printf("%2d", 0 )}' $pretag/project_tjk/run/${maindir}/step${istep}/Siz.out \
-          > $pretag/project_tjk/run/${maindir}/step${istep}/Spomi.out
+          awk '{for (i = 1; i <= NF; i++) printf("%2d", 0 )}' $pretag/project_square_tjk/run/${maindir}/step${istep}/Siz.out \
+          > $pretag/project_square_tjk/run/${maindir}/step${istep}/Si.out
+          awk '{for (i = 1; i <= NF; i++) printf("%2d", 0 )}' $pretag/project_square_tjk/run/${maindir}/step${istep}/Siz.out \
+          > $pretag/project_square_tjk/run/${maindir}/step${istep}/Szi.out
+          awk '{for (i = 1; i <= NF; i++) printf("%2d", 0 )}' $pretag/project_square_tjk/run/${maindir}/step${istep}/Siz.out \
+          > $pretag/project_square_tjk/run/${maindir}/step${istep}/Spomi.out
       fi
 
       #tagarray=$( echo "S Sz Spom Dx Dy Dxy X")
-      tagarray=$( echo "S Sz Spom")
+      tagarray=$( echo "S Sz Spom Dx Dy Dxy")
+      #tagarray=$( echo "S Sz Spom")
       for tag in $tagarray; do
         cd $WORKDIR
-        datafile=$pretag/project_tjk/run/${maindir}/step${istep}/${tag}i${tag}j.out
-        datafile2=$pretag/project_tjk/run/${maindir}/step${istep}/${tag}i.out
+        datafile=$pretag/project_square_tjk/run/${maindir}/step${istep}/${tag}i${tag}j.out
+        datafile2=$pretag/project_square_tjk/run/${maindir}/step${istep}/${tag}i.out
 
         if [ -f $datafile ];  then
             echo " processing $maindir step${istep}'s ${tag} ..."
@@ -63,8 +65,11 @@ J2 = $J2
 gamma1 = $gamma1
 gamma2 = $gamma2
 endin
-            cp -f $pretag/project_tjk/analysis/$exe .
+            cp -f $pretag/project_square_tjk/analysis/$exe .
             python $exe $datafile $datafile2 ${tag} >> ${maindir}.logs
+
+            cp -f $pretag/project_tjk/analysis/$exe2 .
+            python $exe2 $datafile $datafile2 ${tag} >> ${maindir}.logs
 
             # plot
             maxv=$( sort -nrk3 ${tag}dbgk.dat |head -1|awk '{print $3}' )
@@ -99,8 +104,8 @@ endin
             fi
         fi
       done
-      if [ -f $pretag/project_tjk/analysis/${maindir}/Sdbg0j_xdirec.dat ]; then
-          cd $pretag/project_tjk/analysis/${maindir}
+      if [ -f $pretag/project_square_tjk/analysis/${maindir}/Sdbg0j_xdirec.dat ]; then
+          cd $pretag/project_square_tjk/analysis/${maindir}
 cat>plotloglog.gnu<<endin
 set terminal postscript eps enhanced color
 set output "loglog.eps"

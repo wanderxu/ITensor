@@ -42,7 +42,7 @@ for Ny in ${Nyarray}; do
               python -W ignore $exe ../step7/${tag}vsx_$i.dat  ../step8/${tag}vsx_$i.dat  ../step9/${tag}vsx_$i.dat  > ${tag}vsx_$i.dat
           done
       done
-      tagarray=$( echo "Dxdbgcorr Dydbgcorr Dxydbgcorr")
+      tagarray=$( echo "Dxdbgcorr Dydbgcorr Dxydbgcorr Sdbgcorr")
       for tag in $tagarray; do
           python -W ignore $exe ../step7/${tag}_vsx.dat  ../step8/${tag}_vsx.dat  ../step9/${tag}_vsx.dat  > ${tag}_vsx.dat
       done

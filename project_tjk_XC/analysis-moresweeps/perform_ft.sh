@@ -41,13 +41,13 @@ for Ny in ${Nyarray}; do
             tagarray=$( echo "dd11 dd12 dd13 dd22 dd23 dd33")
             for tag in $tagarray; do
                 python -W ignore $exe ${tag}vsx.dat >> tmp.plot
+                mv tmp.pdf ${tag}vsx_ft.pdf
                 pdf2eps ${tag}vsx_ft.pdf
                 eps2png ${tag}vsx_ft.eps
                 sed -i 's/^/+/g' tmp.plot
                 #cat tmp.plot |tr -d '\n' > ${tag}vsx_fitfunc
                 func=$( cat tmp.plot |tr -d '\n' )
                 rm tmp.plot
-                mv tmp.pdf ${tag}vsx_ft.pdf
                 cd ..
                 rm plot_${tag}_fit.gnu
                 cp plot_${tag}.gnu plot_${tag}_fit.gnu
@@ -59,20 +59,20 @@ for Ny in ${Nyarray}; do
                 echo "abs($func) w l lc 7 title \"\|$func\|\"" >> plot_${tag}_fit.gnu
                 gnuplot plot_${tag}_fit.gnu
                 cd step$istep
-                ###if [ $Nx == "48" ]; then
-                ###    xtag=$(echo "x011 x012 x013 x014 x015 x016")
-                ###elif [ $Nx == "72" ]; then
-                ###    xtag=$(echo "x017 x018 x019 x020 x021 x022 x023 x024")
-                ###fi
+                if [ $Nx == "48" ]; then
+                    xtag=$(echo "x011 x012 x013 x014 x015 x016")
+                elif [ $Nx == "72" ]; then
+                    xtag=$(echo "x017 x018 x019 x020 x021 x022 x023 x024")
+                fi
                 for i in $xtag; do
                     python -W ignore $exe ${tag}vsx_$i.dat >> tmp.plot
+                    mv tmp.pdf ${tag}vsx_${i}_ft.pdf
                     pdf2eps ${tag}vsx_${i}_ft.pdf
                     eps2png ${tag}vsx_${i}_ft.eps
                     sed -i 's/^/+/g' tmp.plot
                     #cat tmp.plot |tr -d '\n' > ${tag}vsx_fitfunc
                     func=$( cat tmp.plot |tr -d '\n' )
                     rm tmp.plot
-                    mv tmp.pdf ${tag}vsx_${i}_ft.pdf
                     cd ..
                     rm plot_${tag}_${i}_fit.gnu
                     cp plot_${tag}_${i}.gnu plot_${tag}_${i}_fit.gnu
@@ -86,16 +86,16 @@ for Ny in ${Nyarray}; do
                     cd step$istep
                 done
             done
-            tagarray=$( echo "Dxdbgcorr Dydbgcorr Dxydbgcorr")
+            tagarray=$( echo "Dxdbgcorr Dydbgcorr Dxydbgcorr Sdbgcorr")
             for tag in $tagarray; do
                 python -W ignore $exe ${tag}_vsx.dat >> tmp.plot
+                mv tmp.pdf ${tag}_vsx_ft.pdf
                 pdf2eps ${tag}_vsx_ft.pdf
                 eps2png ${tag}_vsx_ft.eps
                 sed -i 's/^/+/g' tmp.plot
                 #cat tmp.plot |tr -d '\n' > ${tag}_vsx_fitfunc
                 func=$( cat tmp.plot |tr -d '\n' )
                 rm tmp.plot
-                mv tmp.pdf ${tag}_vsx_ft.pdf
                 cd ..
                 rm plot_${tag}_vsx_fit.gnu
                 cp plot_${tag}_vsx.gnu plot_${tag}_vsx_fit.gnu
