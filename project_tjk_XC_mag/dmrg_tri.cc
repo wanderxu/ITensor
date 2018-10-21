@@ -1317,7 +1317,7 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                     std::vector<int> sites_tmp = { i, i, j, j };
                     Cplx cpair = mfourbodyf(psi,sites,sites_tmp,"Aup","Adn","Aup","Adn");
                     pairodp4e.emplace_back(cpair); // store it
-                    printfln(" %d, %d, %d, %d, pair = %.16f", i, i, j, j, cpair);
+                    printfln(" %d, %d, %d, %d, pair4e = %.16f", i, i, j, j, cpair);
                 }
             }
 
@@ -1341,7 +1341,7 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                 cpair = noprime( cpair*sites.op("F",n), Site);
                 cpair = cpair*sites.op("Aup",n)*dag(prime(psi.A(n),Site));
                 pairodp_onsite.emplace_back(cpair.cplx()); // store it
-                printfln(" %d, %d, pair = %.16f", n, n, cpair.cplx());
+                printfln(" %d, %d, paironsite = %.16f", n, n, cpair.cplx());
             }
             // output
             std::ofstream pairodp_onsiteout("pairodp_onsite.out",std::ios::out);
