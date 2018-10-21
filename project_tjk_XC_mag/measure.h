@@ -31,7 +31,7 @@ mtwobody(MPSt<Tensor>& psi,
     auto opj = sites.op(opstr[1].first,opstr[1].second);
 
     psi.position(opstr[1].second);
-    IQTensor SStmp=psi.A(opstr[1].second);
+    ITensor SStmp=psi.A(opstr[1].second);
     if( opstr[0].second != opstr[1].second ) {
         //println("i!=j");
         SStmp *= opj;
@@ -76,7 +76,7 @@ mthreebody(MPSt<Tensor>& psi,
     auto opk = sites.op(opstr[2].first,opstr[2].second);
 
     psi.position(opstr[2].second);
-    IQTensor SStmp=psi.A(opstr[2].second);
+    ITensor SStmp=psi.A(opstr[2].second);
     SStmp *= opk;
     if( opstr[1].second != opstr[2].second ) {
         //println("j!=k");
@@ -148,7 +148,7 @@ mthreebodyC(MPSt<Tensor>& psi,
     auto opk = sites.op(opstr[2].first,opstr[2].second);
 
     psi.position(opstr[2].second);
-    IQTensor SStmp=psi.A(opstr[2].second);
+    ITensor SStmp=psi.A(opstr[2].second);
     SStmp *= opk;
     if( opstr[1].second != opstr[2].second ) {
         //println("j!=k");
@@ -223,7 +223,7 @@ mfourbody(MPSt<Tensor>& psi,
     auto opl = sites.op(opstr[3].first,opstr[3].second);
 
     psi.position(opstr[3].second);
-    IQTensor SStmp=psi.A(opstr[3].second);
+    ITensor SStmp=psi.A(opstr[3].second);
     SStmp *= opl;
     if( opstr[2].second != opstr[3].second ) {
         //println("k!=l");
@@ -359,8 +359,8 @@ mfourbody_str(MPSt<Tensor>& psi,
     ////}
 
     psi.position(opstr_12[0].second);
-    IQTensor SStmp=psi.A(opstr_12[0].second);
-    IQTensor SStmp2=psi.A(opstr_12[0].second);
+    ITensor SStmp=psi.A(opstr_12[0].second);
+    ITensor SStmp2=psi.A(opstr_12[0].second);
     SStmp *= opi;
     auto ir1 = commonIndex(psi.A(opstr_12[0].second), psi.A(opstr_12[0].second+1),Link);
     SStmp *= dag(prime(prime(psi.A(opstr_12[0].second),Site),ir1));
@@ -438,7 +438,7 @@ msixbody(MPSt<Tensor>& psi,
     auto opn = sites.op(opstr[5].first,opstr[5].second);
 
     psi.position(opstr[5].second);
-    IQTensor SStmp=psi.A(opstr[5].second);
+    ITensor SStmp=psi.A(opstr[5].second);
     SStmp *= opn;
     if( opstr[4].second != opstr[5].second ) {
         //println("m!=n");
@@ -620,8 +620,8 @@ msixbody_str(MPSt<Tensor>& psi,
     ////}
 
     psi.position(opstr_123[0].second);
-    IQTensor SStmp=psi.A(opstr_123[0].second);
-    IQTensor SStmp2=psi.A(opstr_123[0].second);
+    ITensor SStmp=psi.A(opstr_123[0].second);
+    ITensor SStmp2=psi.A(opstr_123[0].second);
     SStmp *= opi;
     auto ir1 = commonIndex(psi.A(opstr_123[0].second), psi.A(opstr_123[0].second+1),Link);
     SStmp *= dag(prime(prime(psi.A(opstr_123[0].second),Site),ir1));
@@ -753,7 +753,7 @@ template <class Tensor> Cplx mfourbodyf(
 
     // <psi| O_1 O_2 .... O_N |psi>, apply right side operators first
     psi.position(opstr[3].second);
-    IQTensor SStmp=psi.A(opstr[3].second);
+    ITensor SStmp=psi.A(opstr[3].second);
     SStmp *= opl;
     if( opstr[2].second != opstr[3].second ) {
         //println("k!=l");
@@ -944,8 +944,8 @@ mfourbodyf_str(MPSt<Tensor>& psi,
     ////}
 
     psi.position(opstr_12[0].second);
-    IQTensor SStmp=psi.A(opstr_12[0].second);
-    IQTensor SStmp2=psi.A(opstr_12[0].second);
+    ITensor SStmp=psi.A(opstr_12[0].second);
+    ITensor SStmp2=psi.A(opstr_12[0].second);
     SStmp *= opi;
     if(opstr_12[0].first == "Aup" || opstr_12[0].first == "Adagup") {
         SStmp = noprime(SStmp,Site)*sites.op("F", opstr_12[0].second );
