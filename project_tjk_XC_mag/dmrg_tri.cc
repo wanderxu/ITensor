@@ -27,6 +27,7 @@ int main(int argc, char* argv[])
     double xmag = input.getReal("xmag",0.0);
     double ymag = input.getReal("ymag",0.0);
     double zmag = input.getReal("zmag",0.0);
+    double zmagpin = input.getReal("zmagpin",0.0);
     auto readmps = input.getYesNo("readmps",false);
     auto eneropt = input.getYesNo("eneropt",true);
     auto twist_ybc = input.getYesNo("twist_ybc",false);
@@ -154,6 +155,13 @@ int main(int argc, char* argv[])
             println(" setting zmag term ... ");
             for(int i = 1; i <= N; ++i) {
                 ampo += -zmag*2.0, "Sz", i; // put minus here, positive zmag in input file
+            }
+        }
+
+        if ( zmagpin != 0.0 ) {  // zmag pin at left boundary
+            println(" setting zmagpin term ... ");
+            for(int i = 1; i <= Ny; ++i) {
+                ampo += -zmagpin*2.0, "Sz", i; // put minus here, positive zmag in input file
             }
         }
 
@@ -1232,6 +1240,7 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
         // measure pairing order parameter
         if( meas_pairodp) {
             std::vector<Cplx> pairodp={};
+            std::vector<Cplx> pairodp4e={};
             for(int n = 1; n <= N ; ++n) {
                 int i = nnlist[n-1].s0;
                 for (int id = 0; id<6; id++) {
@@ -1304,6 +1313,11 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                     } else {
                         Error("Error: i and j should be different!");
                     }
+                    // 4e pairing
+                    std::vector<int> sites_tmp = { i, i, j, j };
+                    Cplx cpair = mfourbodyf(psi,sites,sites_tmp,"Aup","Adn","Aup","Adn");
+                    pairodp4e.emplace_back(cpair); // store it
+                    printfln(" %d, %d, %d, %d, pair = %.16f", i, i, j, j, cpair);
                 }
             }
 
@@ -1312,6 +1326,28 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
             pairodpout.precision(16);
             for (std::vector<Cplx>::const_iterator i = pairodp.begin(); i != pairodp.end(); ++i)
                     pairodpout << *i << ' ';
+
+            std::ofstream pairodp4eout("pairodp4e.out",std::ios::out);
+            pairodp4eout.precision(16);
+            for (std::vector<Cplx>::const_iterator i = pairodp4e.begin(); i != pairodp4e.end(); ++i)
+                    pairodp4eout << *i << ' ';
+
+            // onsite pairing
+            // <c_iup c_idn> = <a_iup F_i a_idn>
+            std::vector<Cplx> pairodp_onsite={};
+            for(int n = 1; n <= N ; ++n) {
+                psi.position(n);
+                auto cpair = noprime( psi.A(n)*sites.op("Adn",n), Site);
+                cpair = noprime( cpair*sites.op("F",n), Site);
+                cpair = cpair*sites.op("Aup",n)*dag(prime(psi.A(n),Site));
+                pairodp_onsite.emplace_back(cpair.cplx()); // store it
+                printfln(" %d, %d, pair = %.16f", n, n, cpair.cplx());
+            }
+            // output
+            std::ofstream pairodp_onsiteout("pairodp_onsite.out",std::ios::out);
+            pairodp_onsiteout.precision(16);
+            for (std::vector<Cplx>::const_iterator i = pairodp_onsite.begin(); i != pairodp_onsite.end(); ++i)
+                    pairodp_onsiteout << *i << ' ';
         }
 
         // measure pairing correlation
