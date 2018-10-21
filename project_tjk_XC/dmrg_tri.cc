@@ -1050,7 +1050,7 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
             int id1 = 0, id2 = 0, id3 = 0, id4 = 0, id5 = 0, id6 = 0;
             if(y%2==1) {
                 id1 = (x<Nx ? n+Ny: n+Ny-N);    // (1,0) dir
-                id2 = (y>1 ? n+Ny-1: n+2*Ny-1); // (0,-1) dir
+                id2 = (y>1 ? (x<Nx ? n+Ny-1 : N-n+1): (x<Nx ? n+2*Ny-1 : N-n+1) ); // (0,-1) dir
                 id3 = (y>1 ? n-1 : n+Ny-1); // (-1,-1) dir
                 id4 = (x>1 ? n-Ny : n-Ny+N); // (-1,0) dir
                 id5 = (y<Ny ? n+1: n+1-Ny);  // (0,1) dir
