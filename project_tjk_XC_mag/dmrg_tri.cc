@@ -1240,7 +1240,6 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
         // measure pairing order parameter
         if( meas_pairodp) {
             std::vector<Cplx> pairodp={};
-            std::vector<Cplx> pairodp4e={};
             for(int n = 1; n <= N ; ++n) {
                 int i = nnlist[n-1].s0;
                 for (int id = 0; id<6; id++) {
@@ -1313,11 +1312,6 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
                     } else {
                         Error("Error: i and j should be different!");
                     }
-                    // 4e pairing
-                    std::vector<int> sites_tmp = { i, i, j, j };
-                    Cplx cpair = mfourbodyf(psi,sites,sites_tmp,"Aup","Adn","Aup","Adn");
-                    pairodp4e.emplace_back(cpair); // store it
-                    printfln(" %d, %d, %d, %d, pair4e = %.16f", i, i, j, j, cpair);
                 }
             }
 
@@ -1327,27 +1321,45 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
             for (std::vector<Cplx>::const_iterator i = pairodp.begin(); i != pairodp.end(); ++i)
                     pairodpout << *i << ' ';
 
+            // 4e pairing
+            std::vector<Cplx> pairodp4e={};
+            for(int n = 1; n <= N-Ny ; ++n) {  // Note do not need to consider x direction x=Nx to x=1 bond
+                std::vector<int> sites_tmp = { n, n+Ny, n+Ny+(n%Ny==0 ? -Ny+1 : 1), n+(n%Ny==0 ? -Ny+1 : 1) };
+                // up up dn dn
+                Cplx cpair = mfourbodyf(psi,sites,sites_tmp,"Aup","Aup","Adn","Adn");
+                pairodp4e.emplace_back(cpair); // store it
+                printfln(" %d, %d, %d, %d, pair4e = %.16f", sites_tmp[0], sites_tmp[1], sites_tmp[2], sites_tmp[3], cpair);
+
+                // dn dn up up
+                cpair = mfourbodyf(psi,sites,sites_tmp,"Adn","Adn","Aup","Aup");
+                pairodp4e.emplace_back(cpair); // store it
+                printfln(" %d, %d, %d, %d, pair4e = %.16f", sites_tmp[0], sites_tmp[1], sites_tmp[2], sites_tmp[3], cpair);
+
+                // up dn up dn
+                cpair = mfourbodyf(psi,sites,sites_tmp,"Aup","Adn","Aup","Adn");
+                pairodp4e.emplace_back(cpair); // store it
+                printfln(" %d, %d, %d, %d, pair4e = %.16f", sites_tmp[0], sites_tmp[1], sites_tmp[2], sites_tmp[3], cpair);
+
+                // dn up up dn
+                cpair = mfourbodyf(psi,sites,sites_tmp,"Adn","Aup","Aup","Adn");
+                pairodp4e.emplace_back(cpair); // store it
+                printfln(" %d, %d, %d, %d, pair4e = %.16f", sites_tmp[0], sites_tmp[1], sites_tmp[2], sites_tmp[3], cpair);
+
+                // up dn dn up
+                cpair = mfourbodyf(psi,sites,sites_tmp,"Aup","Adn","Adn","Aup");
+                pairodp4e.emplace_back(cpair); // store it
+                printfln(" %d, %d, %d, %d, pair4e = %.16f", sites_tmp[0], sites_tmp[1], sites_tmp[2], sites_tmp[3], cpair);
+
+                // dn up dn up
+                cpair = mfourbodyf(psi,sites,sites_tmp,"Adn","Aup","Adn","Aup");
+                pairodp4e.emplace_back(cpair); // store it
+                printfln(" %d, %d, %d, %d, pair4e = %.16f", sites_tmp[0], sites_tmp[1], sites_tmp[2], sites_tmp[3], cpair);
+            }
+            // output
             std::ofstream pairodp4eout("pairodp4e.out",std::ios::out);
             pairodp4eout.precision(16);
             for (std::vector<Cplx>::const_iterator i = pairodp4e.begin(); i != pairodp4e.end(); ++i)
                     pairodp4eout << *i << ' ';
-
-            // onsite pairing
-            // <c_iup c_idn> = <a_iup F_i a_idn>
-            std::vector<Cplx> pairodp_onsite={};
-            for(int n = 1; n <= N ; ++n) {
-                psi.position(n);
-                auto cpair = noprime( psi.A(n)*sites.op("Adn",n), Site);
-                cpair = noprime( cpair*sites.op("F",n), Site);
-                cpair = cpair*sites.op("Aup",n)*dag(prime(psi.A(n),Site));
-                pairodp_onsite.emplace_back(cpair.cplx()); // store it
-                printfln(" %d, %d, paironsite = %.16f", n, n, cpair.cplx());
-            }
-            // output
-            std::ofstream pairodp_onsiteout("pairodp_onsite.out",std::ios::out);
-            pairodp_onsiteout.precision(16);
-            for (std::vector<Cplx>::const_iterator i = pairodp_onsite.begin(); i != pairodp_onsite.end(); ++i)
-                    pairodp_onsiteout << *i << ' ';
         }
 
         // measure pairing correlation
