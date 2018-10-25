@@ -33,6 +33,7 @@ int main(int argc, char* argv[])
     auto twist_ybc = input.getYesNo("twist_ybc",false);
     double ytheta = input.getReal("ytheta",0.0);
     double pairpin = input.getReal("pairpin",0.0);
+    auto lpindwave = input.getYesNo("lpindwave",false);
     Cplx expitheta = std::exp( Cplx(0.0,std::acos(-1))* ytheta );
     auto domeas = input.getYesNo("domeas",false);
     auto meas_spincorr = input.getYesNo("meas_spincorr",false);
@@ -191,12 +192,17 @@ int main(int argc, char* argv[])
         }
         // pin pairing at left boundary
         if( pairpin != 0.0 ) {
-            for(auto bnd : lattice) {
-                if( bnd.s1 <= Ny ) {
-                    ampo +=  pairpin, "Cdagup", bnd.s1, "Cdagdn", bnd.s2;
-                    ampo += -pairpin, "Cdagdn", bnd.s1, "Cdagup", bnd.s2;
-                    ampo +=  pairpin, "Cdn", bnd.s2, "Cup", bnd.s1;
-                    ampo += -pairpin, "Cup", bnd.s2, "Cdn", bnd.s1;
+            for(int i = 1; i<=Ny; ++i) {
+                if(not lpindwave) {
+                    ampo +=  pairpin, "Cdagup", i, "Cdagdn", (i+1>Ny ? i+1-Ny : i+1);
+                    ampo += -pairpin, "Cdagdn", i, "Cdagup", (i+1>Ny ? i+1-Ny : i+1);
+                    ampo +=  pairpin, "Cdn", (i+1>Ny ? i+1-Ny : i+1), "Cup", i;
+                    ampo += -pairpin, "Cup", (i+1>Ny ? i+1-Ny : i+1), "Cdn", i;
+                } else {
+                    ampo +=  pairpin*(i%2==0 ? -1.0 : 1.0), "Cdagup", i, "Cdagdn", (i+1>Ny ? i+1-Ny : i+1);
+                    ampo += -pairpin*(i%2==0 ? -1.0 : 1.0), "Cdagdn", i, "Cdagup", (i+1>Ny ? i+1-Ny : i+1);
+                    ampo +=  pairpin*(i%2==0 ? -1.0 : 1.0), "Cdn", (i+1>Ny ? i+1-Ny : i+1), "Cup", i;
+                    ampo += -pairpin*(i%2==0 ? -1.0 : 1.0), "Cup", (i+1>Ny ? i+1-Ny : i+1), "Cdn", i;
                 }
             }
         }
