@@ -24,7 +24,7 @@ input
     meas_chiralcorr = yes
     meas_pair = yes
     meas_pairbubble = no
-    meas_pairodp = no
+    meas_pairodp = yes
     meas_paircorr = no
     lfixi0 = yes
     x0 = 3
