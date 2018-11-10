@@ -134,10 +134,10 @@ ax0 = plt.subplot(gs[0,0])
 ax0.set_xlabel('$x-x_0$', fontsize=14)
 ax0.set_ylabel('$|S(x-x_0)|$', fontsize=14)
 for ifile in range(nfile/2):
-    ax0.loglog(x1[ifile],y1[ifile], mmarker[ifile], markersize=8, markerfacecolor=mcolor[ifile], markeredgecolor=mcolor[ifile])
-    ax0.loglog(x1[ifile],-y1[ifile], mmarker[ifile], markersize=8, markerfacecolor='none', markeredgecolor=mcolor[ifile])
+    ax0.loglog(x1[ifile],y1[ifile]*10**(-2.0*ifile), mmarker[ifile], markersize=8, markerfacecolor=mcolor[ifile], markeredgecolor=mcolor[ifile])
+    ax0.loglog(x1[ifile],-y1[ifile]*10**(-2.0*ifile), mmarker[ifile], markersize=8, markerfacecolor='none', markeredgecolor=mcolor[ifile])
     x0=np.arange(1.0,len(x1[ifile]),0.01)
-    ax0.loglog(x0,np.exp(popt[ifile][0])*x0**popt[ifile][1], '--', color=mcolor[ifile],
+    ax0.loglog(x0,np.exp(popt[ifile][0])*x0**popt[ifile][1]*10**(-2.0*ifile), '--', color=mcolor[ifile],
     label="$f(x-x_0)=%7.3f$"%np.exp(popt[ifile][0])+"$(x-x_0)$"+"$^{%7.3f}$"%popt[ifile][1]+flabel[ifile])
 
 ax0.set_xticks(np.arange(5,40,5))
@@ -147,7 +147,7 @@ ax0.get_xaxis().set_major_formatter(ScalarFormatter())
 
 ax0.set_xlim([idrop-0.5,int(len_x*0.88)-0.5])
 #ax0.set_xlim([1,len_x])
-ax0.set_ylim([0.1**7,1.0])
+ax0.set_ylim([0.1**12,1.0])
 #ax[0].set_yscale('log')
 ax0.grid(which='major')
 #ax0.grid(which='minor')
@@ -158,10 +158,10 @@ ax3 = plt.subplot(gs[0,1])
 ax3.set_xlabel('$x-x_0$', fontsize=14)
 ax3.set_ylabel('$|D(x-x_0)|$', fontsize=14)
 for ifile in range(nfile/2,nfile):
-    ax3.loglog(x1[ifile],y1[ifile], mmarker[ifile], markersize=8, markerfacecolor=mcolor[ifile], markeredgecolor=mcolor[ifile])
-    ax3.loglog(x1[ifile],-y1[ifile], mmarker[ifile], markersize=8, markerfacecolor='none', markeredgecolor=mcolor[ifile])
+    ax3.loglog(x1[ifile],y1[ifile]*10**(-2.0*(ifile-3)), mmarker[ifile], markersize=8, markerfacecolor=mcolor[ifile], markeredgecolor=mcolor[ifile])
+    ax3.loglog(x1[ifile],-y1[ifile]*10**(-2.0*(ifile-3)), mmarker[ifile], markersize=8, markerfacecolor='none', markeredgecolor=mcolor[ifile])
     x0=np.arange(1.0,len(x1[ifile]),0.01)
-    ax3.loglog(x0,np.exp(popt[ifile][0])*x0**popt[ifile][1], '--', color=mcolor[ifile],
+    ax3.loglog(x0,np.exp(popt[ifile][0])*x0**popt[ifile][1]*10**(-2.0*(ifile-3)), '--', color=mcolor[ifile],
     label="$f(x-x_0)=%7.3f$"%np.exp(popt[ifile][0])+"$(x-x_0)$"+"$^{%7.3f}$"%popt[ifile][1]+flabel[ifile])
 
 ax3.set_xticks(np.arange(5,40,5))
@@ -171,7 +171,7 @@ ax3.get_xaxis().set_major_formatter(ScalarFormatter())
 
 ax3.set_xlim([idrop-0.5,int(len_x*0.88)-0.5])
 #ax3.set_xlim([1,len_x])
-ax3.set_ylim([0.1**7,1.0])
+ax3.set_ylim([0.1**14,1.0])
 #ax[0].set_yscale('log')
 ax3.grid(which='major')
 #ax3.grid(which='minor')
@@ -188,9 +188,9 @@ ax1.grid(which='minor')
 ax1.text(-0.12, 1.02, 'c', transform=ax1.transAxes, fontsize=16, fontweight='bold', va='top', ha='right')
 
 for ifile in range(nfile):
-    ax1.plot(xdata[ifile],ydata_norm[ifile], '-', color=mcolor[ifile], linewidth=0.1)
-    ax1.plot(xdata[ifile], pos_y[ifile], mmarker[ifile], markersize=8, markerfacecolor=mcolor[ifile],   markeredgecolor=mcolor[ifile])
-    ax1.plot(xdata[ifile], neg_y[ifile], mmarker[ifile], markersize=8, markerfacecolor='none', markeredgecolor=mcolor[ifile])
+    ax1.plot(xdata[ifile],ydata_norm[ifile]-5.0*ifile, '-', color=mcolor[ifile], linewidth=0.1)
+    ax1.plot(xdata[ifile], pos_y[ifile]-5.0*ifile, mmarker[ifile], markersize=8, markerfacecolor=mcolor[ifile],   markeredgecolor=mcolor[ifile])
+    ax1.plot(xdata[ifile], neg_y[ifile]-5.0*ifile, mmarker[ifile], markersize=8, markerfacecolor='none', markeredgecolor=mcolor[ifile])
 
 ax2 = plt.subplot(gs[1,1])
 ax2.set_xlabel('$qa_0/2\pi$',fontsize=14)
@@ -201,7 +201,7 @@ ax2.grid(which='minor')
 ax2.text(-0.12, 1.02, 'd', transform=ax2.transAxes, fontsize=16, fontweight='bold', va='top', ha='right')
 
 for ifile in range(nfile):
-    ax2.plot(freq[ifile],abs(sp[ifile]),mcolor[ifile]) # plotting the spectrum
+    ax2.plot(freq[ifile],abs(sp[ifile])-0.1*ifile,mcolor[ifile]) # plotting the spectrum
 
 plt.tight_layout()
 plt.savefig("fig3.pdf", dpi=300)
