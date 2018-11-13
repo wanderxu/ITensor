@@ -371,32 +371,32 @@ int main(int argc, char* argv[])
         printfln("Mzsquare = %.10e", Mzsquare );
 
         std::ofstream fSzout("Siz.out",std::ios::out);
-        fSzout.precision(12);
+        fSzout.precision(16);
         for (std::vector<double>::const_iterator i = Sz_meas.begin(); i != Sz_meas.end(); ++i)
                 fSzout << *i << ' ';
 
         std::ofstream fSpout("Sip.out",std::ios::out);
-        fSpout.precision(12);
+        fSpout.precision(16);
         for (std::vector<Cplx>::const_iterator i = Sp_meas.begin(); i != Sp_meas.end(); ++i)
                 fSpout << *i << ' ';
 
         std::ofstream fSmout("Sim.out",std::ios::out);
-        fSmout.precision(12);
+        fSmout.precision(16);
         for (std::vector<Cplx>::const_iterator i = Sm_meas.begin(); i != Sm_meas.end(); ++i)
                 fSmout << *i << ' ';
 
         std::ofstream fSiSjout("SiSj.out",std::ios::out);
-        fSiSjout.precision(12);
+        fSiSjout.precision(16);
         for (std::vector<double>::const_iterator i = SiSj_meas.begin(); i != SiSj_meas.end(); ++i)
                 fSiSjout << *i << ' ';
 
         std::ofstream fSiSjzzout("SiSjzz.out",std::ios::out);
-        fSiSjzzout.precision(12);
+        fSiSjzzout.precision(16);
         for (std::vector<double>::const_iterator i = SiSjzz_meas.begin(); i != SiSjzz_meas.end(); ++i)
                 fSiSjzzout << *i << ' ';
 
         std::ofstream fSiSjpmout("SiSjpm.out",std::ios::out);
-        fSiSjpmout.precision(12);
+        fSiSjpmout.precision(16);
         for (std::vector<double>::const_iterator i = SiSjpm_meas.begin(); i != SiSjpm_meas.end(); ++i)
                 fSiSjpmout << *i << ' ';
     }
@@ -456,7 +456,7 @@ int main(int argc, char* argv[])
         }
         // output to file
         std::ofstream fdxout("Dxi.out",std::ios::out);
-        fdxout.precision(12);
+        fdxout.precision(16);
         for (std::vector<double>::const_iterator i = dx_meas.begin(); i != dx_meas.end(); ++i)
                 fdxout << *i << ' ';
 
@@ -545,7 +545,7 @@ int main(int argc, char* argv[])
         }
         // output to file
         std::ofstream fdxdxout("DxiDxj.out",std::ios::out);
-        fdxdxout.precision(12);
+        fdxdxout.precision(16);
         for (std::vector<double>::const_iterator i = dxdx_meas.begin(); i != dxdx_meas.end(); ++i)
                 fdxdxout << *i << ' ';
     } // end if( meas_dxcorr) {
@@ -561,7 +561,7 @@ int main(int argc, char* argv[])
         }
         // output to file
         std::ofstream fdyout("Dyi.out",std::ios::out);
-        fdyout.precision(12);
+        fdyout.precision(16);
         for (std::vector<double>::const_iterator i = dy_meas.begin(); i != dy_meas.end(); ++i)
                 fdyout << *i << ' ';
 
@@ -649,7 +649,7 @@ int main(int argc, char* argv[])
         }
         // output to file
         std::ofstream fdydyout("DyiDyj.out",std::ios::out);
-        fdydyout.precision(12);
+        fdydyout.precision(16);
         for (std::vector<double>::const_iterator i = dydy_meas.begin(); i != dydy_meas.end(); ++i)
                 fdydyout << *i << ' ';
     } // if( meas_dycorr) {
@@ -665,7 +665,7 @@ int main(int argc, char* argv[])
         }
         // output to file
         std::ofstream fdxyout("Dxyi.out",std::ios::out);
-        fdxyout.precision(12);
+        fdxyout.precision(16);
         for (std::vector<double>::const_iterator i = dxy_meas.begin(); i != dxy_meas.end(); ++i)
                 fdxyout << *i << ' ';
 
@@ -753,7 +753,7 @@ int main(int argc, char* argv[])
         }
         // output to file
         std::ofstream fdxydxyout("DxyiDxyj.out",std::ios::out);
-        fdxydxyout.precision(12);
+        fdxydxyout.precision(16);
         for (std::vector<double>::const_iterator i = dxydxy_meas.begin(); i != dxydxy_meas.end(); ++i)
                 fdxydxyout << *i << ' ';
     }  // if( meas_dxycorr) {
@@ -961,12 +961,12 @@ msixbody_str(psi, sites, {tri_plaq[i].s1,tri_plaq[i].s2,tri_plaq[i].s3}, "Sz", "
             }
         } // end for(int i = 0; i < int(tri_plaq.size()); ++i) {
         std::ofstream fXiXjout("XiXj.out",std::ios::out);
-        fXiXjout.precision(12);
+        fXiXjout.precision(16);
         for (std::vector<double>::const_iterator i = XiXj_meas.begin(); i != XiXj_meas.end(); ++i)
                 fXiXjout << *i << ' ';
 
         std::ofstream fXiout("Xi.out",std::ios::out);
-        fXiout.precision(12);
+        fXiout.precision(16);
         for (std::vector<double>::const_iterator i = Xi_meas.begin(); i != Xi_meas.end(); ++i)
                 fXiout << *i << ' ';
     }
