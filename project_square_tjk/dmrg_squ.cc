@@ -22,6 +22,7 @@ int main(int argc, char* argv[])
     double t2 = input.getReal("t2");
     auto idop = input.getInt("idop");
     double J1 = input.getReal("J1");
+    double Jp = input.getReal("Jp");
     double J2 = input.getReal("J2");
     double gamma1 = input.getReal("gamma1");
     double gamma2 = input.getReal("gamma2");
@@ -212,6 +213,35 @@ int main(int argc, char* argv[])
                 ampo += J1*2.0*expitheta,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta}
                 ampo += J1*2.0/expitheta,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
                 ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
+            }
+        }
+        // second neighbor
+        for(auto bnd : latticeNN)
+        {
+            if( (not bnd.isbd) or (not twist_ybc) ) {
+                ampo += Jp*2.0,"S+",bnd.s1,"S-",bnd.s2;
+                ampo += Jp*2.0,"S-",bnd.s1,"S+",bnd.s2;
+                ampo += Jp*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
+            }
+            else if ( ytheta == 1.0 ) {
+                println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
+                ampo += -Jp*2.0,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta}
+                ampo += -Jp*2.0,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
+                ampo += Jp*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
+            }
+            else if ( bnd.y2 == 1 ) // X+Y direc. boundary bond
+            {
+                println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
+                ampo += Jp*2.0*expitheta,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta}
+                ampo += Jp*2.0/expitheta,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
+                ampo += Jp*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
+            }
+            else if ( bnd.y2 == Ny ) // X-Y direc. boundary bond
+            {
+                println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
+                ampo += Jp*2.0/expitheta,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{-i\theta}
+                ampo += Jp*2.0*expitheta,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{i\theta}
+                ampo += Jp*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
             }
         }
 
