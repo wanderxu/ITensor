@@ -21,6 +21,7 @@ int main(int argc, char* argv[])
     double t1 = input.getReal("t1");
     auto idop = input.getInt("idop");
     double J1 = input.getReal("J1");
+    double u1 = input.getReal("u1",0);
     double J2 = input.getReal("J2");
     double gamma1 = input.getReal("gamma1");
     double gamma2 = input.getReal("gamma2");
@@ -176,6 +177,8 @@ int main(int argc, char* argv[])
                 ampo += J1*2.0/expitheta,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
                 ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
             }
+            // u term
+            ampo += u1,"Ntot",bnd.s1,"Ntot",bnd.s2;
         }
 
 

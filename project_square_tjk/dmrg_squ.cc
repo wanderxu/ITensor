@@ -23,6 +23,8 @@ int main(int argc, char* argv[])
     auto idop = input.getInt("idop");
     double J1 = input.getReal("J1");
     double Jp = input.getReal("Jp");
+    double u1 = input.getReal("u1",0);
+    double u2 = input.getReal("u2",0);
     double J2 = input.getReal("J2");
     double gamma1 = input.getReal("gamma1");
     double gamma2 = input.getReal("gamma2");
@@ -214,6 +216,8 @@ int main(int argc, char* argv[])
                 ampo += J1*2.0/expitheta,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
                 ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
             }
+            // u term
+            ampo += u1,"Ntot",bnd.s1,"Ntot",bnd.s2;
         }
         // second neighbor
         for(auto bnd : latticeNN)
@@ -243,6 +247,8 @@ int main(int argc, char* argv[])
                 ampo += Jp*2.0*expitheta,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{i\theta}
                 ampo += Jp*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
             }
+            // u term
+            ampo += u2,"Ntot",bnd.s1,"Ntot",bnd.s2;
         }
 
 
