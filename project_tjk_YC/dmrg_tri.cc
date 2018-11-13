@@ -224,7 +224,7 @@ int main(int argc, char* argv[])
         //    state.set(i,"Emp");
         //  }
         //}
-        int iper = N/idop;
+        int iper = (idop > 0 ? N/idop : N+999); // if idop == 0, set iper to be larger than N, which will give zero dop in the following code
         for(int i = N; i >= 1; --i) {
           if(i%iper != 0) {
             println("Singly occupying site ",i);
