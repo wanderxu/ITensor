@@ -129,7 +129,8 @@ ax0.set_ylabel('$|P_{22}(x)|$', fontsize=14)
 
 mcolor=['b','g','r']
 mmarker=['o','s','d']
-flabel=["$,\ \\frac{1}{8}$ doping", "$,\ \\frac{1}{12}$ doping", "$,\ \\frac{1}{16}$ doping"]
+#flabel=["$,\ \\frac{1}{8}$ doping", "$,\ \\frac{1}{12}$ doping", "$,\ \\frac{1}{16}$ doping"]
+flabel=["$\ $1/8 doping", "$\ $1/12 doping", "$\ $1/16 doping"]
 for ifile in range(nfile-1,-1,-1):
     ax0.loglog(x1[ifile],y1[ifile]*10**(-3.0*(2-ifile)), mmarker[ifile], markersize=8, markerfacecolor=mcolor[ifile], markeredgecolor=mcolor[ifile])
     ax0.loglog(x1[ifile],-y1[ifile]*10**(-3.0*(2-ifile)), mmarker[ifile], markersize=8, markerfacecolor='none', markeredgecolor=mcolor[ifile])
@@ -162,7 +163,7 @@ ax0.annotate('$\\times 10^{-6}$', fontsize=14, color='b',
 ax1 = gridspec.GridSpecFromSubplotSpec(2, 1, subplot_spec=gs[1,0], hspace=0.05 )
 #ax1 = plt.subplot(gs[1,0])
 ax1_0 = plt.subplot(ax1[0])
-ax1_0.set_ylim([1,11])
+ax1_0.set_ylim([1,12])
 ax1_0.set_yticks([3, 6, 9])
 ax1_0.set_yticklabels( ["-3", "0", "3"] )
 
@@ -177,9 +178,9 @@ ax1_0.grid(which='minor')
 ax1_0.text(-0.15, 1.05, 'b', transform=ax1_0.transAxes, fontsize=16, fontweight='bold', va='top', ha='right')
 
 ax1_1 = plt.subplot(ax1[1])
-ax1_1.set_ylim([-11,-1])
-ax1_1.set_yticks([-9, -6, -3])
-ax1_1.set_yticklabels( ["-3", "0", "3"] )
+ax1_1.set_ylim([-16,3])
+ax1_1.set_yticks([-12, -6, 0])
+ax1_1.set_yticklabels( ["-6", "0", "6"] )
 
 ax1_1.set_xlabel('$x$', fontsize=14)
 #ax1_1.set_ylabel('$P_{22}(x)/f(x)$',fontsize=14)
@@ -206,14 +207,14 @@ ax1_1.plot((-d, +d), (1 - d, 1 + d), **kwargs)  # bottom-left diagonal
 ax1_1.plot((1 - d, 1 + d), (1 - d, 1 + d), **kwargs)  # bottom-right diagonal
 
 #for ifile in range(1,nfile):
+ifile=0
+ax1_1.plot(xdata[ifile],ydata_norm[ifile]+12*(ifile-0.5), '-'+mcolor[ifile], linewidth=0.1)
+ax1_1.plot(xdata[ifile], pos_y[ifile]+12*(ifile-0.5), mmarker[ifile], markersize=8, markerfacecolor=mcolor[ifile],   markeredgecolor=mcolor[ifile])
+ax1_1.plot(xdata[ifile], neg_y[ifile]+12*(ifile-0.5), mmarker[ifile], markersize=8, markerfacecolor='none', markeredgecolor=mcolor[ifile])
 ifile=1
-ax1_1.plot(xdata[ifile],ydata_norm[ifile]+12*(ifile-1.5), '-'+mcolor[ifile], linewidth=0.1)
-ax1_1.plot(xdata[ifile], pos_y[ifile]+12*(ifile-1.5), mmarker[ifile], markersize=8, markerfacecolor=mcolor[ifile],   markeredgecolor=mcolor[ifile])
-ax1_1.plot(xdata[ifile], neg_y[ifile]+12*(ifile-1.5), mmarker[ifile], markersize=8, markerfacecolor='none', markeredgecolor=mcolor[ifile])
-ifile=2
-ax1_0.plot(xdata[ifile],ydata_norm[ifile]+12*(ifile-1.5), '-'+mcolor[ifile], linewidth=0.1)
-ax1_0.plot(xdata[ifile], pos_y[ifile]+12*(ifile-1.5), mmarker[ifile], markersize=8, markerfacecolor=mcolor[ifile],   markeredgecolor=mcolor[ifile])
-ax1_0.plot(xdata[ifile], neg_y[ifile]+12*(ifile-1.5), mmarker[ifile], markersize=8, markerfacecolor='none', markeredgecolor=mcolor[ifile])
+ax1_0.plot(xdata[ifile],ydata_norm[ifile]+12*(ifile-0.5), '-'+mcolor[ifile], linewidth=0.1)
+ax1_0.plot(xdata[ifile], pos_y[ifile]+12*(ifile-0.5), mmarker[ifile], markersize=8, markerfacecolor=mcolor[ifile],   markeredgecolor=mcolor[ifile])
+ax1_0.plot(xdata[ifile], neg_y[ifile]+12*(ifile-0.5), mmarker[ifile], markersize=8, markerfacecolor='none', markeredgecolor=mcolor[ifile])
 
 ax2 = plt.subplot(gs[1,1])
 ax2.set_xlabel('$qa_0/2\pi$',fontsize=14)

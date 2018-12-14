@@ -107,6 +107,15 @@ dd23_collect = np.zeros((Nx/4,Nx/2),dtype=complex)
 dd31_collect = np.zeros((Nx/4,Nx/2),dtype=complex)
 dd32_collect = np.zeros((Nx/4,Nx/2),dtype=complex)
 dd33_collect = np.zeros((Nx/4,Nx/2),dtype=complex)
+dd11_collectmat = np.zeros((Nx/4,Nx/2,Ny),dtype=complex)
+dd12_collectmat = np.zeros((Nx/4,Nx/2,Ny),dtype=complex)
+dd13_collectmat = np.zeros((Nx/4,Nx/2,Ny),dtype=complex)
+dd21_collectmat = np.zeros((Nx/4,Nx/2,Ny),dtype=complex)
+dd22_collectmat = np.zeros((Nx/4,Nx/2,Ny),dtype=complex)
+dd23_collectmat = np.zeros((Nx/4,Nx/2,Ny),dtype=complex)
+dd31_collectmat = np.zeros((Nx/4,Nx/2,Ny),dtype=complex)
+dd32_collectmat = np.zeros((Nx/4,Nx/2,Ny),dtype=complex)
+dd33_collectmat = np.zeros((Nx/4,Nx/2,Ny),dtype=complex)
 for x0 in range(Nx/4-1, Nx/2-1) :
     dd11 = np.zeros((Nx),dtype=complex)
     dd12 = np.zeros((Nx),dtype=complex)
@@ -117,6 +126,15 @@ for x0 in range(Nx/4-1, Nx/2-1) :
     dd31 = np.zeros((Nx),dtype=complex)
     dd32 = np.zeros((Nx),dtype=complex)
     dd33 = np.zeros((Nx),dtype=complex)
+    dd11mat  = np.zeros((Nx,Ny),dtype=complex)
+    dd12mat  = np.zeros((Nx,Ny),dtype=complex)
+    dd13mat  = np.zeros((Nx,Ny),dtype=complex)
+    dd21mat  = np.zeros((Nx,Ny),dtype=complex)
+    dd22mat  = np.zeros((Nx,Ny),dtype=complex)
+    dd23mat  = np.zeros((Nx,Ny),dtype=complex)
+    dd31mat  = np.zeros((Nx,Ny),dtype=complex)
+    dd32mat  = np.zeros((Nx,Ny),dtype=complex)
+    dd33mat  = np.zeros((Nx,Ny),dtype=complex)
     for j in range(N):
         #if j%Ny==1 :
         i0 = x0*Ny + j%Ny
@@ -129,6 +147,15 @@ for x0 in range(Nx/4-1, Nx/2-1) :
         dd31[j/Ny] += ( sisj14[i0,j,5,0] - sisj23[i0,j,5,0] )
         dd32[j/Ny] += ( sisj14[i0,j,5,4] - sisj23[i0,j,5,4] )
         dd33[j/Ny] += ( sisj14[i0,j,5,5] - sisj23[i0,j,5,5] )
+        dd11mat[j/Ny,j%Ny] += ( sisj14[i0,j,0,0] - sisj23[i0,j,0,0] )
+        dd12mat[j/Ny,j%Ny] += ( sisj14[i0,j,0,4] - sisj23[i0,j,0,4] )
+        dd13mat[j/Ny,j%Ny] += ( sisj14[i0,j,0,5] - sisj23[i0,j,0,5] )
+        dd21mat[j/Ny,j%Ny] += ( sisj14[i0,j,4,0] - sisj23[i0,j,4,0] )
+        dd22mat[j/Ny,j%Ny] += ( sisj14[i0,j,4,4] - sisj23[i0,j,4,4] )
+        dd23mat[j/Ny,j%Ny] += ( sisj14[i0,j,4,5] - sisj23[i0,j,4,5] )
+        dd31mat[j/Ny,j%Ny] += ( sisj14[i0,j,5,0] - sisj23[i0,j,5,0] )
+        dd32mat[j/Ny,j%Ny] += ( sisj14[i0,j,5,4] - sisj23[i0,j,5,4] )
+        dd33mat[j/Ny,j%Ny] += ( sisj14[i0,j,5,5] - sisj23[i0,j,5,5] )
     dd11_collect[x0-(Nx/4-1)] = dd11[x0:x0+Nx/2]
     dd12_collect[x0-(Nx/4-1)] = dd12[x0:x0+Nx/2]
     dd13_collect[x0-(Nx/4-1)] = dd13[x0:x0+Nx/2]
@@ -138,6 +165,16 @@ for x0 in range(Nx/4-1, Nx/2-1) :
     dd31_collect[x0-(Nx/4-1)] = dd31[x0:x0+Nx/2]
     dd32_collect[x0-(Nx/4-1)] = dd32[x0:x0+Nx/2]
     dd33_collect[x0-(Nx/4-1)] = dd33[x0:x0+Nx/2]
+
+    dd11_collectmat[x0-(Nx/4-1)] = dd11mat[x0:x0+Nx/2,:]
+    dd12_collectmat[x0-(Nx/4-1)] = dd12mat[x0:x0+Nx/2,:]
+    dd13_collectmat[x0-(Nx/4-1)] = dd13mat[x0:x0+Nx/2,:]
+    dd21_collectmat[x0-(Nx/4-1)] = dd21mat[x0:x0+Nx/2,:]
+    dd22_collectmat[x0-(Nx/4-1)] = dd22mat[x0:x0+Nx/2,:]
+    dd23_collectmat[x0-(Nx/4-1)] = dd23mat[x0:x0+Nx/2,:]
+    dd31_collectmat[x0-(Nx/4-1)] = dd31mat[x0:x0+Nx/2,:]
+    dd32_collectmat[x0-(Nx/4-1)] = dd32mat[x0:x0+Nx/2,:]
+    dd33_collectmat[x0-(Nx/4-1)] = dd33mat[x0:x0+Nx/2,:]
     
     with open("dd11vsx_x0"+str(x0)+".dat","w") as f:
         for ix in range(x0,Nx):
@@ -166,6 +203,36 @@ for x0 in range(Nx/4-1, Nx/2-1) :
     with open("dd33vsx_x0"+str(x0)+".dat","w") as f:
         for ix in range(x0,Nx):
             f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd33[ix].real, dd33[ix].imag) )
+
+    for iy in range(Ny):
+        with open("dd11vsx_y"+str(iy)+".dat","w") as f:
+            for ix in range(x0,Nx):
+                f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd11mat[ix,iy].real, dd11mat[ix,iy].imag) )
+        with open("dd12vsx_y"+str(iy)+".dat","w") as f:
+            for ix in range(x0,Nx):
+                f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd12mat[ix,iy].real, dd12mat[ix,iy].imag) )
+        with open("dd13vsx_y"+str(iy)+".dat","w") as f:
+            for ix in range(x0,Nx):
+                f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd13mat[ix,iy].real, dd13mat[ix,iy].imag) )
+        with open("dd21vsx_y"+str(iy)+".dat","w") as f:
+            for ix in range(x0,Nx):
+                f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd21mat[ix,iy].real, dd21mat[ix,iy].imag) )
+        with open("dd22vsx_y"+str(iy)+".dat","w") as f:
+            for ix in range(x0,Nx):
+                f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd22mat[ix,iy].real, dd22mat[ix,iy].imag) )
+        with open("dd23vsx_y"+str(iy)+".dat","w") as f:
+            for ix in range(x0,Nx):
+                f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd23mat[ix,iy].real, dd23mat[ix,iy].imag) )
+        with open("dd31vsx_y"+str(iy)+".dat","w") as f:
+            for ix in range(x0,Nx):
+                f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd31mat[ix,iy].real, dd31mat[ix,iy].imag) )
+        with open("dd32vsx_y"+str(iy)+".dat","w") as f:
+            for ix in range(x0,Nx):
+                f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd32mat[ix,iy].real, dd32mat[ix,iy].imag) )
+        with open("dd33vsx_y"+str(iy)+".dat","w") as f:
+            for ix in range(x0,Nx):
+                f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd33mat[ix,iy].real, dd33mat[ix,iy].imag) )
+
 dd11 = np.mean(dd11_collect, axis=0)
 dd12 = np.mean(dd12_collect, axis=0)
 dd13 = np.mean(dd13_collect, axis=0)
@@ -175,6 +242,15 @@ dd23 = np.mean(dd23_collect, axis=0)
 dd31 = np.mean(dd31_collect, axis=0)
 dd32 = np.mean(dd32_collect, axis=0)
 dd33 = np.mean(dd33_collect, axis=0)
+dd11mat = np.mean(dd11_collectmat, axis=0)
+dd12mat = np.mean(dd12_collectmat, axis=0)
+dd13mat = np.mean(dd13_collectmat, axis=0)
+dd21mat = np.mean(dd21_collectmat, axis=0)
+dd22mat = np.mean(dd22_collectmat, axis=0)
+dd23mat = np.mean(dd23_collectmat, axis=0)
+dd31mat = np.mean(dd31_collectmat, axis=0)
+dd32mat = np.mean(dd32_collectmat, axis=0)
+dd33mat = np.mean(dd33_collectmat, axis=0)
 
 with open("dd11vsx.dat","w") as f:
     for ix in range(len(dd11)):
@@ -203,3 +279,32 @@ with open("dd32vsx.dat","w") as f:
 with open("dd33vsx.dat","w") as f:
     for ix in range(len(dd11)):
         f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd33[ix].real, dd33[ix].imag) )
+
+for iy in range(Ny):
+    with open("dd11vsx_y"+str(iy)+".dat","w") as f:
+        for ix in range(len(dd11)):
+            f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd11mat[ix,iy].real, dd11mat[ix,iy].imag) )
+    with open("dd12vsx_y"+str(iy)+".dat","w") as f:
+        for ix in range(len(dd11)):
+            f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd12mat[ix,iy].real, dd12mat[ix,iy].imag) )
+    with open("dd13vsx_y"+str(iy)+".dat","w") as f:
+        for ix in range(len(dd11)):
+            f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd13mat[ix,iy].real, dd13mat[ix,iy].imag) )
+    with open("dd21vsx_y"+str(iy)+".dat","w") as f:
+        for ix in range(len(dd11)):
+            f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd21mat[ix,iy].real, dd21mat[ix,iy].imag) )
+    with open("dd22vsx_y"+str(iy)+".dat","w") as f:
+        for ix in range(len(dd11)):
+            f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd22mat[ix,iy].real, dd22mat[ix,iy].imag) )
+    with open("dd23vsx_y"+str(iy)+".dat","w") as f:
+        for ix in range(len(dd11)):
+            f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd23mat[ix,iy].real, dd23mat[ix,iy].imag) )
+    with open("dd31vsx_y"+str(iy)+".dat","w") as f:
+        for ix in range(len(dd11)):
+            f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd31mat[ix,iy].real, dd31mat[ix,iy].imag) )
+    with open("dd32vsx_y"+str(iy)+".dat","w") as f:
+        for ix in range(len(dd11)):
+            f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd32mat[ix,iy].real, dd32mat[ix,iy].imag) )
+    with open("dd33vsx_y"+str(iy)+".dat","w") as f:
+        for ix in range(len(dd11)):
+            f.write( "{:4d} {: .12f} {: .12f}\n".format(ix, dd33mat[ix,iy].real, dd33mat[ix,iy].imag) )

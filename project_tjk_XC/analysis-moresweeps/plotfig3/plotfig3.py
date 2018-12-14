@@ -127,8 +127,10 @@ gs = gridspec.GridSpec(2, 2, height_ratios=[1.0, 1])
 mcolor=['r','g','b', 'y','m','c']
 #mcolor=['b','g','r', 'g','b','r']
 mmarker=['d','s','o', '<', '^', 'v']
-flabel=["$,\ \\frac{1}{16}$ doping", "$,\ \\frac{1}{12}$ doping", "$,\ \\frac{1}{8}$ doping",
-        "$,\ \\frac{1}{16}$ doping", "$,\ \\frac{1}{12}$ doping", "$,\ \\frac{1}{8}$ doping", ]
+#flabel=["$,\ \\frac{1}{16}$ doping", "$,\ \\frac{1}{12}$ doping", "$,\ \\frac{1}{8}$ doping",
+#        "$,\ \\frac{1}{16}$ doping", "$,\ \\frac{1}{12}$ doping", "$,\ \\frac{1}{8}$ doping", ]
+flabel=["$,\ $1/16 doping", "$,\ $1/12 doping", "$,\ $1/8 doping",
+        "$,\ $1/16 doping", "$,\ $1/12 doping", "$,\ $1/8 doping", ]
 
 ax0 = plt.subplot(gs[0,0])
 ax0.set_xlabel('$x$', fontsize=14)
@@ -198,7 +200,7 @@ ax1 = gridspec.GridSpecFromSubplotSpec(6, 1, subplot_spec=gs[1,0], hspace=0.07 )
 ax1arr = [ plt.subplot(ax1[i]) for i in range(nfile) ]
 ax1arr[0].text(-0.12, 1.02, 'c', transform=ax1arr[0].transAxes, fontsize=16, fontweight='bold', va='top', ha='right')
 ax1arr[nfile-1].set_xlabel('$x$', fontsize=14)
-fig.text(.05, .25, '$S\ or\ D(x)/f(x)$', ha='center', va='center', rotation='vertical', fontsize=14)
+fig.text(.035, .25, '$S\ or\ D(x)/f(x)$', ha='center', va='center', rotation='vertical', fontsize=14)
 
 # hide the spines in the middle
 for ifile in range(nfile-1):

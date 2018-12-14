@@ -255,7 +255,7 @@ int main(int argc, char* argv[])
         //
         // Begin the DMRG calculation
         //
-        auto energy = dmrg(psi,H,sweeps,{"Quiet",quiet,"WriteM",600});
+        auto energy = dmrg(psi,H,sweeps,{"Quiet",quiet,"WriteM",3100});
 
         // after the MPS converged, write basis, psi, and H to disk
         writeToFile("sites_file", sites);

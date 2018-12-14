@@ -1,7 +1,7 @@
 #!/bin/bash
 
 source cal_para.sh
-firststep=5
+firststep=7
 maxstep=10
 
 WORKDIR="$PWD"
