@@ -5,21 +5,21 @@ input
     yperiodic = yes
     t1 = 12.0
     t2 =-3.6
-    idop = 8
+    idop = 0
     J1 = 1.0
     u1 = 0.0
-    Jp = 1.0
+    Jp = 0.0
     u2 = 0.0
-    J2 = 0.2
+    J2 = 0.0
     gamma1 = 1.0
     gamma2 = 1.0
     readmps = yes
     eneropt = yes
     twist_ybc_b = no
-    twist_ybc_f = yes
+    twist_ybc_f = no
     ytheta_b = 0.0
-    ytheta_f = 0.1
-    domeas  = no // if domeas=no, then following meas* tag will not work
+    ytheta_f = 0.0
+    domeas  = yes // if domeas=no, then following meas* tag will not work
     Npart = 0
     ithpart = 0
     meas_spincorr = yes
@@ -27,15 +27,15 @@ input
     meas_dxcorr = yes
     meas_dycorr = yes
     meas_dxycorr = yes
-    meas_chiralcorr = yes
-    meas_pair = yes
+    meas_chiralcorr = no
+    meas_pair = no
     meas_pairbubble = yes
     meas_pairodp = yes
     meas_paircorr = yes
     lfixi0 = yes
     x0 = 3
 
-    nsweeps = 1
+    nsweeps = 6
     sweeps
         {
         maxm  minm  cutoff  niter  noise

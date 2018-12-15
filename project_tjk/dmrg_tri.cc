@@ -321,6 +321,7 @@ int main(int argc, char* argv[])
         auto Mzsquare = 0.0;
         std::vector<double> SiSj_meas={};
         std::vector<double> SiSjzz_meas={};
+        std::vector<double> ninj_meas={};
         std::vector<double> SiSjpm_meas={};
         std::vector<double> Sz_meas={};
         std::vector<double> Nup_meas={};
@@ -352,14 +353,21 @@ int main(int argc, char* argv[])
             auto sm_tmp = (bra*sites.op("S-",i)*ket).cplx();
             Sm_meas.emplace_back(sm_tmp);
 
-            auto ss_tmp = 0.0;
-            ss_tmp += 0.75*(((dag(ket)*ket).cplx()).real());
-            SiSj_meas.emplace_back(ss_tmp);
+            auto szsz_tmp = 0.0;
+            szsz_tmp = (( prime(bra*sites.op("Sz",i),Site)*sites.op("Sz",i)*ket).cplx()).real();
+            SiSjzz_meas.emplace_back(szsz_tmp);
+            Mzsquare += szsz_tmp;
+            auto spsm_tmp = 0.0;
+            spsm_tmp = (( prime(bra*sites.op("S+",i),Site)*sites.op("S-",i)*ket).cplx()).real();
+            SiSjpm_meas.emplace_back(spsm_tmp);
+
+            auto ss_tmp = szsz_tmp + spsm_tmp;
             Msquare += ss_tmp;
-            SiSjzz_meas.emplace_back(0.25);
-            Mzsquare += 0.25;
-            SiSjpm_meas.emplace_back(ss_tmp-0.25);
+            SiSj_meas.emplace_back(ss_tmp);
             println( i, " ", i, " ", ss_tmp );
+
+            ss_tmp = (( prime(bra*sites.op("Ntot",i),Site)*sites.op("Ntot",i)*ket).cplx()).real();
+            ninj_meas.emplace_back( ss_tmp );
             
             if ( i < N ) {
                 // i != j part
@@ -369,13 +377,16 @@ int main(int argc, char* argv[])
                 auto op_ip = sites.op("S+",i);
                 auto op_im = sites.op("S-",i);
                 auto op_iz = sites.op("Sz",i);
+                auto op_in = sites.op("Ntot",i);
                 auto Cpm = psi.A(i)*op_ip*dag(prime(psi.A(i),Site,ir));
                 auto Cmp = psi.A(i)*op_im*dag(prime(psi.A(i),Site,ir));
                 auto Czz = psi.A(i)*op_iz*dag(prime(psi.A(i),Site,ir));
+                auto Cnn = psi.A(i)*op_in*dag(prime(psi.A(i),Site,ir));
                 for(int j = i+1; j <= N; ++j) {
                     Cpm *= psi.A(j);
                     Cmp *= psi.A(j);
                     Czz *= psi.A(j);
+                    Cnn *= psi.A(j);
 
                     auto jl = commonIndex(psi.A(j),psi.A(j-1),Link);
 
@@ -399,10 +410,16 @@ int main(int argc, char* argv[])
                     Msquare += ss_tmp*2.0;
                     println( i, " ", j, " ", ss_tmp ); 
 
+                    auto nn_tmp = 0.0;
+                    auto op_jn = sites.op("Ntot",j);
+                    nn_tmp = (( (Cnn*op_jn)*dag(prime(psi.A(j),jl,Site)) ).cplx()).real();
+                    ninj_meas.emplace_back(nn_tmp);
+
                     if(j < N) {
                         Cpm *= dag(prime(psi.A(j),Link));
                         Cmp *= dag(prime(psi.A(j),Link));
                         Czz *= dag(prime(psi.A(j),Link));
+                        Cnn *= dag(prime(psi.A(j),Link));
                     }
                 }
             }
@@ -455,6 +472,11 @@ int main(int argc, char* argv[])
         fSiSjpmout.precision(16);
         for (std::vector<double>::const_iterator i = SiSjpm_meas.begin(); i != SiSjpm_meas.end(); ++i)
                 fSiSjpmout << *i << ' ';
+
+        std::ofstream fninjout("ninj.out",std::ios::out);
+        fninjout.precision(16);
+        for (std::vector<double>::const_iterator i = ninj_meas.begin(); i != ninj_meas.end(); ++i)
+                fninjout << *i << ' ';
     }
 
     if(domeas && meas_dimer) {

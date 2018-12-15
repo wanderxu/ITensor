@@ -236,7 +236,7 @@ int main(int argc, char* argv[])
         //
         // Begin the DMRG calculation
         //
-        auto energy = dmrg(psi,H,sweeps,{"Quiet",quiet,"WriteM",600});
+        auto energy = dmrg(psi,H,sweeps,{"Quiet",quiet,"WriteM",3100});
 
         // after the MPS converged, write basis, psi, and H to disk
         writeToFile("sites_file", sites);
@@ -312,13 +312,17 @@ int main(int argc, char* argv[])
             auto sm_tmp = (bra*sites.op("S-",i)*ket).cplx();
             Sm_meas.emplace_back(sm_tmp);
 
-            auto ss_tmp = 0.0;
-            ss_tmp += 0.75*(((dag(ket)*ket).cplx()).real());
-            SiSj_meas.emplace_back(ss_tmp);
+            auto szsz_tmp = 0.0;
+            szsz_tmp = (( prime(bra*sites.op("Sz",i),Site)*sites.op("Sz",i)*ket).cplx()).real();
+            SiSjzz_meas.emplace_back(szsz_tmp);
+            Mzsquare += szsz_tmp;
+            auto spsm_tmp = 0.0;
+            spsm_tmp = (( prime(bra*sites.op("S+",i),Site)*sites.op("S-",i)*ket).cplx()).real();
+            SiSjpm_meas.emplace_back(spsm_tmp);
+
+            auto ss_tmp = szsz_tmp + spsm_tmp;
             Msquare += ss_tmp;
-            SiSjzz_meas.emplace_back(0.25);
-            Mzsquare += 0.25;
-            SiSjpm_meas.emplace_back(ss_tmp-0.25);
+            SiSj_meas.emplace_back(ss_tmp);
             println( i, " ", i, " ", ss_tmp );
             
             if ( i < N ) {
