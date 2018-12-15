@@ -1,1 +1,1 @@
-../project_tjk/latticeplaque.h
+../project/latticeplaque.h
