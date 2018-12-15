@@ -140,8 +140,13 @@ int main(int argc, char* argv[])
             }
             else {
                 println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
-                ampo += J1*2.0*expitheta,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta}
-                ampo += J1*2.0/expitheta,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
+                if ( bnd.y1 < bnd.y2 ) {
+                    ampo += J1*2.0*expitheta,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta}
+                    ampo += J1*2.0/expitheta,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
+                } else {
+                    ampo += J1*2.0*expitheta,"S+",bnd.s2,"S-",bnd.s1; // S1^+ SL^- e^{i\theta}
+                    ampo += J1*2.0/expitheta,"S-",bnd.s2,"S+",bnd.s1; // S1^- SL^+ e^{-i\theta}
+                }
                 ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
             }
         }
