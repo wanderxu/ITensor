@@ -30,29 +30,32 @@ struct LatticeBondv2
         isbd{isbd_}
         { }
 
-    LatticeBondv2(int s1_, int s2_,
+    LatticeBondv2(int s1_, int s2_, bool isbd_,
                 Real x1_,  Real y1_,
                 Real x2_,  Real y2_)
       : s1{s1_}, 
         s2{s2_},
+        isbd{isbd_},
         x1{x1_},
         y1{y1_},
         x2{x2_},
         y2{y2_}
         { }
 
-    LatticeBondv2(int s1_, int s2_, std::string type_)
+    LatticeBondv2(int s1_, int s2_, bool isbd_, std::string type_)
       : s1{s1_}, 
         s2{s2_}, 
+        isbd{isbd_},
         type{type_} 
         { }
 
-    LatticeBondv2(int s1_, int s2_, 
+    LatticeBondv2(int s1_, int s2_, bool isbd_,
                 Real x1_,  Real y1_,
                 Real x2_,  Real y2_,
                 std::string type_)
       : s1{s1_}, 
         s2{s2_}, 
+        isbd{isbd_},
         type{type_},
         x1{x1_},
         y1{y1_},
@@ -112,26 +115,26 @@ triangularLatticev2(int Nx,
         int y = (n-1)%Ny+1;
 
         //X-direction bonds
-        if(x < Nx) latt.emplace_back(n,n+Ny,false);
+        if(x < Nx) latt.emplace_back(n,n+Ny,false,x,y,x+1,y);
 
         if(Ny > 1) //2d bonds
             {
             // vertical bond 
             if((n+1 <= N) && ((y < Ny)))
                 {
-                latt.emplace_back(n,n+1,false);
+                latt.emplace_back(n,n+1,false,x,y,x,y+1);
                 }
             // Y-periodic diagonal bond
             else if((n+1 <= N) && yperiodic )
                 {
-                latt.emplace_back(n,n+1,true);
+                latt.emplace_back(n,n+1,true,x,y,x+1,1);
                 }
 
             //Periodic vertical bond
-            if(yperiodic && y == 1) latt.emplace_back(n,n+Ny-1,true);
+            if(yperiodic && y == 1) latt.emplace_back(n,n+Ny-1,true,x,y,x,Ny);
 
             //Diagonal bonds
-            if(x < Nx && y < Ny) latt.emplace_back(n,n+Ny+1,false);
+            if(x < Nx && y < Ny) latt.emplace_back(n,n+Ny+1,false,x,y,x+1,y+1);
             }
         }
 
@@ -158,29 +161,29 @@ triangularLatticeYC(int Nx,
         int y = (n-1)%Ny+1;
 
         //X-direction bonds
-        if(x < Nx) latt.emplace_back(n,n+Ny,false);
+        if(x < Nx) latt.emplace_back(n,n+Ny,false,x,y,x+1,y);
 
         if(Ny > 1){ //2d bonds
             // vertical bond 
             if((n+1 <= N) && ((y < Ny))) {
-                latt.emplace_back(n,n+1,false);
+                latt.emplace_back(n,n+1,false,x,y,x,y+1);
             }
             // Y-periodic diagonal bond
             if((n+2*Ny-1 <= N) && y==1 && x%2==1 && yperiodic ) {
-                latt.emplace_back(n,n+2*Ny-1,true);
+                latt.emplace_back(n,n+2*Ny-1,true,x,y,x+1,Ny);
             }
             if((n+1 <= N) && y==Ny && x%2==0 && yperiodic ) {
-                latt.emplace_back(n,n+1,true);
+                latt.emplace_back(n,n+1,true,x,y,x+1,1);
             }
 
             //Periodic vertical bond
-            if(yperiodic && y == 1) latt.emplace_back(n,n+Ny-1,true);
+            if(yperiodic && y == 1) latt.emplace_back(n,n+Ny-1,true,x,y,x,Ny);
 
             //Diagonal bonds
             if(x < Nx && y > 1 && x%2==1) {
-                latt.emplace_back(n,n+Ny-1,false);
+                latt.emplace_back(n,n+Ny-1,false,x,y,x+1,y-1);
             } else if (x < Nx && y < Ny && x%2==0) {
-                latt.emplace_back(n,n+Ny+1,false);
+                latt.emplace_back(n,n+Ny+1,false,x,y,x+1,y+1);
             }
         }
     }
@@ -208,32 +211,32 @@ triangularLatticeXC(int Nx,
         int y = (n-1)%Ny+1;
 
         //X-direction bonds
-        if(x < Nx) latt.emplace_back(n,n+Ny,false);
+        if(x < Nx) latt.emplace_back(n,n+Ny,false,x,y,x+1,y);
 
         if(Ny > 1) { //2d bonds
             // vertical bond 
             if((n+1 <= N) && y%2==1 && (y < Ny)) {
-                latt.emplace_back(n,n+1,false);
+                latt.emplace_back(n,n+1,false,x,y,x,y+1);
             }
             if((n-Ny+1 <= N) && y%2==0 && (y < Ny) && x>1) {
-                latt.emplace_back(n,n-Ny+1,false);
+                latt.emplace_back(n,n-Ny+1,false,x,y,x-1,y+1);
             }
 
             // Y-periodic diagonal bond
             if((n+1 <= N) && y%2==1 && y==Ny && yperiodic ) {
-                latt.emplace_back(n,n+1,true);
+                latt.emplace_back(n,n+1,true,x,y,x+1,1);
             }
             if((n-Ny+1 <= N) && y%2==0 && y==Ny && yperiodic ) {
-                latt.emplace_back(n,n-Ny+1,true);
+                latt.emplace_back(n,n-Ny+1,true,x,y,x,1);
             }
 
             //Periodic vertical bond
-            if(yperiodic && y==Ny && x>1 && y%2==0) latt.emplace_back(n,n-2*Ny+1,true);
-            if(yperiodic && y==Ny && y%2==1) latt.emplace_back(n,n-Ny+1,true);
+            if(yperiodic && y==Ny && x>1 && y%2==0) latt.emplace_back(n,n-2*Ny+1,true,x,y,x-1,1);
+            if(yperiodic && y==Ny && y%2==1) latt.emplace_back(n,n-Ny+1,true,x,y,x,1);
 
             //Diagonal bonds
-            if( n+1<=N && y%2==0 && y<Ny) latt.emplace_back(n,n+1,false);
-            if( n+Ny+1<=N && y%2==1 && y<Ny) latt.emplace_back(n,n+Ny+1,false);
+            if( n+1<=N && y%2==0 && y<Ny) latt.emplace_back(n,n+1,false,x,y,x,y+1);
+            if( n+Ny+1<=N && y%2==1 && y<Ny) latt.emplace_back(n,n+Ny+1,false,x,y,x+1,y+1);
         }
     }
 

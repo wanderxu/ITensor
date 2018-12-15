@@ -1,1 +1,1 @@
-../project_tjk/triangular_more.h
+../project/triangular_more.h
