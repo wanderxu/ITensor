@@ -11,8 +11,10 @@ input
     gamma2 = 1.0
     readmps = yes
     eneropt = yes
-    twist_ybc = no
-    ytheta = 0.0
+    twist_ybc_b = no
+    twist_ybc_f = yes
+    ytheta_b = 0.0
+    ytheta_f = 0.1
     domeas  = yes // if domeas=no, then following meas* tag will not work
     Npart = 0
     ithpart = 0

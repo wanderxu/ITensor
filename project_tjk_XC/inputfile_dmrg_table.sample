@@ -1,6 +1,6 @@
 input
     {
-    Nx = 6
+    Nx = 4
     Ny = 4
     yperiodic = yes
     t1 = 1.0
@@ -11,21 +11,23 @@ input
     gamma2 = 1.0
     readmps = yes
     eneropt = yes
-    twist_ybc = no
-    ytheta = 0.0
+    twist_ybc_b = no
+    twist_ybc_f = yes
+    ytheta_b = 0.0
+    ytheta_f = 0.1
     domeas  = yes // if domeas=no, then following meas* tag will not work
     Npart = 0
     ithpart = 0
     meas_spincorr = no
-    meas_dimer = yes
+    meas_dimer = no
     meas_dxcorr = no
     meas_dycorr = no
     meas_dxycorr = no
-    meas_chiralcorr = yes
+    meas_chiralcorr = no
     meas_pair = yes
-    meas_pairbubble = no
-    meas_pairodp = yes
-    meas_paircorr = no
+    meas_pairbubble = yes
+    meas_pairodp = no
+    meas_paircorr = yes
     lfixi0 = yes
     x0 = 3
 
