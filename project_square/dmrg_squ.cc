@@ -143,8 +143,13 @@ int main(int argc, char* argv[])
             }
             else {
                 println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
-                ampo += J1*2.0*expitheta,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta}
-                ampo += J1*2.0/expitheta,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
+                if ( bnd.y1 < bnd.y2 ) {
+                    ampo += J1*2.0*expitheta,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta}
+                    ampo += J1*2.0/expitheta,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
+                } else {
+                    ampo += J1*2.0*expitheta,"S+",bnd.s2,"S-",bnd.s1; // S1^+ SL^- e^{i\theta}
+                    ampo += J1*2.0/expitheta,"S-",bnd.s2,"S+",bnd.s1; // S1^- SL^+ e^{-i\theta}
+                }
                 ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
             }
         }
@@ -161,19 +166,15 @@ int main(int argc, char* argv[])
                 ampo += -Jp*2.0,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta}
                 ampo += -Jp*2.0,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
                 ampo += Jp*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
-            }
-            else if ( bnd.y2 == 1 ) // X+Y direc. boundary bond
-            {
+            } else {
                 println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
-                ampo += Jp*2.0*expitheta,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta}
-                ampo += Jp*2.0/expitheta,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
-                ampo += Jp*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
-            }
-            else if ( bnd.y2 == Ny ) // X-Y direc. boundary bond
-            {
-                println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
-                ampo += Jp*2.0/expitheta,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{-i\theta}
-                ampo += Jp*2.0*expitheta,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{i\theta}
+                if ( bnd.y1 < bnd.y2 ) {
+                    ampo += Jp*2.0*expitheta,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta}
+                    ampo += Jp*2.0/expitheta,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
+                } else {
+                    ampo += Jp*2.0*expitheta,"S+",bnd.s2,"S-",bnd.s1; // S1^+ SL^- e^{i\theta}
+                    ampo += Jp*2.0/expitheta,"S-",bnd.s2,"S+",bnd.s1; // S1^- SL^+ e^{-i\theta}
+                }
                 ampo += Jp*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
             }
         }

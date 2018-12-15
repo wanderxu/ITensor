@@ -30,9 +30,12 @@ int main(int argc, char* argv[])
     double gamma2 = input.getReal("gamma2");
     auto readmps = input.getYesNo("readmps",false);
     auto eneropt = input.getYesNo("eneropt",true);
-    auto twist_ybc = input.getYesNo("twist_ybc",false);
-    double ytheta = input.getReal("ytheta",0.0);
-    Cplx expitheta = std::exp( Cplx(0.0,std::acos(-1))* ytheta );
+    auto twist_ybc_b = input.getYesNo("twist_ybc_b",false);
+    auto twist_ybc_f = input.getYesNo("twist_ybc_f",false);
+    double ytheta_b = input.getReal("ytheta_b",0.0);
+    double ytheta_f = input.getReal("ytheta_f",0.0);
+    Cplx expitheta_b = std::exp( Cplx(0.0,std::acos(-1))* ytheta_b );
+    Cplx expitheta_f = std::exp( Cplx(0.0,std::acos(-1))* ytheta_f );
     auto domeas = input.getYesNo("domeas",false);
     auto meas_spincorr = input.getYesNo("meas_spincorr",false);
     auto meas_dimer = input.getYesNo("meas_dimer",false);
@@ -68,7 +71,8 @@ int main(int argc, char* argv[])
     runlogfile += ".out";
 
     println("output file name suggested: ", runlogfile);
-    println("expitheta = ", expitheta);
+    println("expitheta_b = ", expitheta_b);
+    println("expitheta_f = ", expitheta_f);
 
     //Create the sweeps class & print
     auto sweeps = Sweeps(nsweeps,table);
@@ -141,79 +145,88 @@ int main(int argc, char* argv[])
         // hopping term
         for(auto bnd : lattice)
         {
-            if( (not bnd.isbd) or (not twist_ybc) ) {
+            if( (not bnd.isbd) or (not twist_ybc_f) ) {
                 ampo += -t1,"Cdagup",bnd.s1,"Cup",bnd.s2;
                 ampo += -t1,"Cdagup",bnd.s2,"Cup",bnd.s1;
                 ampo += -t1,"Cdagdn",bnd.s1,"Cdn",bnd.s2;
                 ampo += -t1,"Cdagdn",bnd.s2,"Cdn",bnd.s1;
             }
-            else if ( ytheta == 1.0 ) {
+            else if ( ytheta_f == 1.0 ) {
                 println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
-                ampo += t1,"Cdagup",bnd.s1,"Cup",bnd.s2; // Cup1^+ CupL e^{i\theta}
-                ampo += t1,"Cdagup",bnd.s2,"Cup",bnd.s1; // CupL^+ Cup1 e^{-i\theta}
-                ampo += t1,"Cdagdn",bnd.s1,"Cdn",bnd.s2; // Cdn1^+ CdnL e^{i\theta}
-                ampo += t1,"Cdagdn",bnd.s2,"Cdn",bnd.s1; // CdnL^+ Cdn1 e^{-i\theta}
+                ampo += t1,"Cdagup",bnd.s1,"Cup",bnd.s2; // Cup1^+ CupL e^{i\theta_f}
+                ampo += t1,"Cdagup",bnd.s2,"Cup",bnd.s1; // CupL^+ Cup1 e^{-i\theta_f}
+                ampo += t1,"Cdagdn",bnd.s1,"Cdn",bnd.s2; // Cdn1^+ CdnL e^{i\theta_f}
+                ampo += t1,"Cdagdn",bnd.s2,"Cdn",bnd.s1; // CdnL^+ Cdn1 e^{-i\theta_f}
             }
             else {
                 println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
-                ampo += -t1*expitheta,"Cdagup",bnd.s1,"Cup",bnd.s2; // Cup1^+ CupL e^{i\theta}
-                ampo += -t1/expitheta,"Cdagup",bnd.s2,"Cup",bnd.s1; // CupL^+ Cup1 e^{-i\theta}
-                ampo += -t1*expitheta,"Cdagdn",bnd.s1,"Cdn",bnd.s2; // Cdn1^+ CdnL e^{i\theta}
-                ampo += -t1/expitheta,"Cdagdn",bnd.s2,"Cdn",bnd.s1; // CdnL^+ Cdn1 e^{-i\theta}
+                if ( bnd.y1 < bnd.y2 ) {
+                    ampo += -t1*expitheta_f,"Cdagup",bnd.s1,"Cup",bnd.s2; // Cup1^+ CupL e^{i\theta_f}
+                    ampo += -t1/expitheta_f,"Cdagup",bnd.s2,"Cup",bnd.s1; // CupL^+ Cup1 e^{-i\theta_f}
+                    ampo += -t1*expitheta_f,"Cdagdn",bnd.s1,"Cdn",bnd.s2; // Cdn1^+ CdnL e^{i\theta_f}
+                    ampo += -t1/expitheta_f,"Cdagdn",bnd.s2,"Cdn",bnd.s1; // CdnL^+ Cdn1 e^{-i\theta_f}
+                } else {
+                    ampo += -t1*expitheta_f,"Cdagup",bnd.s2,"Cup",bnd.s1; // Cup1^+ CupL e^{i\theta_f}
+                    ampo += -t1/expitheta_f,"Cdagup",bnd.s1,"Cup",bnd.s2; // CupL^+ Cup1 e^{-i\theta_f}
+                    ampo += -t1*expitheta_f,"Cdagdn",bnd.s2,"Cdn",bnd.s1; // Cdn1^+ CdnL e^{i\theta_f}
+                    ampo += -t1/expitheta_f,"Cdagdn",bnd.s1,"Cdn",bnd.s2; // CdnL^+ Cdn1 e^{-i\theta_f}
+                }
             }
         }
         // second neighbor hopping
         for(auto bnd : latticeNN)
         {
-            if( (not bnd.isbd) or (not twist_ybc) ) {
+            if( (not bnd.isbd) or (not twist_ybc_f) ) {
                 ampo += -t2,"Cdagup",bnd.s1,"Cup",bnd.s2;
                 ampo += -t2,"Cdagup",bnd.s2,"Cup",bnd.s1;
                 ampo += -t2,"Cdagdn",bnd.s1,"Cdn",bnd.s2;
                 ampo += -t2,"Cdagdn",bnd.s2,"Cdn",bnd.s1;
             }
-            else if ( ytheta == 1.0 ) {
+            else if ( ytheta_f == 1.0 ) {
                 println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
-                ampo += t2,"Cdagup",bnd.s1,"Cup",bnd.s2; // Cup1^+ CupL e^{i\theta}
-                ampo += t2,"Cdagup",bnd.s2,"Cup",bnd.s1; // CupL^+ Cup1 e^{-i\theta}
-                ampo += t2,"Cdagdn",bnd.s1,"Cdn",bnd.s2; // Cdn1^+ CdnL e^{i\theta}
-                ampo += t2,"Cdagdn",bnd.s2,"Cdn",bnd.s1; // CdnL^+ Cdn1 e^{-i\theta}
-            }
-            else if ( bnd.y2 == 1 ) // X+Y direc. boundary bond
-            {
+                ampo += t2,"Cdagup",bnd.s1,"Cup",bnd.s2; // Cup1^+ CupL e^{i\theta_f}
+                ampo += t2,"Cdagup",bnd.s2,"Cup",bnd.s1; // CupL^+ Cup1 e^{-i\theta_f}
+                ampo += t2,"Cdagdn",bnd.s1,"Cdn",bnd.s2; // Cdn1^+ CdnL e^{i\theta_f}
+                ampo += t2,"Cdagdn",bnd.s2,"Cdn",bnd.s1; // CdnL^+ Cdn1 e^{-i\theta_f}
+            } else {
                 println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
-                ampo += -t2*expitheta,"Cdagup",bnd.s1,"Cup",bnd.s2; // Cup1^+ CupL e^{i\theta}
-                ampo += -t2/expitheta,"Cdagup",bnd.s2,"Cup",bnd.s1; // CupL^+ Cup1 e^{-i\theta}
-                ampo += -t2*expitheta,"Cdagdn",bnd.s1,"Cdn",bnd.s2; // Cdn1^+ CdnL e^{i\theta}
-                ampo += -t2/expitheta,"Cdagdn",bnd.s2,"Cdn",bnd.s1; // CdnL^+ Cdn1 e^{-i\theta}
-            }
-            else if ( bnd.y2 == Ny ) // X-Y direc. boundary bond
-            {
-                println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
-                ampo += -t2/expitheta,"Cdagup",bnd.s1,"Cup",bnd.s2; // Cup1^+ CupL e^{-i\theta}
-                ampo += -t2*expitheta,"Cdagup",bnd.s2,"Cup",bnd.s1; // CupL^+ Cup1 e^{i\theta}
-                ampo += -t2/expitheta,"Cdagdn",bnd.s1,"Cdn",bnd.s2; // Cdn1^+ CdnL e^{-i\theta}
-                ampo += -t2*expitheta,"Cdagdn",bnd.s2,"Cdn",bnd.s1; // CdnL^+ Cdn1 e^{i\theta}
+                if ( bnd.y1 < bnd.y2 ) {
+                    ampo += -t2*expitheta_f,"Cdagup",bnd.s1,"Cup",bnd.s2; // Cup1^+ CupL e^{i\theta_f}
+                    ampo += -t2/expitheta_f,"Cdagup",bnd.s2,"Cup",bnd.s1; // CupL^+ Cup1 e^{-i\theta_f}
+                    ampo += -t2*expitheta_f,"Cdagdn",bnd.s1,"Cdn",bnd.s2; // Cdn1^+ CdnL e^{i\theta_f}
+                    ampo += -t2/expitheta_f,"Cdagdn",bnd.s2,"Cdn",bnd.s1; // CdnL^+ Cdn1 e^{-i\theta_f}
+                } else {
+                    ampo += -t2*expitheta_f,"Cdagup",bnd.s2,"Cup",bnd.s1; // Cup1^+ CupL e^{i\theta_f}
+                    ampo += -t2/expitheta_f,"Cdagup",bnd.s1,"Cup",bnd.s2; // CupL^+ Cup1 e^{-i\theta_f}
+                    ampo += -t2*expitheta_f,"Cdagdn",bnd.s2,"Cdn",bnd.s1; // Cdn1^+ CdnL e^{i\theta_f}
+                    ampo += -t2/expitheta_f,"Cdagdn",bnd.s1,"Cdn",bnd.s2; // CdnL^+ Cdn1 e^{-i\theta_f}
+                }
             }
         }
 
         // two-body term, nearest neighbor
         for(auto bnd : lattice)
         {
-            if( (not bnd.isbd) or (not twist_ybc) ) {
+            if( (not bnd.isbd) or (not twist_ybc_b) ) {
                 ampo += J1*2.0,"S+",bnd.s1,"S-",bnd.s2;
                 ampo += J1*2.0,"S-",bnd.s1,"S+",bnd.s2;
                 ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
             }
-            else if ( ytheta == 1.0 ) {
+            else if ( ytheta_b == 1.0 ) {
                 println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
-                ampo += -J1*2.0,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta}
-                ampo += -J1*2.0,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
+                ampo += -J1*2.0,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta_b}
+                ampo += -J1*2.0,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta_b}
                 ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
             }
             else {
                 println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
-                ampo += J1*2.0*expitheta,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta}
-                ampo += J1*2.0/expitheta,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
+                if ( bnd.y1 < bnd.y2 ) {
+                    ampo += J1*2.0*expitheta_b,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta_b}
+                    ampo += J1*2.0/expitheta_b,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta_b}
+                } else {
+                    ampo += J1*2.0*expitheta_b,"S+",bnd.s2,"S-",bnd.s1; // S1^+ SL^- e^{i\theta_b}
+                    ampo += J1*2.0/expitheta_b,"S-",bnd.s2,"S+",bnd.s1; // S1^- SL^+ e^{-i\theta_b}
+                }
                 ampo += J1*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
             }
             // u term
@@ -222,29 +235,25 @@ int main(int argc, char* argv[])
         // second neighbor
         for(auto bnd : latticeNN)
         {
-            if( (not bnd.isbd) or (not twist_ybc) ) {
+            if( (not bnd.isbd) or (not twist_ybc_b) ) {
                 ampo += Jp*2.0,"S+",bnd.s1,"S-",bnd.s2;
                 ampo += Jp*2.0,"S-",bnd.s1,"S+",bnd.s2;
                 ampo += Jp*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
             }
-            else if ( ytheta == 1.0 ) {
+            else if ( ytheta_b == 1.0 ) {
                 println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
-                ampo += -Jp*2.0,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta}
-                ampo += -Jp*2.0,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
+                ampo += -Jp*2.0,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta_b}
+                ampo += -Jp*2.0,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta_b}
                 ampo += Jp*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
-            }
-            else if ( bnd.y2 == 1 ) // X+Y direc. boundary bond
-            {
+            } else {
                 println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
-                ampo += Jp*2.0*expitheta,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta}
-                ampo += Jp*2.0/expitheta,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta}
-                ampo += Jp*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
-            }
-            else if ( bnd.y2 == Ny ) // X-Y direc. boundary bond
-            {
-                println( " Impose twist boundary here ", bnd.s1, " ", bnd.s2);
-                ampo += Jp*2.0/expitheta,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{-i\theta}
-                ampo += Jp*2.0*expitheta,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{i\theta}
+                if ( bnd.y1 < bnd.y2 ) {
+                    ampo += Jp*2.0*expitheta_b,"S+",bnd.s1,"S-",bnd.s2; // S1^+ SL^- e^{i\theta_b}
+                    ampo += Jp*2.0/expitheta_b,"S-",bnd.s1,"S+",bnd.s2; // S1^- SL^+ e^{-i\theta_b}
+                } else {
+                    ampo += Jp*2.0*expitheta_b,"S+",bnd.s2,"S-",bnd.s1; // S1^+ SL^- e^{i\theta_b}
+                    ampo += Jp*2.0/expitheta_b,"S-",bnd.s2,"S+",bnd.s1; // S1^- SL^+ e^{-i\theta_b}
+                }
                 ampo += Jp*gamma1*4.0,"Sz",bnd.s1,"Sz",bnd.s2;
             }
             // u term
