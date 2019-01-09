@@ -1,9 +1,9 @@
 #!/bin/bash
 
 source cal_para.sh
-firststep=7
+firststep=9
 maxstep=10
-taglist=$( echo "s d+id d-id dxy dx2-y2 f p+ip p-ip px py")
+taglist=$( echo "s d+id d-id dxy dx2-y2 f p+ip p-ip px py 11 12 21 22")
 
 WORKDIR="$PWD"
 echo $WORKDIR
@@ -53,8 +53,8 @@ endin
             sed -E -e 's/[[:blank:]]+/\n/g' $datafile >tmp.dat
             sed -E -e 's/[[:blank:]]+/\n/g' $datafile2 >tmp2.dat
             #python $exe tmp.dat tmp2.dat pair >> ${maindir}.logs
-            #python $exe tmp.dat pair >> ${maindir}.logs
-            python $exe tmp2.dat pair >> ${maindir}.logs
+            python $exe tmp.dat pair >> ${maindir}.logs
+            #python $exe tmp2.dat pair >> ${maindir}.logs
             python $exe2 tmp.dat pair >> ${maindir}.logs
 
             for pairtag in ${taglist}; do

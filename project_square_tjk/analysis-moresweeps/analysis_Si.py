@@ -105,7 +105,7 @@ for ri in range(N):
 
 simj = np.zeros(N)
 # load indati into simj, deduct background
-for i in range(len(indati)):
+for i in range(2*Ny,len(indati)-2*Ny):  # Note boundary data are dropped out
     simj[i] = indati[i]-bg
 
 # perform fourier transformation

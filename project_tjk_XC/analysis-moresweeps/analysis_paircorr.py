@@ -91,7 +91,7 @@ for i in range(N):
             #print( sisj14[i,j,id1,:] )
 
 ##calculate pairing
-phase = np.zeros((10,6),dtype=complex)
+phase = np.zeros((14,6),dtype=complex)
 phase[0,:] = 6*[1.0+0.j]/np.sqrt(6.0)
 phase[1,:] = [1.0+0.j, np.exp(2.0*np.pi/3.0*1.j), np.exp(-2.0*np.pi/3.0*1.j), 1.0+0.j, np.exp(2.0*np.pi/3.0*1.j), np.exp(-2.0*np.pi/3.0*1.j)]/np.sqrt(6.0)
 phase[2,:] = [1.0+0.j, np.exp(-2.0*np.pi/3.0*1.j), np.exp(2.0*np.pi/3.0*1.j), 1.0+0.j, np.exp(-2.0*np.pi/3.0*1.j), np.exp(2.0*np.pi/3.0*1.j)]/np.sqrt(6.0)
@@ -103,36 +103,46 @@ phase[7,:] = [1.0+0.j, np.exp(-np.pi/3.0*1.j), np.exp(-2.0*np.pi/3.0*1.j), -1.0+
 phase[8,:] = [2.0+0.j, 1.0+0.j, -1.0+0.j, -2.0+0.j, -1.0+0.j, 1.0+0.j]/np.sqrt(12.0)
 phase[9,:] = [0.0+0.j, -1.0+0.j, -1.0+0.j, 0.0+0.j, 1.0+0.j, 1.0+0.j]/np.sqrt(4.0)
 np.set_printoptions(precision=4,linewidth=400)
-pairlist=['s', 'd+id', 'd-id', 'dxy', 'dx2-y2', 'f', 'p+ip', 'p-ip', 'px', 'py']
+pairlist=['s', 'd+id', 'd-id', 'dxy', 'dx2-y2', 'f', 'p+ip', 'p-ip', 'px', 'py', '11','12','21','22']
 print "phi(", pairlist, ") = "
 #print "phi(s, d+id, d-id, dxy, dx2-y2, f, p+ip, p-ip, px, py) = "
 print phase
 
 # calculate didj
 # drop out boundaries
-didj = np.zeros((10,N,N),dtype=complex)
+didj = np.zeros((14,N,N),dtype=complex)
 for id1 in range(6):
     for id2 in range(6):
-        for i in range(N/4,N/4*3):
-            for j in range(N/4,N/4*3):
+        for i in range(2*Ny,N-2*Ny): # note boundary data are dropped out
+            for j in range(2*Ny,N-2*Ny):
                 # singlet pairing
                 for ipair in range(5):
                     didj[ipair,i,j] += np.conj(phase[ipair,id1])*phase[ipair,id2]*(sisj14[i,j,id1,id2] - sisj23[i,j,id1,id2])
                 for ipair in range(5,10):
                 # triplet pairing
                     didj[ipair,i,j] += np.conj(phase[ipair,id1])*phase[ipair,id2]*(sisj14[i,j,id1,id2] + sisj23[i,j,id1,id2])
+for i in range(2*Ny, N-2*Ny):
+    for j in range(2*Ny,N-2*Ny):
+        # singlet pairing
+        didj[10,i,j] += (sisj14[i,j,0,0] - sisj23[i,j,0,0])
+        didj[11,i,j] += (sisj14[i,j,0,4] - sisj23[i,j,0,4])
+        didj[12,i,j] += (sisj14[i,j,4,0] - sisj23[i,j,4,0])
+        didj[13,i,j] += (sisj14[i,j,4,4] - sisj23[i,j,4,4])
 
 # calculate dimj
-dimj = np.zeros((10,N),dtype=complex)
+# multiply a power to be able to see features in structure factor as it decays so fast
+dimj = np.zeros((14,N),dtype=complex)
 for i in range(N):
     for j in range(N):
+        # as we use PBC in y direction, the length calculation will change a little bit.
+        rlen_power = ( (xv[i]-xv[j])**2 + ( float(Ny)-abs(yv[i]-yv[j]) if abs(yv[i]-yv[j]) > float(Ny)/2.0 else abs(yv[i]-yv[j]) )**2 )**3 # r^6
         imj = int( (xv[i]-xv[j] + Nx)%Nx * Ny + (yv[i]-yv[j]+Ny)%Ny )
         #print "imj=",imj
-        for ipair in range(10):
-            dimj[ipair,imj] += didj[ipair,i,j]
+        for ipair in range(14):
+            dimj[ipair,imj] += didj[ipair,i,j]*rlen_power
 
 # perform fourier transformation
-for ipair in range(10):
+for ipair in range(14):
     with open(tag+pairlist[ipair]+"k.dat","w") as f:
         for ki in range(Nk):
             ssk = 0.+0.j
