@@ -18,6 +18,7 @@ int main(int argc, char* argv[])
     auto Ny = input.getInt("Ny");
     auto N = Nx*Ny;
     auto yperiodic = input.getYesNo("yperiodic",true);
+    auto xperiodic = input.getYesNo("xperiodic",false);
     double J1 = input.getReal("J1");
     double J2 = input.getReal("J2");
     double gamma1 = input.getReal("gamma1");
@@ -111,8 +112,8 @@ int main(int argc, char* argv[])
         //
 
         auto ampo = AutoMPO(sites);
-        auto lattice = triangularLatticev2(Nx,Ny,{"YPeriodic=",yperiodic});
-        auto lattice4plaque = triangularLattice4Plaque(Nx,Ny,{"YPeriodic=",yperiodic});
+        auto lattice = triangularLatticev2(Nx,Ny,{"YPeriodic=",yperiodic,"XPeriodic=",xperiodic});
+        auto lattice4plaque = triangularLattice4Plaque(Nx,Ny,{"YPeriodic=",yperiodic,"XPeriodic=",xperiodic});
 
         println("H is made up of ");
         println("\nBound:\n", lattice);

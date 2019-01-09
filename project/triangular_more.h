@@ -102,10 +102,11 @@ triangularLatticev2(int Nx,
                   Args const& args = Args::global())
     {
     auto yperiodic = args.getBool("YPeriodic",true);
+    auto xperiodic = args.getBool("XPeriodic",false);
     // Periodicity on y is meaningless for one dimensional chain or a ladder
     yperiodic = yperiodic && (Ny > 2);
     auto N = Nx*Ny;
-    auto Nbond = 3*N-2*Ny + (yperiodic ? 0 : -2*Nx+1);
+    auto Nbond = 3*N + (xperiodic ? (yperiodic ? 0 : -2*Nx) : (yperiodic ? -2*Ny : -2*Ny-2*Nx+1) );
     LatticeGraphv2 latt; 
     latt.reserve(Nbond);
 
@@ -116,19 +117,27 @@ triangularLatticev2(int Nx,
 
         //X-direction bonds
         if(x < Nx) latt.emplace_back(n,n+Ny,false,x,y,x+1,y);
+        // X-direction periodic bond
+        if( x== Nx && xperiodic) latt.emplace_back(n,n+Ny-N,false,x,y,1,y);
 
-        if(Ny > 1) //2d bonds
-            {
+        //2d bonds
+        if(Ny > 1) {
             // vertical bond 
-            if((n+1 <= N) && ((y < Ny)))
-                {
+            if((n+1 <= N) && ((y < Ny))) {
                 latt.emplace_back(n,n+1,false,x,y,x,y+1);
-                }
+            }
             // Y-periodic diagonal bond
-            else if((n+1 <= N) && yperiodic )
-                {
+            else if((n+1 <= N) && yperiodic ) {
                 latt.emplace_back(n,n+1,true,x,y,x+1,1);
-                }
+            }
+            // Y-periodic and X-periodic diagonal bond
+            if(x == Nx && y==Ny && xperiodic && yperiodic ) {
+                latt.emplace_back(n,1,true,x,y,1,1);
+            }
+            // X-periodic diagonal bond
+            if(x == Nx && y!=Ny && xperiodic ) {
+                latt.emplace_back(n,y+1,false,x,y,1,y+1);
+            }
 
             //Periodic vertical bond
             if(yperiodic && y == 1) latt.emplace_back(n,n+Ny-1,true,x,y,x,Ny);
@@ -254,10 +263,13 @@ triangularLattice4Plaque(int Nx,
                   Args const& args = Args::global())
     {
     auto yperiodic = args.getBool("YPeriodic",true);
+    auto xperiodic = args.getBool("XPeriodic",false);
     // Periodicity on y is meaningless for one dimensional chain or a ladder
     yperiodic = yperiodic && (Ny > 2);
+    xperiodic = xperiodic && (Ny > 1); // only Ny>1 case, there are plaques.
     auto N = Nx*Ny;
-    auto Nplaque = (Ny<2 ? 0 : 3*N-4*Ny + (yperiodic ? 0 : -4*Nx+5));
+    //auto Nplaque = (Ny<2 ? 0 : 3*N-4*Ny + (yperiodic ? 0 : -4*Nx+5));
+    auto Nplaque = (Ny<2 ? 0 : 3*N + (xperiodic ? (yperiodic ? 0 : -4*Nx) : (yperiodic ? -4*Ny : -4*Ny-4*Nx+5)));
     Lattice4PlaqueGraph latt; 
     latt.reserve(Nplaque);
 
@@ -271,15 +283,24 @@ triangularLattice4Plaque(int Nx,
             //X-direction plaques, P1
             if(x < Nx-1 && y < Ny) latt.emplace_back(n,n+Ny,n+2*Ny+1,n+Ny+1);
             if(x < Nx-1 && y == Ny && yperiodic) latt.emplace_back(n,n+Ny,n+Ny+1,n+1);
+            if(x == Nx-1 && y == Ny && yperiodic && xperiodic) latt.emplace_back(n,n+Ny,1,n+1);
+            if(x == Nx   && y == Ny && yperiodic && xperiodic) latt.emplace_back(n,y,y+1,1);
+            if(x == Nx-1 && y != Ny && xperiodic) latt.emplace_back(n,n+Ny,y+1,n+Ny+1);
+            if(x == Nx   && y != Ny && xperiodic) latt.emplace_back(n,y,y+Ny+1,y+1);
 
             //Diagonal plaques, P2
             if(x < Nx && y < Ny-1) latt.emplace_back(n,n+Ny+1,n+Ny+2,n+1);
             if(x < Nx && y == Ny-1 && yperiodic) latt.emplace_back(n,n+Ny+1,n+2,n+1);
             if(x < Nx && y == Ny && yperiodic) latt.emplace_back(n,n+1,n+2,n-Ny+1);
+            if(x == Nx && y == Ny   && yperiodic && xperiodic) latt.emplace_back(n,1,2,n-Ny+1);
+            if(x == Nx && y == Ny-1 && yperiodic && xperiodic) latt.emplace_back(n,Ny,1,n+1);
+            if(x == Nx && y <  Ny-1 && xperiodic) latt.emplace_back(n,y+1,y+2,n+1);
 
             //Vertical plaques, P3
             if(x < Nx && y > 1) latt.emplace_back(n,n-1,n+Ny-1,n+Ny);
             if(x < Nx && y == 1 && yperiodic) latt.emplace_back(n,n+Ny-1,n+2*Ny-1,n+Ny);
+            if(x == Nx && y == 1 && yperiodic && xperiodic) latt.emplace_back(n,n+Ny-1,Ny,1);
+            if(x == Nx && y >  1 && xperiodic) latt.emplace_back(n,n-1,y-1,y);
             }
         }
 
