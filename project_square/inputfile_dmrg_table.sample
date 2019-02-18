@@ -3,6 +3,7 @@ input
     Nx = 4
     Ny = 4
     yperiodic = yes
+    xperiodic = yes
     J1 = 1.0
     Jp = 0.0
     J2 = 0.0
@@ -22,7 +23,7 @@ input
     meas_dxycorr = yes
     meas_chiralcorr = yes
 
-    nsweeps = 9
+    nsweeps = 1
     sweeps
         {
         maxm  minm  cutoff  niter  noise

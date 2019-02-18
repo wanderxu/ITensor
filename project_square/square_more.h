@@ -101,10 +101,11 @@ squareLatticev2(int Nx,
         int Ny,
         Args const& args = Args::global()) {
     auto yperiodic = args.getBool("YPeriodic",true);
+    auto xperiodic = args.getBool("XPeriodic",false);
     // Periodicity on y is meaningless for one dimensional chain or a ladder
     yperiodic = yperiodic && (Ny > 2);
     auto N = Nx*Ny;
-    auto Nbond = 2*N-Ny + (yperiodic ? 0 : -Nx);
+    auto Nbond = 2*N + (xperiodic ? (yperiodic ? 0 : -Nx) : (yperiodic ? -Ny : -Ny-Nx) );
     LatticeGraphv2 latt; 
     latt.reserve(Nbond);
 
@@ -115,6 +116,8 @@ squareLatticev2(int Nx,
 
         //X-direction bonds
         if(x < Nx) latt.emplace_back(n,n+Ny,false,x,y,x+1,y);
+        // X-direction periodic bond
+        if( x== Nx && xperiodic) latt.emplace_back(n,n+Ny-N,false,x,y,1,y);
 
         if(Ny > 1) //2d bonds
         {
@@ -137,10 +140,11 @@ squareLatticeNNeighbor(int Nx,
         int Ny,
         Args const& args = Args::global()) {
     auto yperiodic = args.getBool("YPeriodic",true);
+    auto xperiodic = args.getBool("XPeriodic",false);
     // Periodicity on y is meaningless for one dimensional chain or a ladder
     yperiodic = yperiodic && (Ny > 2);
     auto N = Nx*Ny;
-    auto Nbond = 2*N-2*Ny + (yperiodic ? 0 : -2*Nx+2);
+    auto Nbond = 2*N + (xperiodic ? (yperiodic ? 0 : -2*Nx) : (yperiodic ? -2*Ny : -2*Ny-2*Nx+2) );
     LatticeGraphv2 latt; 
     latt.reserve(Nbond);
 
@@ -164,6 +168,22 @@ squareLatticeNNeighbor(int Nx,
                 latt.emplace_back(n,n+2*Ny-1,true,x,1,x+1,Ny,"2");
             }
         }
+        if(x==Nx && xperiodic) {
+            //Next-Neighbor X +Y
+            if(y < Ny) latt.emplace_back(n,n+Ny+1-N,false,x,y,1,y+1,"2");
+            //Next-Neighbor X -Y
+            if(y > 1) latt.emplace_back(n,n+Ny-1-N,false,x,y,1,y-1,"2");
+            //Periodic Next-Neighbor bonds
+            if(yperiodic && y == Ny) {
+                //Periodic Next-Neighbor X +Y
+                latt.emplace_back(n,n+1-N,true,x,Ny,1,1,"2");
+            }
+            if(yperiodic && y == 1) {
+                //Periodic Next-Neighbor X -Y
+                latt.emplace_back(n,n+2*Ny-1-N,true,x,1,1,Ny,"2");
+            }
+            
+        }
     }
 
     if(int(latt.size()) != Nbond) Error("Wrong number of bonds");
@@ -178,10 +198,12 @@ squareLattice4Plaque(int Nx,
                   Args const& args = Args::global())
   {
     auto yperiodic = args.getBool("YPeriodic",true);
+    auto xperiodic = args.getBool("XPeriodic",false);
     // Periodicity on y is meaningless for one dimensional chain or a ladder
     yperiodic = yperiodic && (Ny > 2);
     auto N = Nx*Ny;
-    auto Nplaque = (Ny<2 ? 0 : N-Ny + (yperiodic ? 0 : -Nx+1));
+    //auto Nplaque = (Ny<2 ? 0 : N-Ny + (yperiodic ? 0 : -Nx+1));
+    auto Nplaque = (Ny<2 ? 0 : N + (xperiodic ? (yperiodic ? 0 : -Nx) : (yperiodic ? -Nx : -Ny-Nx+1)));
     Lattice4PlaqueGraph latt; 
     latt.reserve(Nplaque);
 
@@ -193,6 +215,8 @@ squareLattice4Plaque(int Nx,
             //Vertical plaques
             if(x < Nx && y > 1) latt.emplace_back(n,n-1,n+Ny-1,n+Ny);
             if(x < Nx && y == 1 && yperiodic) latt.emplace_back(n,n+Ny-1,n+2*Ny-1,n+Ny);
+            if(x == Nx && y == 1 && yperiodic && xperiodic) latt.emplace_back(n,n+Ny-1,Ny,1);
+            if(x == Nx && y >  1 && xperiodic) latt.emplace_back(n,n-1,y-1,y);
         }
     }
 
