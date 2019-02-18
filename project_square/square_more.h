@@ -203,7 +203,7 @@ squareLattice4Plaque(int Nx,
     yperiodic = yperiodic && (Ny > 2);
     auto N = Nx*Ny;
     //auto Nplaque = (Ny<2 ? 0 : N-Ny + (yperiodic ? 0 : -Nx+1));
-    auto Nplaque = (Ny<2 ? 0 : N + (xperiodic ? (yperiodic ? 0 : -Nx) : (yperiodic ? -Nx : -Ny-Nx+1)));
+    auto Nplaque = (Ny<2 ? 0 : N + (xperiodic ? (yperiodic ? 0 : -Nx) : (yperiodic ? -Ny : -Ny-Nx+1)));
     Lattice4PlaqueGraph latt; 
     latt.reserve(Nplaque);
 
