@@ -34,9 +34,13 @@ for Ny in ${Nyarray}; do
           awk '{for (i = 1; i <= NF; i++) printf("%2d", 0 )}' $pretag/project_tjk_XC/run-moresweeps/${maindir}/step${istep}/Siz.out \
           > $pretag/project_tjk_XC/run-moresweeps/${maindir}/step${istep}/Spomi.out
       fi
+      if [ -f $pretag/project_tjk_XC/run-moresweeps/${maindir}/step${istep}/Ntot.out ]; then
+          cp $pretag/project_tjk_XC/run-moresweeps/${maindir}/step${istep}/Ntot.out $pretag/project_tjk_XC/run-moresweeps/${maindir}/step${istep}/ni.out
+      fi
 
       #tagarray=$( echo "S Sz Spom Dx Dy Dxy X")
-      tagarray=$( echo "S Sz Spom Dx Dy Dxy")
+      #tagarray=$( echo "S Sz Spom Dx Dy Dxy")
+      tagarray=$( echo "n")
       #tagarray=$( echo "S Sz Spom")
       for tag in $tagarray; do
         cd $WORKDIR
@@ -59,7 +63,7 @@ cat>model_para.py<<endin
 Nx = $Nx
 Ny = $Ny
 N = Nx*Ny
-yperiodic = $yperiodic
+yperiodic = "$yperiodic"
 J1 = $J1
 J2 = $J2
 gamma1 = $gamma1
@@ -88,6 +92,9 @@ set pm3d map
 set pm3d interpolate 7,7
 set xrange[-0.5:0.5]
 set yrange[-0.5:0.5]
+set xtics ("-0.5" -0.5,"" -0.375,"-0.25" -0.25,"" -0.125,"0" 0,"" 0.125, "0.25" 0.25, "" 0.375, "0.5" 0.5)
+set ytics ("-0.5" -0.5,"" -0.375,"-0.25" -0.25,"" -0.125,"0" 0,"" 0.125, "0.25" 0.25, "" 0.375, "0.5" 0.5)
+set grid
 set cbrange[0:1]
 splot "${tag}dbgk.dat" u 1:2:(\$3/$maxv) notitle
 endin
