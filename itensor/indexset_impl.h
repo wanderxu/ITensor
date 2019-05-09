@@ -2,8 +2,8 @@
 // Distributed under the ITensor Library License, Version 1.2
 //    (See accompanying LICENSE file.)
 //
-#ifndef __ITENSOR_INDEXSET_IH
-#define __ITENSOR_INDEXSET_IH
+#ifndef __ITENSOR_INDEXSET_IMPL_H
+#define __ITENSOR_INDEXSET_IMPL_H
 
 namespace itensor {
 
@@ -505,7 +505,7 @@ dir(const IndexSetT<IndexT>& is, const IndexT& I)
 
 
 template <class IndexT>
-const IndexT&
+IndexT
 finddir(const IndexSetT<IndexT>& iset, Arrow dir)
     {
     for(const auto& J : iset)
@@ -534,7 +534,7 @@ findindex(const IndexSetT<IndexT>& iset,
     }
 
 template <class IndexT>
-const IndexT&
+IndexT
 findtype(const IndexSetT<IndexT>& iset, IndexType t)
 	{
     for(auto& J : iset)
