@@ -1,0 +1,8 @@
+Nx = 4
+Ny = 4
+N = Nx*Ny
+yperiodic = True
+J1 = 1.0
+J2 = 1.0
+gamma1 = 1.0
+gamma2 = 1.0
