@@ -42,7 +42,7 @@ for Ny in ${Nyarray}; do
             datafile=$pretag/project_tjk_XC/run-moresweeps/${maindir}/step${istep}/${tag}.out
             cat $datafile |sed -E -e 's/[[:blank:]]+/\n/g'> ${tag}_column.dat
 
-            awk '{s+=$1}NR%4==0{print s/4;s=0}' ${tag}_column.dat > ${tag}_yave.dat
+            awk -v nyv=$Ny '{s+=$1}NR%nyv==0{print s/nyv;s=0}' ${tag}_column.dat > ${tag}_yave.dat
         fi
       done
       done
